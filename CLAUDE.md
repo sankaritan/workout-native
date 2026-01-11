@@ -1,7 +1,8 @@
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-Whenever you make an update to the codebase, check whether CLAUDE.md should not be updated (such as describing project overview and current state) and if so, make updates there too.
+
+**Note**: README.md is for developers getting started with the project. When making significant changes, consider whether README.md needs updating too (setup instructions, commands, etc.). This file (CLAUDE.md) is for AI development context and coding patterns.
 
 ## Project Overview
 
