@@ -8,9 +8,11 @@ import React from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useWizard } from "@/lib/wizard-context";
 
 export default function ConfirmationScreen() {
+  const insets = useSafeAreaInsets();
   const { state, resetState } = useWizard();
   const { generatedProgram } = state;
 
@@ -25,8 +27,15 @@ export default function ConfirmationScreen() {
   };
 
   return (
-    <View className="flex-1 bg-background-light dark:bg-background-dark">
-      <ScrollView className="flex-1 px-6 pt-12">
+    <View className="flex-1 bg-background-light dark:bg-background-dark w-full">
+      <ScrollView
+        className="flex-1 w-full"
+        contentContainerStyle={{
+          paddingHorizontal: 24,
+          paddingTop: insets.top + 48,
+          paddingBottom: 120 + insets.bottom,
+        }}
+      >
         {/* Success Icon */}
         <View className="items-center mb-8">
           <View className="size-24 rounded-full bg-primary/20 items-center justify-center mb-4">

@@ -119,22 +119,32 @@ export function SetTracker({
   return (
     <View testID={testID} className="gap-2">
       {/* Header Row */}
-      <View className="grid grid-cols-[50px_1fr_80px_80px_50px] gap-3 px-2">
-        <Text className="text-[10px] uppercase tracking-wider font-bold text-text-muted text-center">
-          Set
-        </Text>
-        <Text className="text-[10px] uppercase tracking-wider font-bold text-text-muted text-left pl-2">
-          Previous
-        </Text>
-        <Text className="text-[10px] uppercase tracking-wider font-bold text-text-muted text-center">
-          lbs
-        </Text>
-        <Text className="text-[10px] uppercase tracking-wider font-bold text-text-muted text-center">
-          Reps
-        </Text>
-        <Text className="text-[10px] uppercase tracking-wider font-bold text-text-muted text-center">
-          Done
-        </Text>
+      <View className="flex-row items-center gap-3 px-2">
+        <View style={{ width: 50 }}>
+          <Text className="text-[10px] uppercase tracking-wider font-bold text-text-muted text-center">
+            Set
+          </Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text className="text-[10px] uppercase tracking-wider font-bold text-text-muted text-left pl-2">
+            Previous
+          </Text>
+        </View>
+        <View style={{ width: 80 }}>
+          <Text className="text-[10px] uppercase tracking-wider font-bold text-text-muted text-center">
+            lbs
+          </Text>
+        </View>
+        <View style={{ width: 80 }}>
+          <Text className="text-[10px] uppercase tracking-wider font-bold text-text-muted text-center">
+            Reps
+          </Text>
+        </View>
+        <View style={{ width: 50 }}>
+          <Text className="text-[10px] uppercase tracking-wider font-bold text-text-muted text-center">
+            Done
+          </Text>
+        </View>
       </View>
 
       {/* Set Rows */}
@@ -153,7 +163,7 @@ export function SetTracker({
           <View
             key={set.setNumber}
             className={cn(
-              "grid grid-cols-[50px_1fr_80px_80px_50px] gap-3 rounded-lg p-3 items-center",
+              "flex-row items-center gap-3 rounded-lg p-3",
               isCompleted && "bg-surface-dark/40 opacity-60",
               isActive && "bg-surface-dark border border-primary/40 shadow-lg",
               isFuture && "bg-surface-dark/20",
@@ -162,7 +172,7 @@ export function SetTracker({
             testID={`set-row-${set.setNumber}`}
           >
             {/* Set Number */}
-            <View className="flex flex-col items-center justify-center">
+            <View style={{ width: 50 }} className="flex flex-col items-center justify-center">
               <Text
                 className={cn(
                   "font-bold",
@@ -179,59 +189,65 @@ export function SetTracker({
             </View>
 
             {/* Previous Performance */}
-            <Text
-              className={cn(
-                "text-sm pl-2",
-                isCompleted && "text-white/50",
-                isActive && "text-text-muted font-medium",
-                isFuture && "text-white/50"
-              )}
-            >
-              {prevText}
-            </Text>
+            <View style={{ flex: 1 }}>
+              <Text
+                className={cn(
+                  "text-sm pl-2",
+                  isCompleted && "text-white/50",
+                  isActive && "text-text-muted font-medium",
+                  isFuture && "text-white/50"
+                )}
+              >
+                {prevText}
+              </Text>
+            </View>
 
             {/* Weight Input */}
-            <TextInput
-              value={set.weight?.toString() || ""}
-              onChangeText={(text) => {
-                const num = text ? parseFloat(text) : null;
-                updateSet(index, "weight", num);
-              }}
-              placeholder={previousWeight?.toString() || "-"}
-              placeholderTextColor={isActive ? "#ffffff33" : "#ffffff20"}
-              keyboardType="numeric"
-              editable={!isCompleted}
-              testID={`weight-input-${set.setNumber}`}
-              className={cn(
-                "h-10 rounded border text-center font-medium text-base p-0",
-                isCompleted && "bg-[#111814] border-border text-white/50",
-                isActive && "h-12 bg-[#111814] border-border-light text-white font-bold text-lg",
-                isFuture && "bg-transparent border-border text-white/70"
-              )}
-            />
+            <View style={{ width: 80 }}>
+              <TextInput
+                value={set.weight?.toString() || ""}
+                onChangeText={(text) => {
+                  const num = text ? parseFloat(text) : null;
+                  updateSet(index, "weight", num);
+                }}
+                placeholder={previousWeight?.toString() || "-"}
+                placeholderTextColor={isActive ? "#ffffff33" : "#ffffff20"}
+                keyboardType="numeric"
+                editable={!isCompleted}
+                testID={`weight-input-${set.setNumber}`}
+                className={cn(
+                  "h-10 rounded border text-center font-medium text-base p-0",
+                  isCompleted && "bg-[#111814] border-border text-white/50",
+                  isActive && "h-12 bg-[#111814] border-border-light text-white font-bold text-lg",
+                  isFuture && "bg-transparent border-border text-white/70"
+                )}
+              />
+            </View>
 
             {/* Reps Input */}
-            <TextInput
-              value={set.reps?.toString() || ""}
-              onChangeText={(text) => {
-                const num = text ? parseInt(text, 10) : null;
-                updateSet(index, "reps", num);
-              }}
-              placeholder={previousReps?.toString() || "-"}
-              placeholderTextColor={isActive ? "#ffffff33" : "#ffffff20"}
-              keyboardType="number-pad"
-              editable={!isCompleted}
-              testID={`reps-input-${set.setNumber}`}
-              className={cn(
-                "h-10 rounded border text-center font-medium text-base p-0",
-                isCompleted && "bg-[#111814] border-border text-white/50",
-                isActive && "h-12 bg-[#111814] border-border-light text-white font-bold text-lg",
-                isFuture && "bg-transparent border-border text-white/70"
-              )}
-            />
+            <View style={{ width: 80 }}>
+              <TextInput
+                value={set.reps?.toString() || ""}
+                onChangeText={(text) => {
+                  const num = text ? parseInt(text, 10) : null;
+                  updateSet(index, "reps", num);
+                }}
+                placeholder={previousReps?.toString() || "-"}
+                placeholderTextColor={isActive ? "#ffffff33" : "#ffffff20"}
+                keyboardType="number-pad"
+                editable={!isCompleted}
+                testID={`reps-input-${set.setNumber}`}
+                className={cn(
+                  "h-10 rounded border text-center font-medium text-base p-0",
+                  isCompleted && "bg-[#111814] border-border text-white/50",
+                  isActive && "h-12 bg-[#111814] border-border-light text-white font-bold text-lg",
+                  isFuture && "bg-transparent border-border text-white/70"
+                )}
+              />
+            </View>
 
             {/* Completed Checkbox */}
-            <View className="flex items-center justify-center">
+            <View style={{ width: 50 }} className="flex items-center justify-center">
               {isCompleted ? (
                 <MaterialIcons name="check-circle" size={20} color="#13ec6d" />
               ) : (

@@ -7,6 +7,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SetTracker, type SetData } from "@/components/SetTracker";
 import { showAlert } from "@/lib/utils/alert";
 import {
@@ -26,6 +27,7 @@ import { cn } from "@/lib/utils/cn";
 export default function WorkoutSessionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const sessionTemplateId = id ? parseInt(id, 10) : null;
+  const insets = useSafeAreaInsets();
 
   // Session state
   const [session, setSession] = useState<SessionWithExercises | null>(null);
@@ -254,7 +256,7 @@ export default function WorkoutSessionScreen() {
   // Loading state
   if (isLoading || !session) {
     return (
-      <View className="flex-1 bg-background-dark items-center justify-center">
+      <View className="flex-1 bg-background-dark items-center justify-center w-full">
         <Text className="text-white">Loading...</Text>
       </View>
     );
@@ -263,17 +265,20 @@ export default function WorkoutSessionScreen() {
   // No exercises state
   if (!currentExercise) {
     return (
-      <View className="flex-1 bg-background-dark items-center justify-center">
+      <View className="flex-1 bg-background-dark items-center justify-center w-full">
         <Text className="text-white">No exercises in session</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-background-dark">
+    <View className="flex-1 bg-background-dark w-full">
       {/* Header */}
-      <View className="bg-background-dark/95 border-b border-white/5 px-4 py-3">
-        <View className="flex-row items-center justify-between">
+      <View
+        className="bg-background-dark/95 border-b border-white/5 px-4 pb-3"
+        style={{ paddingTop: insets.top + 12 }}
+      >
+        <View className="flex-row items-center justify-between w-full">
           <Pressable
             onPress={handleBack}
             testID="back-button"
@@ -304,7 +309,14 @@ export default function WorkoutSessionScreen() {
       </View>
 
       {/* Main Content */}
-      <ScrollView className="flex-1 p-4 gap-6">
+      <ScrollView
+        className="flex-1 w-full"
+        contentContainerStyle={{
+          padding: 16,
+          gap: 24,
+          paddingBottom: insets.bottom + 16,
+        }}
+      >
         {/* Exercise Navigation */}
         <View className="flex-col gap-2">
           <View className="flex-row items-center justify-between gap-2">

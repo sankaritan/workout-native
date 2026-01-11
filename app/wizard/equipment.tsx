@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { EquipmentCard } from "@/components/ui/EquipmentCard";
 import { useWizard } from "@/lib/wizard-context";
 import { cn } from "@/lib/utils/cn";
@@ -58,6 +59,7 @@ const EQUIPMENT_OPTIONS: Array<{
 ];
 
 export default function EquipmentScreen() {
+  const insets = useSafeAreaInsets();
   const { state, updateState } = useWizard();
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment[]>(
     state.equipment || []
@@ -94,9 +96,9 @@ export default function EquipmentScreen() {
   const isContinueDisabled = selectedEquipment.length === 0;
 
   return (
-    <View className="flex-1 bg-background-dark">
+    <View className="flex-1 bg-background-dark w-full">
       {/* Header */}
-      <View className="bg-background-dark/80 px-4 pt-4 pb-2">
+      <View className="bg-background-dark/80 px-4 pb-2 w-full" style={{ paddingTop: insets.top + 16 }}>
         <View className="flex-row items-center justify-between mb-4">
           {/* Back button */}
           <Pressable
@@ -128,7 +130,14 @@ export default function EquipmentScreen() {
       </View>
 
       {/* Main Content */}
-      <ScrollView className="flex-1 px-4 pt-4 pb-32">
+      <ScrollView
+        className="flex-1 w-full"
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 16,
+          paddingBottom: 120 + insets.bottom,
+        }}
+      >
         {/* Title and Subtitle */}
         <View className="mb-8">
           <Text className="text-3xl font-bold leading-tight tracking-tight text-white mb-2">
@@ -143,7 +152,7 @@ export default function EquipmentScreen() {
         {/* Equipment Options Grid */}
         <View className="flex-row flex-wrap gap-3 pb-4">
           {EQUIPMENT_OPTIONS.map((option) => (
-            <View key={option.value} className="w-[calc(50%-6px)]">
+            <View key={option.value} style={{ width: "48%" }}>
               <EquipmentCard
                 name={option.name}
                 description={option.description}
@@ -158,7 +167,10 @@ export default function EquipmentScreen() {
       </ScrollView>
 
       {/* Continue Button (Fixed at bottom) */}
-      <View className="absolute bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 p-4 pb-8">
+      <View
+        className="absolute bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 p-4 w-full"
+        style={{ paddingBottom: insets.bottom + 24 }}
+      >
         <Pressable
           onPress={handleContinue}
           disabled={isContinueDisabled}

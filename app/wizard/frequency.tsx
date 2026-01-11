@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SelectionCard } from "@/components/ui/SelectionCard";
 import { useWizard } from "@/lib/wizard-context";
 import { cn } from "@/lib/utils/cn";
@@ -20,6 +21,7 @@ const FREQUENCY_OPTIONS = [
 ];
 
 export default function FrequencyScreen() {
+  const insets = useSafeAreaInsets();
   const { state, updateState } = useWizard();
   const [selectedFrequency, setSelectedFrequency] = useState<number | undefined>(
     state.frequency
@@ -52,9 +54,12 @@ export default function FrequencyScreen() {
   const isContinueDisabled = !selectedFrequency;
 
   return (
-    <View className="flex-1 bg-background-dark">
+    <View className="flex-1 bg-background-dark w-full">
       {/* Header */}
-      <View className="flex-row items-center justify-between p-4 bg-background-dark/95">
+      <View
+        className="flex-row items-center justify-between px-4 pb-4 bg-background-dark/95 w-full"
+        style={{ paddingTop: insets.top + 16 }}
+      >
         {/* Back button */}
         <Pressable
           onPress={handleBack}
@@ -102,7 +107,14 @@ export default function FrequencyScreen() {
       </View>
 
       {/* Main Content */}
-      <ScrollView className="flex-1 px-4 pb-24 pt-4">
+      <ScrollView
+        className="flex-1 w-full"
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 16,
+          paddingBottom: 120 + insets.bottom,
+        }}
+      >
         {/* Title and Subtitle */}
         <View className="mb-8">
           <Text className="text-3xl font-bold leading-tight tracking-tight mb-2 text-white">
@@ -114,9 +126,9 @@ export default function FrequencyScreen() {
         </View>
 
         {/* Frequency Options Grid */}
-        <View className="flex-row flex-wrap gap-4">
+        <View className="flex-row flex-wrap justify-between gap-y-4">
           {FREQUENCY_OPTIONS.map((option) => (
-            <View key={option.value} className="w-[calc(50%-8px)]">
+            <View key={option.value} style={{ width: "48%" }}>
               <SelectionCard
                 label={option.label}
                 value={option.value.toString()}
@@ -132,7 +144,10 @@ export default function FrequencyScreen() {
       </ScrollView>
 
       {/* Continue Button (Fixed at bottom) */}
-      <View className="absolute bottom-0 left-0 right-0 p-4 bg-background-dark/95 pb-6 pt-12">
+      <View
+        className="absolute bottom-0 left-0 right-0 px-4 bg-background-dark/95 pt-12 w-full"
+        style={{ paddingBottom: insets.bottom + 24 }}
+      >
         <Pressable
           onPress={handleContinue}
           disabled={isContinueDisabled}

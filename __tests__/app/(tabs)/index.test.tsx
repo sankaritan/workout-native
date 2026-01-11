@@ -14,6 +14,11 @@ jest.mock("expo-router", () => ({
 // Mock storage
 jest.mock("@/lib/storage/storage");
 
+// Mock safe area context
+jest.mock("react-native-safe-area-context", () => ({
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+}));
+
 // Mock MaterialIcons
 jest.mock("@expo/vector-icons", () => ({
   MaterialIcons: "MaterialIcons",

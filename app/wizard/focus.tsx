@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SelectionCard } from "@/components/ui/SelectionCard";
 import { useWizard } from "@/lib/wizard-context";
 import { cn } from "@/lib/utils/cn";
@@ -40,6 +41,7 @@ const FOCUS_OPTIONS: Array<{
 ];
 
 export default function FocusScreen() {
+  const insets = useSafeAreaInsets();
   const { state, updateState } = useWizard();
   const [selectedFocus, setSelectedFocus] = useState<
     "Hypertrophy" | "Strength" | "Endurance" | undefined
@@ -113,9 +115,9 @@ export default function FocusScreen() {
   const isGenerateDisabled = !selectedFocus || isGenerating;
 
   return (
-    <View className="flex-1 bg-background-dark">
+    <View className="flex-1 bg-background-dark w-full">
       {/* Header */}
-      <View className="bg-background-dark/80 px-4 pt-4 pb-2">
+      <View className="bg-background-dark/80 px-4 pb-2 w-full" style={{ paddingTop: insets.top + 16 }}>
         <View className="flex-row items-center justify-between mb-4">
           {/* Back button */}
           <Pressable
@@ -147,7 +149,14 @@ export default function FocusScreen() {
       </View>
 
       {/* Main Content */}
-      <ScrollView className="flex-1 px-4 pt-4 pb-32">
+      <ScrollView
+        className="flex-1 w-full"
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 16,
+          paddingBottom: 120 + insets.bottom,
+        }}
+      >
         {/* Title and Subtitle */}
         <View className="mb-8">
           <Text className="text-3xl font-bold leading-tight tracking-tight text-white mb-2">
@@ -176,7 +185,10 @@ export default function FocusScreen() {
       </ScrollView>
 
       {/* Generate Plan Button (Fixed at bottom) */}
-      <View className="absolute bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 p-4 pb-8">
+      <View
+        className="absolute bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 p-4 w-full"
+        style={{ paddingBottom: insets.bottom + 24 }}
+      >
         <Pressable
           onPress={handleGeneratePlan}
           disabled={isGenerateDisabled}

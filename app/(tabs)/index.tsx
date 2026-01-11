@@ -7,6 +7,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   getActiveWorkoutPlan,
   getSessionTemplatesByPlanId,
@@ -19,6 +20,7 @@ import type { WorkoutPlan, WorkoutSessionTemplate, WorkoutSessionCompleted } fro
 import { cn } from "@/lib/utils/cn";
 
 export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
   const [activePlan, setActivePlan] = useState<WorkoutPlan | null>(null);
   const [sessions, setSessions] = useState<WorkoutSessionTemplate[]>([]);
   const [completedSessions, setCompletedSessions] = useState<WorkoutSessionCompleted[]>([]);
@@ -149,7 +151,7 @@ export default function HomeScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 bg-background-dark items-center justify-center">
+      <View className="flex-1 bg-background-dark items-center justify-center w-full">
         <ActivityIndicator size="large" color="#13ec6d" />
       </View>
     );
@@ -158,7 +160,10 @@ export default function HomeScreen() {
   // Empty state - no active plan
   if (!activePlan) {
     return (
-      <View className="flex-1 bg-background-dark items-center justify-center px-6">
+      <View
+        className="flex-1 bg-background-dark items-center justify-center px-6 w-full"
+        style={{ paddingTop: insets.top }}
+      >
         {/* Icon placeholder */}
         <View className="relative w-64 h-64 mb-10 flex items-center justify-center">
           <View className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
@@ -209,8 +214,15 @@ export default function HomeScreen() {
   const monthlyWorkouts = getMonthlyStats();
 
   return (
-    <ScrollView className="flex-1 bg-background-dark">
-      <View className="px-4 pt-6 pb-32">
+    <ScrollView
+      className="flex-1 bg-background-dark w-full"
+      contentContainerStyle={{
+        paddingTop: insets.top + 24,
+        paddingHorizontal: 16,
+        paddingBottom: insets.bottom + 128,
+      }}
+    >
+      <View>
         {/* Header */}
         <View className="mb-6">
           <Text className="text-3xl font-bold text-white mb-2">

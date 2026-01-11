@@ -7,11 +7,13 @@ import React from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useWizard } from "@/lib/wizard-context";
 import { WorkoutPlanCard } from "@/components/WorkoutPlanCard";
 import { SessionCard } from "@/components/SessionCard";
 
 export default function PlanReviewScreen() {
+  const insets = useSafeAreaInsets();
   const { state, resetState } = useWizard();
   const { generatedProgram } = state;
 
@@ -61,9 +63,9 @@ export default function PlanReviewScreen() {
   }
 
   return (
-    <View className="flex-1 bg-background-dark">
+    <View className="flex-1 bg-background-dark w-full">
       {/* Header */}
-      <View className="bg-background-dark/80 px-4 pt-4 pb-2">
+      <View className="bg-background-dark/80 px-4 pb-2 w-full" style={{ paddingTop: insets.top + 16 }}>
         <View className="flex-row items-center mb-4">
           <View className="flex-1">
             <Text className="text-2xl font-bold text-white">
@@ -77,7 +79,14 @@ export default function PlanReviewScreen() {
       </View>
 
       {/* Main Content */}
-      <ScrollView className="flex-1 px-4 pt-4 pb-32">
+      <ScrollView
+        className="flex-1 w-full"
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 16,
+          paddingBottom: 120 + insets.bottom,
+        }}
+      >
         {/* Plan Overview Card */}
         <WorkoutPlanCard program={generatedProgram} />
 
@@ -98,7 +107,10 @@ export default function PlanReviewScreen() {
       </ScrollView>
 
       {/* Action Buttons (Fixed at bottom) */}
-      <View className="absolute bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 p-4 pb-8">
+      <View
+        className="absolute bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 p-4 w-full"
+        style={{ paddingBottom: insets.bottom + 24 }}
+      >
         <View className="gap-3">
           {/* Temporary Test Session Button (for Story 9 testing) */}
           <Pressable
