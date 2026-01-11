@@ -4,12 +4,15 @@
  */
 
 import React, { useState } from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { SelectionCard } from "@/components/ui/SelectionCard";
 import { useWizard } from "@/lib/wizard-context";
 import { cn } from "@/lib/utils/cn";
+import { generateWorkoutProgram, saveWorkoutProgram } from "@/lib/workout-generator/engine";
+import { initDatabase } from "@/lib/storage/database";
+import { seedExercises } from "@/lib/storage/seed-data";
 
 // Focus options based on database types
 const FOCUS_OPTIONS: Array<{
@@ -43,6 +46,7 @@ export default function FocusScreen() {
   const [selectedFocus, setSelectedFocus] = useState<
     "Hypertrophy" | "Strength" | "Endurance" | undefined
   >(state.focus);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   /**
    * Handle focus selection
@@ -55,11 +59,36 @@ export default function FocusScreen() {
   /**
    * Handle generate plan button press
    */
-  const handleGeneratePlan = () => {
-    if (selectedFocus) {
-      // For now, navigate to a temporary confirmation screen
-      // In Story 7, this will trigger the actual plan generation
+  const handleGeneratePlan = async () => {
+    if (!selectedFocus || !state.frequency || !state.equipment) {
+      console.error("Missing required wizard state");
+      return;
+    }
+
+    setIsGenerating(true);
+
+    try {
+      // Ensure database is initialized and seeded
+      initDatabase();
+      seedExercises();
+
+      // Generate workout program
+      const program = generateWorkoutProgram({
+        frequency: state.frequency,
+        equipment: state.equipment,
+        focus: selectedFocus,
+      });
+
+      // Save to database
+      const planId = saveWorkoutProgram(program);
+
+      // Navigate to confirmation (or plan review when Story 8 is done)
       router.push("/wizard/confirmation");
+    } catch (error) {
+      console.error("Failed to generate workout plan:", error);
+      alert("Failed to generate workout plan. Please try again.");
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -70,7 +99,7 @@ export default function FocusScreen() {
     router.back();
   };
 
-  const isGenerateDisabled = !selectedFocus;
+  const isGenerateDisabled = !selectedFocus || isGenerating;
 
   return (
     <View className="flex-1 bg-background-light dark:bg-background-dark">
@@ -151,21 +180,32 @@ export default function FocusScreen() {
               : "bg-primary active:scale-[0.98] shadow-primary/20"
           )}
         >
-          <MaterialIcons
-            name="auto-awesome"
-            size={20}
-            color={isGenerateDisabled ? "#64748b" : "#102218"}
-          />
-          <Text
-            className={cn(
-              "text-base font-bold",
-              isGenerateDisabled
-                ? "text-slate-500 dark:text-slate-400"
-                : "text-background-dark"
-            )}
-          >
-            Generate Plan
-          </Text>
+          {isGenerating ? (
+            <>
+              <ActivityIndicator size="small" color="#102218" />
+              <Text className="text-base font-bold text-background-dark">
+                Generating...
+              </Text>
+            </>
+          ) : (
+            <>
+              <MaterialIcons
+                name="auto-awesome"
+                size={20}
+                color={isGenerateDisabled ? "#64748b" : "#102218"}
+              />
+              <Text
+                className={cn(
+                  "text-base font-bold",
+                  isGenerateDisabled
+                    ? "text-slate-500 dark:text-slate-400"
+                    : "text-background-dark"
+                )}
+              >
+                Generate Plan
+              </Text>
+            </>
+          )}
         </Pressable>
       </View>
     </View>

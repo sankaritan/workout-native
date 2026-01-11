@@ -396,7 +396,7 @@ export const EXERCISES: ExerciseInsert[] = [
 export function seedExercises(): void {
   try {
     // Get existing exercises
-    const existingExercises = getAllExercises();
+    const existingExercises = getAllExercises() || [];
     const existingNames = new Set(existingExercises.map((ex) => ex.name));
 
     // Insert only new exercises
