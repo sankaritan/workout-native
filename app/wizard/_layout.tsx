@@ -1,5 +1,5 @@
 /**
- * Wizard Stack Layout
+ * Wizard Layout
  * Wraps wizard screens with WizardProvider for shared state
  */
 
@@ -13,14 +13,9 @@ export default function WizardLayout() {
         screenOptions={{
           headerShown: false,
           animation: "slide_from_right",
+          contentStyle: { backgroundColor: "#102218" },
         }}
-      >
-        <Stack.Screen name="frequency" />
-        <Stack.Screen name="equipment" />
-        <Stack.Screen name="focus" />
-        <Stack.Screen name="review" />
-        <Stack.Screen name="confirmation" />
-      </Stack>
+      />
     </WizardProvider>
   );
 }

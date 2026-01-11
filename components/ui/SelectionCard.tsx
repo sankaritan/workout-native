@@ -58,17 +58,22 @@ export function SelectionCard({
         // Border and background (dark theme)
         "border-surface-dark",
         "bg-surface-dark",
-        // Hover state
-        "active:opacity-80",
         // Selected state
         selected && [
           "border-primary",
           "bg-primary/10",
-          "shadow-[0_0_20px_rgba(19,236,109,0.15)]",
         ],
-        // Disabled state
-        disabled && "opacity-50"
       )}
+      style={{
+        opacity: disabled ? 0.5 : 1,
+        ...(selected && {
+          shadowColor: "#13ec6d",
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.15,
+          shadowRadius: 20,
+          elevation: 8,
+        }),
+      }}
       {...props}
     >
       {/* Check icon (top right) */}

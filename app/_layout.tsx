@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import {
   useFonts,
   Lexend_300Light,
@@ -81,7 +82,7 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <SafeAreaProvider>
       <StatusBar style="light" />
       <Stack
         screenOptions={{
@@ -90,9 +91,15 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="wizard" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="wizard"
+          options={{
+            headerShown: false,
+            animation: "slide_from_right"
+          }}
+        />
         <Stack.Screen name="modal" options={{ presentation: "modal" }} />
       </Stack>
-    </>
+    </SafeAreaProvider>
   );
 }
