@@ -5,6 +5,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import type { Equipment } from "./storage/types";
+import type { WorkoutProgram } from "./workout-generator/types";
 
 // Wizard state interface
 export interface WizardState {
@@ -12,6 +13,7 @@ export interface WizardState {
   equipment?: Equipment[]; // Array of equipment types
   focus?: "Hypertrophy" | "Strength" | "Endurance"; // Training focus
   duration?: 4 | 6 | 8 | 12; // Duration in weeks
+  generatedProgram?: WorkoutProgram; // Generated workout program
 }
 
 // Context value interface

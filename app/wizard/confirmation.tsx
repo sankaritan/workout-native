@@ -12,6 +12,7 @@ import { useWizard } from "@/lib/wizard-context";
 
 export default function ConfirmationScreen() {
   const { state, resetState } = useWizard();
+  const { generatedProgram } = state;
 
   const handleStartOver = () => {
     resetState();
@@ -76,15 +77,73 @@ export default function ConfirmationScreen() {
           </View>
         </View>
 
+        {/* Generated Program */}
+        {generatedProgram && (
+          <View className="bg-white dark:bg-surface-dark rounded-2xl p-6 mb-6 border border-slate-200 dark:border-white/10">
+            <Text className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+              Generated Workout Plan
+            </Text>
+            <Text className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+              {generatedProgram.name}
+            </Text>
+
+            {/* Sessions */}
+            {generatedProgram.sessions.map((session, sessionIdx) => (
+              <View key={sessionIdx} className="mb-6 last:mb-0">
+                <View className="flex-row items-center mb-3">
+                  <View className="bg-primary/20 rounded-full px-3 py-1 mr-2">
+                    <Text className="text-primary font-bold text-xs">
+                      Day {session.dayOfWeek}
+                    </Text>
+                  </View>
+                  <Text className="text-lg font-bold text-slate-900 dark:text-white">
+                    {session.name}
+                  </Text>
+                </View>
+
+                {/* Exercises */}
+                <View className="gap-2">
+                  {session.exercises.map((programEx, exIdx) => (
+                    <View
+                      key={exIdx}
+                      className="flex-row items-center bg-slate-50 dark:bg-white/5 rounded-lg p-3"
+                    >
+                      <View className="bg-slate-200 dark:bg-white/10 rounded-full size-8 items-center justify-center mr-3">
+                        <Text className="text-slate-700 dark:text-white font-bold text-sm">
+                          {programEx.order}
+                        </Text>
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-slate-900 dark:text-white font-semibold">
+                          {programEx.exercise.name}
+                        </Text>
+                        <Text className="text-xs text-slate-500 dark:text-slate-400">
+                          {programEx.exercise.muscle_group} • {programEx.exercise.equipment_required || "Bodyweight"}
+                        </Text>
+                      </View>
+                      <View className="bg-primary/10 rounded-lg px-3 py-1.5">
+                        <Text className="text-primary font-bold text-sm">
+                          {programEx.sets} × {programEx.repsMin}-{programEx.repsMax}
+                        </Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
         {/* Info Box */}
-        <View className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6">
-          <Text className="text-slate-700 dark:text-slate-300 text-sm">
-            <Text className="font-bold">Note: </Text>
-            This is a temporary confirmation screen. In Story 7, clicking
-            "Generate Plan" will trigger the rule-based workout generation
-            engine to create your personalized workout plan.
-          </Text>
-        </View>
+        {!generatedProgram && (
+          <View className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6">
+            <Text className="text-slate-700 dark:text-slate-300 text-sm">
+              <Text className="font-bold">Note: </Text>
+              No workout program was generated. This might happen on web platform
+              where database operations are limited.
+            </Text>
+          </View>
+        )}
 
         {/* Action Buttons */}
         <View className="gap-3 pb-8">

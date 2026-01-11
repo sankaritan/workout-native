@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from "react";
-import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, ScrollView, ActivityIndicator, Platform } from "react-native";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { SelectionCard } from "@/components/ui/SelectionCard";
@@ -61,32 +61,67 @@ export default function FocusScreen() {
    */
   const handleGeneratePlan = async () => {
     if (!selectedFocus || !state.frequency || !state.equipment) {
-      console.error("Missing required wizard state");
+      console.error("Missing required wizard state", { state, selectedFocus });
+      alert("Missing required information. Please complete all steps.");
       return;
     }
 
     setIsGenerating(true);
 
     try {
-      // Ensure database is initialized and seeded
-      initDatabase();
-      seedExercises();
-
-      // Generate workout program
-      const program = generateWorkoutProgram({
+      console.log("Starting workout generation...");
+      console.log("Platform:", Platform.OS);
+      console.log("Input:", {
         frequency: state.frequency,
         equipment: state.equipment,
         focus: selectedFocus,
       });
 
-      // Save to database
-      const planId = saveWorkoutProgram(program);
+      let program;
 
-      // Navigate to confirmation (or plan review when Story 8 is done)
+      // On web, generate with mock data (database not available due to SharedArrayBuffer)
+      if (Platform.OS === "web") {
+        console.log("Web platform detected - using mock exercise data");
+
+        // Import and use mock exercises for web
+        const { generateWorkoutProgramWithMockData } = await import("@/lib/workout-generator/web-generator");
+        program = generateWorkoutProgramWithMockData({
+          frequency: state.frequency,
+          equipment: state.equipment,
+          focus: selectedFocus,
+        });
+
+        console.log("Program generated (web mock):", program);
+      } else {
+        // On native, use real database
+        console.log("Native platform - using database");
+        initDatabase();
+        seedExercises();
+
+        program = generateWorkoutProgram({
+          frequency: state.frequency,
+          equipment: state.equipment,
+          focus: selectedFocus,
+        });
+
+        console.log("Program generated:", program);
+
+        // Save to database
+        const planId = saveWorkoutProgram(program);
+        console.log("Plan saved with ID:", planId);
+      }
+
+      // Store generated program in wizard context for display
+      updateState({ generatedProgram: program });
+
+      // Navigate to confirmation
       router.push("/wizard/confirmation");
     } catch (error) {
-      console.error("Failed to generate workout plan:", error);
-      alert("Failed to generate workout plan. Please try again.");
+      console.error("Failed to generate workout plan:");
+      console.error("Error details:", error);
+      console.error("Error message:", error instanceof Error ? error.message : String(error));
+      console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
+      alert(`Failed to generate workout plan: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsGenerating(false);
     }
