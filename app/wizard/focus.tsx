@@ -114,8 +114,8 @@ export default function FocusScreen() {
       // Store generated program in wizard context for display
       updateState({ generatedProgram: program });
 
-      // Navigate to confirmation
-      router.push("/wizard/confirmation");
+      // Navigate to review screen
+      router.push("/wizard/review");
     } catch (error) {
       console.error("Failed to generate workout plan:");
       console.error("Error details:", error);
