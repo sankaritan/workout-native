@@ -18,6 +18,7 @@ export default function WizardLayout() {
         <Stack.Screen name="frequency" />
         <Stack.Screen name="equipment" />
         <Stack.Screen name="focus" />
+        <Stack.Screen name="confirmation" />
       </Stack>
     </WizardProvider>
   );
