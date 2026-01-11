@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Current Workout Session</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec6d",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#102218",
+                        "surface-dark": "#1c2e24",
+                        "surface-active": "#263c30"
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>.custom-checkbox:checked {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuB6F-t49kYcvBh_msh4_rEADzSpQyPVPrJU5jO0f-zjCv8jKNr1uaHjJ8U9ekzCeRCES3m5wdx65Wjkh4Fd__wIhk7zdvop0GeHYzvoEWVKzxQnZZjfLhPnb3rBrlFPO0IJ2NWhAJtluFa_nrLy0TQAsT2MASczut9Ctp3GocJdKvKGTXGiye4sUusk5qb5CdjiIuHZw7A6Lr3Tzl1Uq3RcLrOD4e07iYbhy00-FWjVDpyK25ohGfEUypWS_ipRydL3dzbat4Jp0aI)
+    }input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0
+    }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-[#111814] dark:text-white font-display min-h-screen flex flex-col overflow-x-hidden selection:bg-primary selection:text-background-dark">
+<header class="sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-b border-[#28392f]/30">
+<div class="flex items-center justify-between px-4 py-3">
+<div class="flex flex-col">
+<h2 class="text-sm font-medium text-[#9db9a8] uppercase tracking-wider">Leg Day - Week 4</h2>
+</div>
+<button class="bg-primary/10 hover:bg-primary/20 active:bg-primary/30 text-primary px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                Finish
+            </button>
+</div>
+</header>
+<main class="flex-1 flex flex-col p-4 gap-6 pb-6">
+<section class="flex flex-col gap-2">
+<div class="flex items-center justify-between gap-2">
+<button class="size-10 flex items-center justify-center rounded-full hover:bg-surface-dark text-[#9db9a8] transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<div class="flex-1 text-center">
+<h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight">Squat (Barbell)</h1>
+<p class="text-xs text-[#9db9a8] mt-1">Target: Hypertrophy</p>
+</div>
+<button class="size-10 flex items-center justify-center rounded-full hover:bg-surface-dark text-primary transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+<details class="group mt-2">
+<summary class="flex cursor-pointer items-center justify-between gap-4 rounded-lg bg-surface-dark px-4 py-3 select-none transition-colors hover:bg-surface-active">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#9db9a8] group-open:text-primary transition-colors">history</span>
+<span class="text-sm font-medium text-white/90">Last Time: 225lbs x 8 reps</span>
+</div>
+<span class="material-symbols-outlined text-[#9db9a8] group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="px-4 py-3 bg-surface-dark/50 rounded-b-lg -mt-1 border-t border-[#28392f] text-sm text-[#9db9a8]">
+<p class="mb-2"><strong class="text-white">Form Note:</strong> Keep chest up, drive through heels. Watch knee cave on ascent.</p>
+<p>1RM Est: 315lbs</p>
+</div>
+</details>
+</section>
+<section class="flex flex-col gap-2">
+<div class="grid grid-cols-[30px_1fr_60px_60px_40px] gap-3 px-2 text-[10px] uppercase tracking-wider font-bold text-[#9db9a8] text-center items-center">
+<span>Set</span>
+<span class="text-left pl-2">Previous</span>
+<span>lbs</span>
+<span>Reps</span>
+<span>Done</span>
+</div>
+<div class="grid grid-cols-[30px_1fr_60px_60px_40px] gap-3 bg-surface-dark/40 rounded-lg p-3 items-center border border-transparent opacity-60">
+<div class="flex flex-col items-center justify-center">
+<span class="text-sm font-bold text-white/50">1</span>
+<span class="text-[9px] text-primary uppercase">Warm</span>
+</div>
+<div class="text-sm text-white/50 pl-2">135 x 12</div>
+<input class="w-full h-10 bg-[#111814] rounded border border-[#28392f] text-center text-white/50 font-medium focus:outline-none text-base p-0" disabled="" type="number" value="135"/>
+<input class="w-full h-10 bg-[#111814] rounded border border-[#28392f] text-center text-white/50 font-medium focus:outline-none text-base p-0" disabled="" type="number" value="10"/>
+<div class="flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">check_circle</span>
+</div>
+</div>
+<div class="grid grid-cols-[30px_1fr_60px_60px_40px] gap-3 bg-surface-dark/40 rounded-lg p-3 items-center border border-transparent opacity-60">
+<div class="flex flex-col items-center justify-center">
+<span class="text-sm font-bold text-white/50">2</span>
+</div>
+<div class="text-sm text-white/50 pl-2">225 x 5</div>
+<input class="w-full h-10 bg-[#111814] rounded border border-[#28392f] text-center text-white/50 font-medium focus:outline-none text-base p-0" disabled="" type="number" value="225"/>
+<input class="w-full h-10 bg-[#111814] rounded border border-[#28392f] text-center text-white/50 font-medium focus:outline-none text-base p-0" disabled="" type="number" value="5"/>
+<div class="flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">check_circle</span>
+</div>
+</div>
+<div class="relative group">
+<div class="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-emerald-600/50 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
+<div class="relative grid grid-cols-[30px_1fr_60px_60px_40px] gap-3 bg-surface-dark rounded-lg p-3 items-center border border-primary/40 shadow-lg shadow-primary/5">
+<div class="flex flex-col items-center justify-center">
+<span class="text-lg font-bold text-white">3</span>
+</div>
+<div class="text-sm text-[#9db9a8] pl-2 font-medium">225 x 5</div>
+<input class="w-full h-12 bg-[#111814] rounded-md border border-[#3b5445] text-center text-white font-bold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-lg p-0 placeholder-white/20 transition-all" placeholder="225" type="number"/>
+<input class="w-full h-12 bg-[#111814] rounded-md border border-[#3b5445] text-center text-white font-bold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-lg p-0 placeholder-white/20 transition-all" placeholder="5" type="number"/>
+<div class="flex items-center justify-center h-12">
+<input class="custom-checkbox h-7 w-7 rounded border-2 border-[#3b5445] bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0 transition-all cursor-pointer" type="checkbox"/>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-[30px_1fr_60px_60px_40px] gap-3 bg-surface-dark/20 rounded-lg p-3 items-center border border-transparent">
+<div class="flex flex-col items-center justify-center">
+<span class="text-sm font-bold text-white/70">4</span>
+</div>
+<div class="text-sm text-white/50 pl-2">225 x 5</div>
+<input class="w-full h-10 bg-transparent rounded border border-[#28392f] text-center text-white/70 font-medium focus:outline-none focus:border-[#3b5445] text-base p-0" placeholder="-" type="number"/>
+<input class="w-full h-10 bg-transparent rounded border border-[#28392f] text-center text-white/70 font-medium focus:outline-none focus:border-[#3b5445] text-base p-0" placeholder="-" type="number"/>
+<div class="flex items-center justify-center">
+<div class="h-5 w-5 rounded border border-[#28392f] bg-transparent"></div>
+</div>
+</div>
+<button class="flex items-center justify-center gap-2 py-3 mt-2 rounded-lg border border-dashed border-[#3b5445] text-[#9db9a8] hover:text-white hover:border-primary/50 hover:bg-surface-dark transition-all group">
+<span class="material-symbols-outlined text-lg group-hover:text-primary transition-colors">add</span>
+<span class="text-sm font-medium">Add Set</span>
+</button>
+</section>
+</main>
+
+</body></html>
