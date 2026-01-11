@@ -206,6 +206,7 @@ Build a fitness/workout planning and tracking application with three main featur
 - Create `components/ui/SelectionCard.tsx` reusable component
 - Implement navigation to equipment selection
 - Add step indicator (Step 1 of 4)
+- **Add temporary home screen button to access wizard for testing**
 
 **Acceptance Criteria**:
 
@@ -225,12 +226,26 @@ Build a fitness/workout planning and tracking application with three main featur
 - State persists on navigation
 ```
 
+**Manual Testing**:
+
+1. Run `npm start` and open web browser
+2. Click "Generate Your First Plan" button on home screen
+3. Verify frequency selection screen appears
+4. Select different frequencies (2, 3, 4, 5 days)
+5. Verify only one can be selected at a time
+6. Verify Continue button is disabled until selection made
+7. Click Continue (will navigate to /wizard/equipment - will show 404 until Story 5)
+
 **Files to Create**:
 
 - `app/wizard/frequency.tsx`
 - `app/wizard/_layout.tsx` (wizard stack navigation)
 - `lib/wizard-context.tsx`
 - `components/ui/SelectionCard.tsx`
+
+**Files to Modify**:
+
+- `app/(tabs)/index.tsx` - Add temporary empty state with navigation to wizard
 
 ---
 
@@ -263,6 +278,18 @@ Build a fitness/workout planning and tracking application with three main featur
 - Progress indicator correct
 ```
 
+**Manual Testing**:
+
+1. Start from home screen, click "Generate Your First Plan"
+2. Select a frequency, click Continue
+3. Verify equipment selection screen appears
+4. Select multiple equipment types (Barbell, Dumbbell, etc.)
+5. Verify multiple selections work (checkmarks appear)
+6. Try to continue without selecting anything (should be disabled)
+7. Select at least one equipment type
+8. Verify progress bar shows 2/4 steps complete
+9. Click Continue (will navigate to /wizard/focus - will show 404 until Story 6)
+
 **Files to Create**:
 
 - `app/wizard/equipment.tsx`
@@ -278,15 +305,16 @@ Build a fitness/workout planning and tracking application with three main featur
 - Create `app/wizard/focus.tsx` matching mockup
 - Add focus type selection (Hypertrophy, Strength, Endurance)
 - Add duration selection (4, 6, 8, 12 weeks)
-- Wire up "Generate Plan" button
+- Wire up "Generate Plan" button (will call Story 7 generation engine)
 - Add loading state during generation
+- For now, navigate to temporary success screen after "generation"
 
 **Acceptance Criteria**:
 
 - ✅ UI matches focus mockup
 - ✅ Radio buttons for focus type
 - ✅ Duration selector
-- ✅ Generate button triggers algorithm
+- ✅ Generate button triggers generation (mock for now)
 - ✅ Loading state displays
 
 **Test Verification**:
@@ -297,6 +325,18 @@ Build a fitness/workout planning and tracking application with three main featur
 - Duration selectable
 - Generate button calls generation function
 ```
+
+**Manual Testing**:
+
+1. Complete frequency and equipment selection
+2. Verify focus selection screen appears
+3. Select focus type (Hypertrophy, Strength, or Endurance)
+4. Select duration (4, 6, 8, or 12 weeks)
+5. Verify progress bar shows 3/4 steps
+6. Click "Generate Plan"
+7. Verify loading state appears briefly
+8. For now, should navigate to temporary success screen or back to home
+   (Full plan generation will be wired in Story 7)
 
 **Files to Create**:
 
@@ -320,6 +360,9 @@ Build a fitness/workout planning and tracking application with three main featur
   4. Order exercises (compound first, isolation after)
   5. Assign sets/reps based on focus (Hypertrophy: 3x8-12, Strength: 5x3-5, Endurance: 3x15-20)
   6. Validate constraints (max 5 exercises/session, 48h muscle recovery)
+- Wire up to focus screen's "Generate Plan" button
+- Save generated plan to database
+- Navigate to plan review screen (Story 8) after generation
 
 **Acceptance Criteria**:
 
@@ -343,6 +386,20 @@ Build a fitness/workout planning and tracking application with three main featur
 - Strength plan has 5x3-5 rep scheme
 ```
 
+**Manual Testing**:
+
+1. Complete full wizard flow (frequency → equipment → focus)
+2. Click "Generate Plan" on focus screen
+3. Verify loading state appears
+4. **Verify generation completes without errors**
+5. **Check console logs to see generated plan structure**
+6. For now, add temporary console.log to display:
+   - Number of sessions created
+   - Exercises per session
+   - Sets/reps for each exercise
+7. Verify plan is saved to database (can check with database inspection)
+8. Should navigate to plan review screen (Story 8)
+
 **Files to Create**:
 
 - `lib/workout-generator/engine.ts`
@@ -363,17 +420,18 @@ Build a fitness/workout planning and tracking application with three main featur
 - Create `components/SessionCard.tsx`
 - Create `components/ExerciseListItem.tsx`
 - Implement expandable session details
-- Save plan to database on "Save Plan"
-- Navigate to tracking on "Start Session"
+- Add "Accept Plan" button to save and set as active
+- Add "Regenerate" button to go back to wizard
+- Navigate to home screen after accepting plan
 
 **Acceptance Criteria**:
 
 - ✅ UI matches plan mockup
 - ✅ Shows plan overview (name, duration, frequency)
-- ✅ Sequence overview with session carousel
+- ✅ Shows all sessions with exercises
 - ✅ Expandable session details
-- ✅ Save creates database records
-- ✅ Start Session navigates to tracking
+- ✅ Accept Plan saves and marks as active
+- ✅ Regenerate button returns to wizard
 
 **Test Verification**:
 
@@ -381,9 +439,25 @@ Build a fitness/workout planning and tracking application with three main featur
 // __tests__/app/plan/[id].test.tsx
 - Plan details display correctly
 - Sessions expandable/collapsible
-- Save button creates DB records
-- Navigation to session works
+- Accept Plan button creates DB records
+- Navigation works
 ```
+
+**Manual Testing**:
+
+1. Complete wizard and generate plan (Story 7)
+2. Verify plan review screen appears automatically
+3. Verify plan details show:
+   - Plan name (e.g., "4-Day Hypertrophy Plan")
+   - Duration (e.g., "8 weeks")
+   - Frequency (e.g., "4 sessions/week")
+4. Expand/collapse session cards
+5. Verify each session shows:
+   - Session name (e.g., "Upper Body A")
+   - Exercise list with sets x reps
+6. Click "Accept Plan"
+7. Verify navigation to home screen
+8. Verify plan is now active (home screen should show it)
 
 **Files to Create**:
 
@@ -407,6 +481,7 @@ Build a fitness/workout planning and tracking application with three main featur
 - Save sets to exercise_sets_completed on completion
 - Create session record on start
 - Handle "Finish" to complete session
+- Navigate back to home screen after finishing
 
 **Acceptance Criteria**:
 
@@ -430,6 +505,23 @@ Build a fitness/workout planning and tracking application with three main featur
 - Finish saves to database
 ```
 
+**Manual Testing**:
+
+1. From home screen with active plan, click "Start Session" on a session
+2. Verify tracking screen appears with first exercise
+3. Verify exercise name and target sets/reps display
+4. Enter weight and reps for each set
+5. Check off completed sets
+6. Click "Next Exercise" to move to next exercise
+7. Verify previous performance data shows (if available)
+8. Click "Add Set" to add extra set
+9. Click "Previous Exercise" to go back
+10. Click "Finish Workout"
+11. Verify confirmation dialog
+12. Confirm finish
+13. Verify navigation back to home
+14. Verify session marked as completed
+
 **Files to Create**:
 
 - `app/session/[id].tsx`
@@ -441,33 +533,62 @@ Build a fitness/workout planning and tracking application with three main featur
 
 **Value**: User sees current plan and can start sessions
 
+**Note**: Empty state with wizard navigation already implemented in Story 4
+
 **Tasks**:
 
-- Update `app/(tabs)/index.tsx` matching dashboard mockup
-- Query active plan from workout_plans
-- Show next scheduled session prominently
-- Display "Generate Your First Plan" empty state
-- Add "Start Session" button to begin tracking
-- Show upcoming sessions in sequence
+- Update `app/(tabs)/index.tsx` to query and display active plan
+- Show active plan details when one exists:
+  - Plan name and progress (e.g., "Week 3 of 8")
+  - Progress bar showing completion percentage
+  - Next scheduled session highlighted
+  - "Start Session" button
+  - List of upcoming sessions
+- Keep empty state for when no active plan exists
+- Add workout completion stats (e.g., "12 workouts this month")
+- Update `app/(tabs)/_layout.tsx` tab icons/labels to match mockup
 
 **Acceptance Criteria**:
 
-- ✅ Empty state when no plan
+- ✅ Empty state when no plan (already done)
 - ✅ Active plan displays when exists
 - ✅ Next session highlighted
 - ✅ Start button navigates to tracking
-- ✅ Completed sessions marked
+- ✅ Completed sessions marked with checkmark
+- ✅ Progress bar shows completion %
 
 **Test Verification**:
 
 ```typescript
 // __tests__/app/(tabs)/index.test.tsx
-- Empty state renders correctly
+- Empty state renders correctly (already tested)
 - Active plan shows when exists
 - Next session identified correctly
-- Navigation to wizard works
+- Navigation to wizard works (already tested)
 - Navigation to session works
+- Progress calculation correct
 ```
+
+**Manual Testing**:
+
+1. **Without active plan:**
+   - Open app
+   - Verify empty state shows
+   - Verify "Generate Your First Plan" button works
+
+2. **With active plan:**
+   - Complete wizard and accept a plan (Stories 4-8)
+   - Return to home screen
+   - Verify active plan card displays:
+     - Plan name (e.g., "4-Day Hypertrophy")
+     - Current week (e.g., "Week 1 of 8")
+     - Progress bar
+   - Verify next session is highlighted
+   - Click "Start Session" and verify navigation
+   - Complete a session (Story 9)
+   - Return to home
+   - Verify completed session has checkmark
+   - Verify workout stats update
 
 **Files to Modify**:
 
@@ -488,16 +609,18 @@ Build a fitness/workout planning and tracking application with three main featur
 - Create `components/Calendar.tsx` component
 - Query workout_sessions_completed grouped by date
 - Implement month/year toggle
-- Add month navigation
+- Add month navigation (< > arrows)
 - Show session summary on day tap
+- Display workout count for each day with workouts
 
 **Acceptance Criteria**:
 
 - ✅ UI matches calendar mockup
 - ✅ Calendar shows current month
-- ✅ Workout days highlighted
+- ✅ Workout days highlighted with primary color
 - ✅ Month navigation works
-- ✅ Day tap shows session details
+- ✅ Day tap shows session details in modal/sheet
+- ✅ Empty state for months with no workouts
 
 **Test Verification**:
 
@@ -507,7 +630,30 @@ Build a fitness/workout planning and tracking application with three main featur
 - Workout days highlighted
 - Navigation updates display
 - Toggle changes view
+- Tap shows session details
 ```
+
+**Manual Testing**:
+
+1. Navigate to History tab (calendar icon in bottom nav)
+2. **If no completed workouts:**
+   - Verify empty state shows
+   - Complete some workouts first (Story 9)
+   - Come back to verify calendar
+
+3. **With completed workouts:**
+   - Verify current month displays
+   - Verify days with workouts are highlighted in primary green
+   - Click < > arrows to navigate months
+   - Verify month/year updates correctly
+   - Tap on a day with a workout
+   - Verify session summary shows:
+     - Session name (e.g., "Upper Body A")
+     - Date and time
+     - Exercises completed
+     - Total volume/sets
+   - Close summary and tap different day
+   - Toggle between month/year view (if implemented)
 
 **Files to Create**:
 
@@ -527,18 +673,21 @@ Build a fitness/workout planning and tracking application with three main featur
 
 - Create `app/exercise/[id]/history.tsx`
 - Query exercise_sets_completed for specific exercise
-- Display historical sets with date/weight/reps
+- Display historical sets with date/weight/reps in a list
 - Create `components/ProgressChart.tsx` with SVG line chart
 - Show max weight per session over time
 - X-axis: dates, Y-axis: weight
+- Add navigation from workout tracking screen to view exercise history
+- Add personal records (PRs) display
 
 **Acceptance Criteria**:
 
 - ✅ Exercise name and total sessions shown
-- ✅ Historical data listed
+- ✅ Historical data listed chronologically
 - ✅ Line chart renders correctly
 - ✅ Chart shows weight progression
 - ✅ Data points chronological
+- ✅ Personal records highlighted
 
 **Test Verification**:
 
@@ -547,12 +696,118 @@ Build a fitness/workout planning and tracking application with three main featur
 - Historical data displays
 - Chart renders with data
 - Axes labeled correctly
+- PRs calculated correctly
 ```
+
+**Manual Testing**:
+
+1. **Setup - Complete multiple workouts with same exercise:**
+   - Do a workout with Bench Press (e.g., 135 lbs)
+   - Do another workout with Bench Press (e.g., 140 lbs)
+   - Do a third workout with Bench Press (e.g., 145 lbs)
+
+2. **View exercise history:**
+   - During workout tracking, tap on exercise name (e.g., "Bench Press")
+   - OR: Add a link/button to view exercise history
+   - Verify exercise history screen opens
+
+3. **Verify history display:**
+   - Exercise name at top (e.g., "Bench Press")
+   - Total sessions count (e.g., "3 sessions")
+   - Personal record displayed (e.g., "PR: 145 lbs × 8 reps")
+
+4. **Verify progress chart:**
+   - Line chart shows progression over time
+   - X-axis shows dates
+   - Y-axis shows weight
+   - Data points connected by line
+   - Upward trend visible if progressing
+
+5. **Verify historical list:**
+   - List of all previous sets
+   - Grouped by date/session
+   - Shows weight and reps for each set
+   - Most recent at top
 
 **Files to Create**:
 
 - `app/exercise/[id]/history.tsx`
 - `components/ProgressChart.tsx`
+
+---
+
+## Manual Testing Approach
+
+### Overview
+
+Each story includes a **"Manual Testing"** section with step-by-step instructions to verify the feature works correctly in the browser/app. This ensures every story delivers independently testable, visible functionality.
+
+### How to Test After Each Story
+
+1. **Start the dev server:**
+   ```bash
+   npm start
+   # Then press 'w' for web browser
+   ```
+
+2. **Follow the "Manual Testing" section** for the story you just completed
+
+3. **Verify all acceptance criteria** by clicking through the experience
+
+4. **Check console** for any errors or warnings
+
+5. **Test edge cases:**
+   - Try to break the feature
+   - Test with missing data
+   - Test navigation back/forward
+   - Test on different screen sizes (resize browser)
+
+### Testing Flow by Phase
+
+**Phase 1 (Foundation):**
+- Story 1-3: Use browser DevTools to inspect database and storage
+- Verify data persistence by refreshing the page
+
+**Phase 2 (Core MVP):**
+- **After Story 4:** Test wizard step 1 (frequency selection)
+- **After Story 5:** Test full flow through step 2 (equipment)
+- **After Story 6:** Test full flow through step 3/4 (focus)
+- **After Story 7:** Test complete plan generation
+- **After Story 8:** Test plan review and acceptance
+- **After Story 9:** Test workout tracking end-to-end
+- **After Story 10:** Test dashboard with active plan
+
+**Phase 3 (Enhancements):**
+- **After Story 11:** Test history calendar
+- **After Story 12:** Test exercise progression charts
+
+### Temporary Scaffolding
+
+Some stories require temporary code to enable testing:
+
+- ✅ **Story 4:** Empty state home screen with "Generate Plan" button (implemented)
+- Story 6: Temporary success screen or navigation after wizard completion
+- Story 9: Temporary way to trigger workout tracking without full plan flow
+
+**Note:** Temporary scaffolding is marked clearly and will be replaced/removed in later stories when the full flow is implemented.
+
+### Quick Test Commands
+
+```bash
+# Run all tests
+npm test
+
+# Run tests for specific story
+npm test -- --testPathPattern=frequency  # Story 4
+npm test -- --testPathPattern=equipment  # Story 5
+npm test -- --testPathPattern=generator  # Story 7
+
+# Type check
+npm run typecheck
+
+# Start dev server
+npm start
+```
 
 ---
 
