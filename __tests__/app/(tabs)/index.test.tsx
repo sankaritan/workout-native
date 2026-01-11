@@ -8,6 +8,7 @@ jest.mock("expo-router", () => ({
   router: {
     push: jest.fn(),
   },
+  useFocusEffect: jest.fn(),
 }));
 
 // Mock storage
@@ -101,6 +102,8 @@ describe("HomeScreen", () => {
         mockSessions
       );
       (storage.getCompletedSessionsByPlanId as jest.Mock).mockReturnValue([]);
+      (storage.getInProgressSessionByPlanId as jest.Mock).mockReturnValue(null);
+      (storage.hasAnyCompletedSets as jest.Mock).mockReturnValue(false);
     });
 
     it("renders active plan when exists", async () => {

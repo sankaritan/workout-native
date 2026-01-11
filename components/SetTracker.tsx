@@ -24,6 +24,8 @@ export interface SetTrackerProps {
   /** Previous performance data for placeholders */
   previousWeight?: number;
   previousReps?: number;
+  /** Initial sets data (for returning to already-started exercise) */
+  initialSets?: SetData[];
   /** Callback when set data changes */
   onSetsChange: (sets: SetData[]) => void;
   /** Test ID */
@@ -35,22 +37,48 @@ export function SetTracker({
   targetReps,
   previousWeight,
   previousReps,
+  initialSets,
   onSetsChange,
   testID,
 }: SetTrackerProps) {
-  // Initialize sets state
+  // Track the last sets we notified parent about to prevent sync loop
+  const lastNotifiedSets = React.useRef<SetData[] | undefined>(undefined);
+
+  // Initialize sets state - use initialSets if provided, otherwise create empty sets
   const [sets, setSets] = useState<SetData[]>(() =>
-    Array.from({ length: targetSets }, (_, i) => ({
-      setNumber: i + 1,
-      weight: null,
-      reps: null,
-      isCompleted: false,
-      isWarmup: false,
-    }))
+    initialSets && initialSets.length > 0
+      ? initialSets
+      : Array.from({ length: targetSets }, (_, i) => ({
+          setNumber: i + 1,
+          weight: null,
+          reps: null,
+          isCompleted: false,
+          isWarmup: false,
+        }))
   );
+
+  // Update sets when initialSets changes (when navigating between exercises)
+  // Only sync if initialSets is a different reference than what we last sent to parent
+  useEffect(() => {
+    if (initialSets && initialSets.length > 0 && initialSets !== lastNotifiedSets.current) {
+      setSets(initialSets);
+    } else if (!initialSets || (initialSets.length === 0 && initialSets !== lastNotifiedSets.current)) {
+      // Reset to empty sets for new exercise
+      setSets(
+        Array.from({ length: targetSets }, (_, i) => ({
+          setNumber: i + 1,
+          weight: null,
+          reps: null,
+          isCompleted: false,
+          isWarmup: false,
+        }))
+      );
+    }
+  }, [initialSets, targetSets]);
 
   // Notify parent of changes
   useEffect(() => {
+    lastNotifiedSets.current = sets;
     onSetsChange(sets);
   }, [sets, onSetsChange]);
 

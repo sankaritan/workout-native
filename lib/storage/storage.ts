@@ -386,6 +386,38 @@ export function updateCompletedSession(
   }
 }
 
+/**
+ * Get in-progress session for a plan (started but not completed)
+ * Returns the most recently started session that has completed_at = null
+ */
+export function getInProgressSessionByPlanId(planId: number): WorkoutSessionCompleted | null {
+  ensureInitialized();
+  const inProgressSessions = cache.completedSessions
+    .filter((s) => s.workout_plan_id === planId && s.completed_at === null)
+    .sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime());
+  return inProgressSessions[0] ?? null;
+}
+
+/**
+ * Check if a completed session has any sets entered
+ */
+export function hasAnyCompletedSets(completedSessionId: number): boolean {
+  ensureInitialized();
+  return cache.completedSets.some((s) => s.completed_session_id === completedSessionId);
+}
+
+/**
+ * Get in-progress session for a specific session template
+ * Returns the most recent in-progress session (completed_at = null) for this template
+ */
+export function getInProgressSessionByTemplateId(sessionTemplateId: number): WorkoutSessionCompleted | null {
+  ensureInitialized();
+  const inProgressSessions = cache.completedSessions
+    .filter((s) => s.session_template_id === sessionTemplateId && s.completed_at === null)
+    .sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime());
+  return inProgressSessions[0] ?? null;
+}
+
 // ============================================================================
 // Completed Exercise Set queries
 // ============================================================================
@@ -419,6 +451,15 @@ export function insertCompletedSet(set: ExerciseSetCompletedInsert): number {
   cache.completedSets.push(newSet);
   persistCache().catch(console.error);
   return id;
+}
+
+/**
+ * Delete all completed sets for a session (used when re-saving session data)
+ */
+export function deleteCompletedSetsBySessionId(sessionId: number): void {
+  ensureInitialized();
+  cache.completedSets = cache.completedSets.filter((s) => s.completed_session_id !== sessionId);
+  persistCache().catch(console.error);
 }
 
 // ============================================================================

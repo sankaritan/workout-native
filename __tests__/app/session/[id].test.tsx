@@ -1,6 +1,5 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react-native";
-import { Alert } from "react-native";
 import WorkoutSessionScreen from "@/app/session/[id]";
 
 // Mock expo-router
@@ -9,6 +8,7 @@ jest.mock("expo-router", () => ({
   router: {
     back: jest.fn(),
     push: jest.fn(),
+    replace: jest.fn(),
   },
 }));
 
@@ -19,7 +19,26 @@ jest.mock("@/lib/storage/storage", () => ({
   insertCompletedSession: jest.fn(),
   updateCompletedSession: jest.fn(),
   insertCompletedSet: jest.fn(),
+  deleteCompletedSetsBySessionId: jest.fn(),
   getWorkoutPlanById: jest.fn(),
+  getInProgressSessionByTemplateId: jest.fn(),
+  getCompletedSetsBySessionId: jest.fn(),
+}));
+
+// Mock alert utility
+let mockAlertCallback: (() => void) | null = null;
+jest.mock("@/lib/utils/alert", () => ({
+  showAlert: jest.fn((title: string, message?: string, buttons?: any[]) => {
+    if (buttons && buttons.length > 1) {
+      // Store the confirm callback for testing
+      const confirmButton = buttons.find((btn: any) => btn.style !== "cancel");
+      if (confirmButton?.onPress) {
+        mockAlertCallback = confirmButton.onPress;
+        // Auto-call it for most tests
+        confirmButton.onPress();
+      }
+    }
+  }),
 }));
 
 // Mock MaterialIcons
@@ -33,7 +52,11 @@ import {
   insertCompletedSession,
   updateCompletedSession,
   insertCompletedSet,
+  deleteCompletedSetsBySessionId,
+  getInProgressSessionByTemplateId,
+  getCompletedSetsBySessionId,
 } from "@/lib/storage/storage";
+import { showAlert } from "@/lib/utils/alert";
 import { router } from "expo-router";
 
 const mockSession = {
@@ -90,7 +113,10 @@ describe("WorkoutSessionScreen", () => {
       reps: 10,
     });
     (insertCompletedSession as jest.Mock).mockReturnValue(1);
-    jest.spyOn(Alert, "alert");
+    (getInProgressSessionByTemplateId as jest.Mock).mockReturnValue(null);
+    (getCompletedSetsBySessionId as jest.Mock).mockReturnValue([]);
+    (deleteCompletedSetsBySessionId as jest.Mock).mockReturnValue(undefined);
+    mockAlertCallback = null;
   });
 
   it("renders session name in header", async () => {
@@ -228,7 +254,7 @@ describe("WorkoutSessionScreen", () => {
     const finishButton = screen.getByTestId("finish-button");
     fireEvent.press(finishButton);
 
-    expect(Alert.alert).toHaveBeenCalledWith(
+    expect(showAlert).toHaveBeenCalledWith(
       "Finish Workout",
       "Are you sure you want to finish this workout?",
       expect.any(Array)
@@ -245,14 +271,10 @@ describe("WorkoutSessionScreen", () => {
     const finishButton = screen.getByTestId("finish-button");
     fireEvent.press(finishButton);
 
-    // Get the alert callback and call it
-    const alertCall = (Alert.alert as jest.Mock).mock.calls[0];
-    const confirmButton = alertCall[2].find((btn: any) => btn.text === "Finish");
-    confirmButton.onPress();
-
+    // Since window.confirm returns true in our mock, the confirm callback executes immediately
     await waitFor(() => {
       expect(updateCompletedSession).toHaveBeenCalled();
-      expect(router.push).toHaveBeenCalledWith("/");
+      expect(router.replace).toHaveBeenCalledWith("/(tabs)");
     });
   });
 
@@ -262,7 +284,7 @@ describe("WorkoutSessionScreen", () => {
     render(<WorkoutSessionScreen />);
 
     await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith("Error", "Session not found");
+      expect(showAlert).toHaveBeenCalledWith("Error", "Session not found");
       expect(router.back).toHaveBeenCalled();
     });
   });

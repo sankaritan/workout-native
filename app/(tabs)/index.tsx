@@ -5,12 +5,14 @@
 
 import React, { useState, useEffect } from "react";
 import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import {
   getActiveWorkoutPlan,
   getSessionTemplatesByPlanId,
   getCompletedSessionsByPlanId,
+  getInProgressSessionByPlanId,
+  hasAnyCompletedSets,
   isStorageInitialized,
 } from "@/lib/storage/storage";
 import type { WorkoutPlan, WorkoutSessionTemplate, WorkoutSessionCompleted } from "@/lib/storage/types";
@@ -20,11 +22,19 @@ export default function HomeScreen() {
   const [activePlan, setActivePlan] = useState<WorkoutPlan | null>(null);
   const [sessions, setSessions] = useState<WorkoutSessionTemplate[]>([]);
   const [completedSessions, setCompletedSessions] = useState<WorkoutSessionCompleted[]>([]);
+  const [inProgressSession, setInProgressSession] = useState<WorkoutSessionCompleted | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadDashboardData();
   }, []);
+
+  // Reload data when screen comes into focus (e.g., after finishing a workout)
+  useFocusEffect(
+    React.useCallback(() => {
+      loadDashboardData();
+    }, [])
+  );
 
   const loadDashboardData = () => {
     try {
@@ -47,6 +57,10 @@ export default function HomeScreen() {
         // Get completed sessions
         const completed = getCompletedSessionsByPlanId(plan.id);
         setCompletedSessions(completed);
+
+        // Get in-progress session (started but not finished)
+        const inProgress = getInProgressSessionByPlanId(plan.id);
+        setInProgressSession(inProgress);
       }
 
       setIsLoading(false);
@@ -81,7 +95,13 @@ export default function HomeScreen() {
   const getNextSession = (): WorkoutSessionTemplate | null => {
     if (sessions.length === 0) return null;
 
-    // Get completed session template IDs
+    // If there's an in-progress session, return that session template
+    if (inProgressSession) {
+      const inProgressTemplate = sessions.find(s => s.id === inProgressSession.session_template_id);
+      if (inProgressTemplate) return inProgressTemplate;
+    }
+
+    // Get completed session template IDs (only truly completed ones)
     const completedTemplateIds = new Set(
       completedSessions
         .filter(s => s.completed_at !== null)
@@ -230,9 +250,13 @@ export default function HomeScreen() {
               <View className="flex-row items-center justify-between mb-3">
                 <View className="flex-row items-center gap-2">
                   <MaterialIcons name="fitness-center" size={20} color="#13ec6d" />
-                  <Text className="text-white font-bold">Next Up</Text>
+                  <Text className="text-white font-bold">
+                    {inProgressSession && hasAnyCompletedSets(inProgressSession.id)
+                      ? "In Progress"
+                      : "Next Up"}
+                  </Text>
                 </View>
-                {isSessionCompleted(nextSession.id) && (
+                {isSessionCompleted(nextSession.id) && !inProgressSession && (
                   <View className="flex-row items-center gap-1">
                     <MaterialIcons name="check-circle" size={16} color="#13ec6d" />
                     <Text className="text-primary text-xs">Done before</Text>
@@ -251,13 +275,13 @@ export default function HomeScreen() {
                 onPress={() => handleStartSession(nextSession.id)}
                 className="bg-primary rounded-xl py-3 px-6 active:scale-[0.98]"
                 accessibilityRole="button"
-                accessibilityLabel={`Start ${nextSession.name}`}
+                accessibilityLabel={`${inProgressSession ? "Continue" : "Start"} ${nextSession.name}`}
                 testID="start-session-button"
               >
                 <View className="flex-row items-center justify-center gap-2">
                   <MaterialIcons name="play-arrow" size={20} color="#102218" />
                   <Text className="text-background-dark font-bold">
-                    Start Session
+                    {inProgressSession ? "Continue Session" : "Start Session"}
                   </Text>
                 </View>
               </Pressable>

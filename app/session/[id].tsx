@@ -4,17 +4,21 @@
  */
 
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, Pressable, ScrollView, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { SetTracker, type SetData } from "@/components/SetTracker";
+import { showAlert } from "@/lib/utils/alert";
 import {
   getSessionWithExercises,
   getLastCompletedSetForExercise,
   insertCompletedSession,
   updateCompletedSession,
   insertCompletedSet,
+  deleteCompletedSetsBySessionId,
   getWorkoutPlanById,
+  getInProgressSessionByTemplateId,
+  getCompletedSetsBySessionId,
   type SessionWithExercises,
 } from "@/lib/storage/storage";
 import { cn } from "@/lib/utils/cn";
@@ -74,10 +78,63 @@ export default function WorkoutSessionScreen() {
   }, [isLastExercise]);
 
   /**
+   * Handle back/pause - exit without finishing
+   */
+  const handleBack = useCallback(() => {
+    showAlert(
+      "Pause Workout",
+      "Your progress will be saved and you can resume later.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Pause",
+          style: "default",
+          onPress: () => {
+            try {
+              // Delete existing sets and save current progress
+              if (completedSessionId) {
+                deleteCompletedSetsBySessionId(completedSessionId);
+
+                // Save current sets to database (even incomplete ones)
+                const now = new Date().toISOString();
+                exerciseSets.forEach((sets, exerciseId) => {
+                  sets.forEach((set) => {
+                    if (set.isCompleted && set.weight !== null && set.reps !== null) {
+                      insertCompletedSet({
+                        completed_session_id: completedSessionId,
+                        exercise_id: exerciseId,
+                        set_number: set.setNumber,
+                        weight: set.weight,
+                        reps: set.reps,
+                        is_warmup: set.isWarmup || false,
+                        completed_at: now,
+                      });
+                    }
+                  });
+                });
+              }
+
+              // Navigate back - session stays in progress (completed_at = null)
+              router.replace("/(tabs)");
+            } catch (error) {
+              console.error("Failed to save progress:", error);
+              // Navigate back anyway
+              router.replace("/(tabs)");
+            }
+          },
+        },
+      ]
+    );
+  }, [exerciseSets, completedSessionId]);
+
+  /**
    * Finish workout and save all data
    */
   const handleFinish = useCallback(() => {
-    Alert.alert(
+    showAlert(
       "Finish Workout",
       "Are you sure you want to finish this workout?",
       [
@@ -90,6 +147,11 @@ export default function WorkoutSessionScreen() {
           style: "default",
           onPress: () => {
             try {
+              // Delete existing sets (in case we're continuing a session)
+              if (completedSessionId) {
+                deleteCompletedSetsBySessionId(completedSessionId);
+              }
+
               // Save all completed sets to database
               const now = new Date().toISOString();
 
@@ -115,10 +177,10 @@ export default function WorkoutSessionScreen() {
               }
 
               // Navigate back to home
-              router.push("/");
+              router.replace("/(tabs)");
             } catch (error) {
               console.error("Failed to save workout:", error);
-              Alert.alert("Error", "Failed to save workout");
+              showAlert("Error", "Failed to save workout");
             }
           },
         },
@@ -133,29 +195,58 @@ export default function WorkoutSessionScreen() {
     try {
       const sessionData = getSessionWithExercises(sessionTemplateId);
       if (!sessionData) {
-        Alert.alert("Error", "Session not found");
+        showAlert("Error", "Session not found");
         router.back();
         return;
       }
 
       setSession(sessionData);
 
-      // Create completed session record
-      const now = new Date().toISOString();
-      const planId = sessionData.workout_plan_id;
-      const sessionId = insertCompletedSession({
-        workout_plan_id: planId,
-        session_template_id: sessionTemplateId,
-        started_at: now,
-        completed_at: null,
-        notes: null,
-      });
+      // Check if there's an in-progress session for this template
+      const existingSession = getInProgressSessionByTemplateId(sessionTemplateId);
+
+      let sessionId: number;
+      if (existingSession) {
+        // Continue existing session
+        sessionId = existingSession.id;
+
+        // Load existing sets from the in-progress session
+        const existingSets = getCompletedSetsBySessionId(sessionId);
+        if (existingSets.length > 0) {
+          // Group sets by exercise_id
+          const setsByExercise = new Map<number, SetData[]>();
+          existingSets.forEach((set) => {
+            if (!setsByExercise.has(set.exercise_id)) {
+              setsByExercise.set(set.exercise_id, []);
+            }
+            setsByExercise.get(set.exercise_id)!.push({
+              setNumber: set.set_number,
+              weight: set.weight,
+              reps: set.reps,
+              isCompleted: true,
+              isWarmup: set.is_warmup,
+            });
+          });
+          setExerciseSets(setsByExercise);
+        }
+      } else {
+        // Create new completed session record
+        const now = new Date().toISOString();
+        const planId = sessionData.workout_plan_id;
+        sessionId = insertCompletedSession({
+          workout_plan_id: planId,
+          session_template_id: sessionTemplateId,
+          started_at: now,
+          completed_at: null,
+          notes: null,
+        });
+      }
 
       setCompletedSessionId(sessionId);
       setIsLoading(false);
     } catch (error) {
       console.error("Failed to load session:", error);
-      Alert.alert("Error", "Failed to load session");
+      showAlert("Error", "Failed to load session");
       router.back();
     }
   }, [sessionTemplateId]);
@@ -183,11 +274,23 @@ export default function WorkoutSessionScreen() {
       {/* Header */}
       <View className="bg-background-dark/95 border-b border-white/5 px-4 py-3">
         <View className="flex-row items-center justify-between">
+          <Pressable
+            onPress={handleBack}
+            testID="back-button"
+            accessibilityRole="button"
+            accessibilityLabel="Go back and pause workout"
+            className="flex-row items-center gap-1 active:opacity-70"
+          >
+            <MaterialIcons name="arrow-back" size={24} color="#9db9a8" />
+            <Text className="text-text-muted text-sm font-medium">Back</Text>
+          </Pressable>
+
           <View className="flex-col">
             <Text className="text-sm font-medium text-text-muted uppercase tracking-wider">
               {session.name}
             </Text>
           </View>
+
           <Pressable
             onPress={handleFinish}
             testID="finish-button"
@@ -275,6 +378,7 @@ export default function WorkoutSessionScreen() {
           targetReps={currentExercise.reps}
           previousWeight={previousSet?.weight}
           previousReps={previousSet?.reps}
+          initialSets={exerciseSets.get(currentExercise.exercise_id)}
           onSetsChange={handleSetsChange}
           testID="set-tracker"
         />
