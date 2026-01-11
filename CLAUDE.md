@@ -39,17 +39,18 @@ npm run typecheck      # TypeScript type check
 
 ```
 app/                    # Expo Router routes (file-based)
-  (tabs)/               # Tab navigation screens
+  (tabs)/               # Route groups (parentheses don't affect URL)
+  +html.tsx             # Special routes (plus sign = HTML customization)
   _layout.tsx           # Root layout with fonts
 components/
   ui/                   # Reusable UI primitives (Button, etc.)
-  layout/               # Layout components
+  __tests__/            # Component tests
 lib/
   utils/                # Utilities (cn.ts for classnames)
   storage/              # Database and preferences
 constants/
   theme.ts              # Design tokens
-__tests__/              # Test files (NOT in app/ - files there become routes)
+__tests__/              # Route/integration tests (NOT in app/ - files there become routes)
 design-assets/          # Original HTML mockups for reference
 ```
 
@@ -69,9 +70,17 @@ text-muted: #9db9a8
 ## Key Patterns
 
 - Use `cn()` from `@/lib/utils/cn` to merge Tailwind classes
-- Tests go in `__tests__/` directory (not in `app/`)
 - Import global.css in root layout for NativeWind
 - Use `@/` path alias for imports
+
+## Testing Patterns
+
+- **NEVER** place test files in the `app/` directory - files there become routes in Expo Router
+- For code in `components/` and `lib/`: tests should live next to the code they test
+  - Either: `Button.tsx` + `Button.test.tsx` (same directory)
+  - Or: `Button.tsx` + `__tests__/Button.test.tsx` (subdirectory)
+- For route-related tests: use `__tests__/` directory in project root
+- All test files must use TypeScript (`.test.tsx` or `.test.ts`)
 
 ## Design Assets
 
