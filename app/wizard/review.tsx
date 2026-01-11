@@ -40,12 +40,12 @@ export default function PlanReviewScreen() {
   // Handle missing program
   if (!generatedProgram) {
     return (
-      <View className="flex-1 bg-background-light dark:bg-background-dark items-center justify-center px-6">
+      <View className="flex-1 bg-background-dark items-center justify-center px-6">
         <MaterialIcons name="error-outline" size={64} color="#ef4444" />
-        <Text className="text-xl font-bold text-slate-900 dark:text-white mt-4 mb-2">
+        <Text className="text-xl font-bold text-white mt-4 mb-2">
           No Plan Found
         </Text>
-        <Text className="text-slate-600 dark:text-slate-400 text-center mb-6">
+        <Text className="text-gray-400 text-center mb-6">
           Please go through the wizard to generate a workout plan.
         </Text>
         <Pressable
@@ -61,15 +61,15 @@ export default function PlanReviewScreen() {
   }
 
   return (
-    <View className="flex-1 bg-background-light dark:bg-background-dark">
+    <View className="flex-1 bg-background-dark">
       {/* Header */}
-      <View className="bg-background-light/80 dark:bg-background-dark/80 px-4 pt-4 pb-2">
+      <View className="bg-background-dark/80 px-4 pt-4 pb-2">
         <View className="flex-row items-center mb-4">
           <View className="flex-1">
-            <Text className="text-2xl font-bold text-slate-900 dark:text-white">
+            <Text className="text-2xl font-bold text-white">
               Your Workout Plan
             </Text>
-            <Text className="text-sm text-slate-600 dark:text-slate-400">
+            <Text className="text-sm text-gray-400">
               Review and accept to start training
             </Text>
           </View>
@@ -83,10 +83,10 @@ export default function PlanReviewScreen() {
 
         {/* Sessions Header */}
         <View className="mb-4">
-          <Text className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+          <Text className="text-xl font-bold text-white mb-2">
             Training Sessions
           </Text>
-          <Text className="text-sm text-slate-600 dark:text-slate-400">
+          <Text className="text-sm text-gray-400">
             Tap to expand and view exercises
           </Text>
         </View>
@@ -98,7 +98,7 @@ export default function PlanReviewScreen() {
       </ScrollView>
 
       {/* Action Buttons (Fixed at bottom) */}
-      <View className="absolute bottom-0 left-0 right-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-lg border-t border-slate-200 dark:border-white/5 p-4 pb-8">
+      <View className="absolute bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 p-4 pb-8">
         <View className="gap-3">
           {/* Accept Plan Button */}
           <Pressable
@@ -120,10 +120,10 @@ export default function PlanReviewScreen() {
             testID="regenerate-button"
             accessibilityRole="button"
             accessibilityLabel="Regenerate workout plan"
-            className="flex-row items-center justify-center gap-2 bg-white dark:bg-surface-dark border border-slate-200 dark:border-white/10 rounded-xl px-6 py-4 active:scale-[0.98]"
+            className="flex-row items-center justify-center gap-2 bg-surface-dark border border-white/10 rounded-xl px-6 py-4 active:scale-[0.98]"
           >
             <MaterialIcons name="refresh" size={20} color="#ffffff" />
-            <Text className="text-slate-900 dark:text-white text-base font-bold">
+            <Text className="text-white text-base font-bold">
               Regenerate
             </Text>
           </Pressable>

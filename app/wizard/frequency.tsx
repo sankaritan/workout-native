@@ -52,13 +52,13 @@ export default function FrequencyScreen() {
   const isContinueDisabled = !selectedFrequency;
 
   return (
-    <View className="flex-1 bg-background-light dark:bg-background-dark">
+    <View className="flex-1 bg-background-dark">
       {/* Header */}
-      <View className="flex-row items-center justify-between p-4 bg-background-light/95 dark:bg-background-dark/95">
+      <View className="flex-row items-center justify-between p-4 bg-background-dark/95">
         {/* Back button */}
         <Pressable
           onPress={handleBack}
-          className="flex items-center justify-center size-10 rounded-full active:bg-black/5 dark:active:bg-white/10"
+          className="flex items-center justify-center size-10 rounded-full active:bg-white/10"
           testID="back-button"
           accessibilityRole="button"
           accessibilityLabel="Go back"
@@ -66,14 +66,13 @@ export default function FrequencyScreen() {
           <MaterialIcons
             name="arrow-back-ios-new"
             size={24}
-            className="text-slate-900 dark:text-white"
             color="#ffffff"
           />
         </Pressable>
 
         {/* Step indicator */}
         <View className="flex-1 items-center">
-          <Text className="text-sm font-medium text-slate-500 dark:text-gray-400 uppercase tracking-wider">
+          <Text className="text-sm font-medium text-gray-400 uppercase tracking-wider">
             Step 1 of 4
           </Text>
         </View>
@@ -90,15 +89,15 @@ export default function FrequencyScreen() {
         />
         <View
           testID="progress-step-2"
-          className="h-1.5 flex-1 rounded-full bg-slate-200 dark:bg-surface-dark"
+          className="h-1.5 flex-1 rounded-full bg-surface-dark"
         />
         <View
           testID="progress-step-3"
-          className="h-1.5 flex-1 rounded-full bg-slate-200 dark:bg-surface-dark"
+          className="h-1.5 flex-1 rounded-full bg-surface-dark"
         />
         <View
           testID="progress-step-4"
-          className="h-1.5 flex-1 rounded-full bg-slate-200 dark:bg-surface-dark"
+          className="h-1.5 flex-1 rounded-full bg-surface-dark"
         />
       </View>
 
@@ -106,10 +105,10 @@ export default function FrequencyScreen() {
       <ScrollView className="flex-1 px-4 pb-24 pt-4">
         {/* Title and Subtitle */}
         <View className="mb-8">
-          <Text className="text-3xl font-bold leading-tight tracking-tight mb-2 text-slate-900 dark:text-white">
+          <Text className="text-3xl font-bold leading-tight tracking-tight mb-2 text-white">
             How often do you want to workout?
           </Text>
-          <Text className="text-base text-slate-600 dark:text-gray-400 font-normal leading-relaxed">
+          <Text className="text-base text-gray-400 font-normal leading-relaxed">
             Choose a weekly goal that fits your schedule.
           </Text>
         </View>
@@ -133,7 +132,7 @@ export default function FrequencyScreen() {
       </ScrollView>
 
       {/* Continue Button (Fixed at bottom) */}
-      <View className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background-light via-background-light to-transparent dark:from-background-dark dark:via-background-dark dark:to-transparent pb-6 pt-12">
+      <View className="absolute bottom-0 left-0 right-0 p-4 bg-background-dark/95 pb-6 pt-12">
         <Pressable
           onPress={handleContinue}
           disabled={isContinueDisabled}
@@ -145,7 +144,7 @@ export default function FrequencyScreen() {
             "w-full rounded-xl py-4 px-6 text-lg font-bold shadow-lg flex-row items-center justify-center gap-2",
             "transition-all",
             isContinueDisabled
-              ? "bg-slate-300 dark:bg-slate-700 opacity-50"
+              ? "bg-surface-dark opacity-50"
               : "bg-primary active:scale-[0.98] active:bg-[#10d460]"
           )}
         >
@@ -153,7 +152,7 @@ export default function FrequencyScreen() {
             className={cn(
               "text-lg font-bold",
               isContinueDisabled
-                ? "text-slate-500 dark:text-slate-400"
+                ? "text-gray-400"
                 : "text-background-dark"
             )}
           >
@@ -162,7 +161,7 @@ export default function FrequencyScreen() {
           <MaterialIcons
             name="arrow-forward"
             size={20}
-            color={isContinueDisabled ? "#64748b" : "#102218"}
+            color={isContinueDisabled ? "#6b8779" : "#102218"}
           />
         </Pressable>
       </View>

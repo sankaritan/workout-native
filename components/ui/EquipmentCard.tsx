@@ -54,15 +54,15 @@ export function EquipmentCard({
         "shadow-sm",
         // Hover/Active states
         "active:scale-[0.98]",
-        // Border and background
+        // Border and background (dark theme)
         "border",
         selected
           ? [
-              "border-primary bg-primary/5 dark:bg-primary/10",
+              "border-primary bg-primary/10",
               "ring-1 ring-primary/20",
             ]
           : [
-              "border-transparent bg-white dark:bg-surface-dark",
+              "border-transparent bg-surface-dark",
             ],
         // Disabled state
         disabled && "opacity-50"
@@ -82,27 +82,22 @@ export function EquipmentCard({
           "rounded-full p-2.5 transition-colors",
           selected
             ? "bg-primary/20"
-            : "bg-slate-100 dark:bg-white/5"
+            : "bg-white/5"
         )}
       >
         <MaterialIcons
           name={icon}
           size={28}
-          color={selected ? "#13ec6d" : undefined}
-          className={cn(
-            selected
-              ? "text-primary-dark dark:text-primary"
-              : "text-slate-900 dark:text-white"
-          )}
+          color={selected ? "#13ec6d" : "#ffffff"}
         />
       </View>
 
       {/* Text content */}
       <View>
-        <Text className="text-base font-bold text-slate-900 dark:text-white">
+        <Text className="text-base font-bold text-white">
           {name}
         </Text>
-        <Text className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+        <Text className="text-xs text-gray-400 mt-0.5">
           {description}
         </Text>
       </View>

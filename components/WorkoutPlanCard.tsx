@@ -16,9 +16,9 @@ export function WorkoutPlanCard({ program }: WorkoutPlanCardProps) {
   const weekText = program.durationWeeks === 1 ? "week" : "weeks";
 
   return (
-    <View className="bg-white dark:bg-surface-dark rounded-2xl p-6 mb-6 border border-slate-200 dark:border-white/10">
+    <View className="bg-surface-dark rounded-2xl p-6 mb-6 border border-white/10">
       {/* Program Name */}
-      <Text className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+      <Text className="text-2xl font-bold text-white mb-4">
         {program.name}
       </Text>
 
@@ -30,10 +30,10 @@ export function WorkoutPlanCard({ program }: WorkoutPlanCardProps) {
             <MaterialIcons name="calendar-today" size={20} color="#13ec6d" />
           </View>
           <View>
-            <Text className="text-xs text-slate-500 dark:text-slate-400">
+            <Text className="text-xs text-gray-400">
               Duration
             </Text>
-            <Text className="text-base font-semibold text-slate-900 dark:text-white">
+            <Text className="text-base font-semibold text-white">
               {program.durationWeeks} {weekText}
             </Text>
           </View>
@@ -45,10 +45,10 @@ export function WorkoutPlanCard({ program }: WorkoutPlanCardProps) {
             <MaterialIcons name="fitness-center" size={20} color="#13ec6d" />
           </View>
           <View>
-            <Text className="text-xs text-slate-500 dark:text-slate-400">
+            <Text className="text-xs text-gray-400">
               Frequency
             </Text>
-            <Text className="text-base font-semibold text-slate-900 dark:text-white">
+            <Text className="text-base font-semibold text-white">
               {program.sessionsPerWeek} sessions/week
             </Text>
           </View>
@@ -60,10 +60,10 @@ export function WorkoutPlanCard({ program }: WorkoutPlanCardProps) {
             <MaterialIcons name="trending-up" size={20} color="#13ec6d" />
           </View>
           <View>
-            <Text className="text-xs text-slate-500 dark:text-slate-400">
+            <Text className="text-xs text-gray-400">
               Training Focus
             </Text>
-            <Text className="text-base font-semibold text-slate-900 dark:text-white">
+            <Text className="text-base font-semibold text-white">
               {program.focus}
             </Text>
           </View>

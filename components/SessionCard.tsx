@@ -24,7 +24,7 @@ export function SessionCard({ session }: SessionCardProps) {
       <Pressable
         onPress={() => setIsExpanded(!isExpanded)}
         testID="session-card"
-        className="bg-white dark:bg-surface-dark rounded-2xl p-4 border border-slate-200 dark:border-white/10"
+        className="bg-surface-dark rounded-2xl p-4 border border-white/10"
       >
         {/* Header */}
         <View className="flex-row items-center justify-between mb-2">
@@ -34,7 +34,7 @@ export function SessionCard({ session }: SessionCardProps) {
                 Day {session.dayOfWeek}
               </Text>
             </View>
-            <Text className="text-lg font-bold text-slate-900 dark:text-white flex-1">
+            <Text className="text-lg font-bold text-white flex-1">
               {session.name}
             </Text>
           </View>
@@ -48,7 +48,7 @@ export function SessionCard({ session }: SessionCardProps) {
         </View>
 
         {/* Exercise Count */}
-        <Text className="text-sm text-slate-500 dark:text-slate-400">
+        <Text className="text-sm text-gray-400">
           {exerciseCount} {exerciseText}
         </Text>
 

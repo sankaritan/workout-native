@@ -137,14 +137,14 @@ export default function FocusScreen() {
   const isGenerateDisabled = !selectedFocus || isGenerating;
 
   return (
-    <View className="flex-1 bg-background-light dark:bg-background-dark">
+    <View className="flex-1 bg-background-dark">
       {/* Header */}
-      <View className="bg-background-light/80 dark:bg-background-dark/80 px-4 pt-4 pb-2">
+      <View className="bg-background-dark/80 px-4 pt-4 pb-2">
         <View className="flex-row items-center justify-between mb-4">
           {/* Back button */}
           <Pressable
             onPress={handleBack}
-            className="flex size-10 items-center justify-center rounded-full active:bg-black/5 dark:active:bg-white/10"
+            className="flex size-10 items-center justify-center rounded-full active:bg-white/10"
             testID="back-button"
             accessibilityRole="button"
             accessibilityLabel="Go back"
@@ -153,7 +153,7 @@ export default function FocusScreen() {
           </Pressable>
 
           {/* Step indicator */}
-          <Text className="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+          <Text className="text-sm font-semibold uppercase tracking-widest text-gray-400">
             Step 3 of 4
           </Text>
 
@@ -162,7 +162,7 @@ export default function FocusScreen() {
         </View>
 
         {/* Progress Bar */}
-        <View className="h-1.5 w-full rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+        <View className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
           <View
             testID="progress-bar"
             className="h-full w-3/4 rounded-full bg-primary transition-all duration-500"
@@ -174,10 +174,10 @@ export default function FocusScreen() {
       <ScrollView className="flex-1 px-4 pt-4 pb-32">
         {/* Title and Subtitle */}
         <View className="mb-8">
-          <Text className="text-3xl font-bold leading-tight tracking-tight text-slate-900 dark:text-white mb-2">
+          <Text className="text-3xl font-bold leading-tight tracking-tight text-white mb-2">
             What's your goal?
           </Text>
-          <Text className="text-slate-600 dark:text-slate-400 text-base font-normal leading-relaxed">
+          <Text className="text-gray-400 text-base font-normal leading-relaxed">
             Choose your training focus to customize your workout plan.
           </Text>
         </View>
@@ -200,7 +200,7 @@ export default function FocusScreen() {
       </ScrollView>
 
       {/* Generate Plan Button (Fixed at bottom) */}
-      <View className="absolute bottom-0 left-0 right-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-lg border-t border-slate-200 dark:border-white/5 p-4 pb-8">
+      <View className="absolute bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 p-4 pb-8">
         <Pressable
           onPress={handleGeneratePlan}
           disabled={isGenerateDisabled}
@@ -211,7 +211,7 @@ export default function FocusScreen() {
           className={cn(
             "flex w-full items-center justify-center gap-2 rounded-xl px-6 py-4 text-base font-bold shadow-lg transition-transform",
             isGenerateDisabled
-              ? "bg-slate-300 dark:bg-slate-700 opacity-50"
+              ? "bg-surface-dark opacity-50"
               : "bg-primary active:scale-[0.98] shadow-primary/20"
           )}
         >
@@ -227,13 +227,13 @@ export default function FocusScreen() {
               <MaterialIcons
                 name="auto-awesome"
                 size={20}
-                color={isGenerateDisabled ? "#64748b" : "#102218"}
+                color={isGenerateDisabled ? "#6b8779" : "#102218"}
               />
               <Text
                 className={cn(
                   "text-base font-bold",
                   isGenerateDisabled
-                    ? "text-slate-500 dark:text-slate-400"
+                    ? "text-gray-400"
                     : "text-background-dark"
                 )}
               >
