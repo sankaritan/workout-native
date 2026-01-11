@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
@@ -15,6 +15,8 @@ import {
   NotoSans_500Medium,
   NotoSans_700Bold,
 } from "@expo-google-fonts/noto-sans";
+import { initStorage } from "@/lib/storage/storage";
+import { seedExercises, seedTestWorkoutPlan } from "@/lib/storage/seed-data";
 
 import "../global.css";
 
@@ -32,6 +34,7 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [storageReady, setStorageReady] = useState(false);
   const [fontsLoaded, fontError] = useFonts({
     Lexend_300Light,
     Lexend_400Regular,
@@ -48,13 +51,32 @@ export default function RootLayout() {
     if (fontError) throw fontError;
   }, [fontError]);
 
+  // Initialize storage (works on both web and mobile)
   useEffect(() => {
-    if (fontsLoaded) {
+    async function setupStorage() {
+      try {
+        console.log("Initializing storage...");
+        await initStorage();
+        seedExercises();
+        seedTestWorkoutPlan();
+        setStorageReady(true);
+        console.log("Storage initialized successfully");
+      } catch (error) {
+        console.error("Failed to initialize storage:", error);
+        // Still set ready so the app can render (workout features just won't work)
+        setStorageReady(true);
+      }
+    }
+    setupStorage();
+  }, []);
+
+  useEffect(() => {
+    if (fontsLoaded && storageReady) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, storageReady]);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || !storageReady) {
     return null;
   }
 

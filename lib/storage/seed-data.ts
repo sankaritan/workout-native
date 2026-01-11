@@ -3,7 +3,7 @@
  * Contains 50+ exercises covering all major muscle groups
  */
 
-import { insertExercise, getAllExercises } from "./db-utils";
+import { insertExercise, getAllExercises } from "./storage";
 import type { ExerciseInsert } from "./types";
 
 export const EXERCISES: ExerciseInsert[] = [
@@ -444,4 +444,135 @@ export function getExerciseCountByMuscleGroup(): Record<string, number> {
  */
 export function getCompoundExerciseCount(): number {
   return EXERCISES.filter((ex) => ex.is_compound).length;
+}
+
+/**
+ * Seed a test workout plan for development/testing
+ * Creates a simple 3-day plan with session ID 1 for testing
+ */
+export function seedTestWorkoutPlan(): void {
+  try {
+    const {
+      getAllWorkoutPlans,
+      insertWorkoutPlan,
+      insertSessionTemplate,
+      insertExerciseTemplate,
+      getExercisesByMuscleGroup,
+    } = require("./storage");
+
+    // Check if test plan already exists
+    const existingPlans = getAllWorkoutPlans();
+    if (existingPlans.length > 0) {
+      console.log("Test workout plan already exists, skipping seed");
+      return;
+    }
+
+    // Create workout plan
+    const planId = insertWorkoutPlan({
+      name: "Test 3-Day Split",
+      description: "Development test plan",
+      weekly_frequency: 3,
+      duration_weeks: 8,
+      estimated_duration_minutes: 60,
+      created_at: new Date().toISOString(),
+      is_active: true,
+    });
+
+    // Get some exercises for each muscle group
+    const chestExercises = getExercisesByMuscleGroup("Chest");
+    const backExercises = getExercisesByMuscleGroup("Back");
+    const legExercises = getExercisesByMuscleGroup("Legs");
+
+    // Create Session 1: Upper Body A
+    const session1Id = insertSessionTemplate({
+      workout_plan_id: planId,
+      sequence_order: 1,
+      name: "Upper Body A",
+      target_muscle_groups: '["Chest","Back"]',
+      estimated_duration_minutes: 60,
+    });
+
+    // Add exercises to Session 1
+    if (chestExercises[0]) {
+      insertExerciseTemplate({
+        session_template_id: session1Id,
+        exercise_id: chestExercises[0].id,
+        exercise_order: 1,
+        sets: 3,
+        reps: 10,
+        is_warmup: false,
+      });
+    }
+
+    if (backExercises[0]) {
+      insertExerciseTemplate({
+        session_template_id: session1Id,
+        exercise_id: backExercises[0].id,
+        exercise_order: 2,
+        sets: 3,
+        reps: 12,
+        is_warmup: false,
+      });
+    }
+
+    // Create Session 2: Lower Body
+    const session2Id = insertSessionTemplate({
+      workout_plan_id: planId,
+      sequence_order: 2,
+      name: "Lower Body",
+      target_muscle_groups: '["Legs"]',
+      estimated_duration_minutes: 60,
+    });
+
+    // Add exercises to Session 2
+    if (legExercises[0]) {
+      insertExerciseTemplate({
+        session_template_id: session2Id,
+        exercise_id: legExercises[0].id,
+        exercise_order: 1,
+        sets: 4,
+        reps: 8,
+        is_warmup: false,
+      });
+    }
+
+    // Create Session 3: Upper Body B
+    const session3Id = insertSessionTemplate({
+      workout_plan_id: planId,
+      sequence_order: 3,
+      name: "Upper Body B",
+      target_muscle_groups: '["Shoulders","Arms"]',
+      estimated_duration_minutes: 60,
+    });
+
+    const shoulderExercises = getExercisesByMuscleGroup("Shoulders");
+    const armExercises = getExercisesByMuscleGroup("Arms");
+
+    if (shoulderExercises[0]) {
+      insertExerciseTemplate({
+        session_template_id: session3Id,
+        exercise_id: shoulderExercises[0].id,
+        exercise_order: 1,
+        sets: 3,
+        reps: 10,
+        is_warmup: false,
+      });
+    }
+
+    if (armExercises[0]) {
+      insertExerciseTemplate({
+        session_template_id: session3Id,
+        exercise_id: armExercises[0].id,
+        exercise_order: 2,
+        sets: 3,
+        reps: 12,
+        is_warmup: false,
+      });
+    }
+
+    console.log("Seeded test workout plan with 3 sessions");
+  } catch (error) {
+    console.error("Failed to seed test workout plan:", error);
+    throw error;
+  }
 }

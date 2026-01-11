@@ -12,14 +12,15 @@ Workout App - A fitness/workout planning and tracking application built with Exp
 
 - Build for extensibility by default if possible. If there is part of app that use very similar building block twice, consider generalizing it and reusing it in those places.
 - Use TDD approach when building new features. Create new tests first, then build logic to make them pass. Always run all tests at the end of building a feature to ensure nothing got broken and there are no regressions.
+- **All features must work on both web and iOS.** Even if iOS is the primary end-user platform, developers test features on web during development. If a feature doesn't work on web, it's useless for development workflow. Never make features "mobile-only".
 
 ## Tech Stack
 
 - **Framework**: Expo SDK 54 with React Native
-- **Language**: TypeScript (strict mode)
+- **Language**: TypeScript (strict mode). Never use Javascript.
 - **Routing**: Expo Router (file-based routing in `app/` directory)
 - **Styling**: NativeWind v4 (Tailwind CSS for React Native)
-- **Storage**: expo-sqlite (structured data), AsyncStorage (preferences)
+- **Storage**: AsyncStorage (all data - works cross-platform on web and mobile)
 - **Testing**: Jest + React Native Testing Library
 - **Icons**: MaterialIcons from @expo/vector-icons
 

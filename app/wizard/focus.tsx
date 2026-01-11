@@ -4,15 +4,13 @@
  */
 
 import React, { useState } from "react";
-import { View, Text, Pressable, ScrollView, ActivityIndicator, Platform } from "react-native";
+import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { SelectionCard } from "@/components/ui/SelectionCard";
 import { useWizard } from "@/lib/wizard-context";
 import { cn } from "@/lib/utils/cn";
 import { generateWorkoutProgram, saveWorkoutProgram } from "@/lib/workout-generator/engine";
-import { initDatabase } from "@/lib/storage/database";
-import { seedExercises } from "@/lib/storage/seed-data";
 
 // Focus options based on database types
 const FOCUS_OPTIONS: Array<{
@@ -70,46 +68,24 @@ export default function FocusScreen() {
 
     try {
       console.log("Starting workout generation...");
-      console.log("Platform:", Platform.OS);
       console.log("Input:", {
         frequency: state.frequency,
         equipment: state.equipment,
         focus: selectedFocus,
       });
 
-      let program;
+      // Generate workout program (works on both web and mobile)
+      const program = generateWorkoutProgram({
+        frequency: state.frequency,
+        equipment: state.equipment,
+        focus: selectedFocus,
+      });
 
-      // On web, generate with mock data (database not available due to SharedArrayBuffer)
-      if (Platform.OS === "web") {
-        console.log("Web platform detected - using mock exercise data");
+      console.log("Program generated:", program);
 
-        // Import and use mock exercises for web
-        const { generateWorkoutProgramWithMockData } = await import("@/lib/workout-generator/web-generator");
-        program = generateWorkoutProgramWithMockData({
-          frequency: state.frequency,
-          equipment: state.equipment,
-          focus: selectedFocus,
-        });
-
-        console.log("Program generated (web mock):", program);
-      } else {
-        // On native, use real database
-        console.log("Native platform - using database");
-        initDatabase();
-        seedExercises();
-
-        program = generateWorkoutProgram({
-          frequency: state.frequency,
-          equipment: state.equipment,
-          focus: selectedFocus,
-        });
-
-        console.log("Program generated:", program);
-
-        // Save to database
-        const planId = saveWorkoutProgram(program);
-        console.log("Plan saved with ID:", planId);
-      }
+      // Save to storage
+      const planId = saveWorkoutProgram(program);
+      console.log("Plan saved with ID:", planId);
 
       // Store generated program in wizard context for display
       updateState({ generatedProgram: program });

@@ -1,10 +1,10 @@
 import { generateWorkoutProgram, getSetsRepsScheme } from "@/lib/workout-generator/engine";
-import * as dbUtils from "@/lib/storage/db-utils";
+import * as storage from "@/lib/storage/storage";
 import type { GenerationInput } from "@/lib/workout-generator/types";
 import type { Exercise } from "@/lib/storage/types";
 
-// Mock database utilities
-jest.mock("@/lib/storage/db-utils");
+// Mock storage utilities
+jest.mock("@/lib/storage/storage");
 
 describe("Workout Generation Engine", () => {
   const mockExercises: Exercise[] = [
@@ -92,7 +92,7 @@ describe("Workout Generation Engine", () => {
 
   beforeEach(() => {
     // Mock getAllExercises to return test data
-    jest.spyOn(dbUtils, "getAllExercises").mockReturnValue(mockExercises);
+    jest.spyOn(storage, "getAllExercises").mockReturnValue(mockExercises);
   });
 
   afterEach(() => {

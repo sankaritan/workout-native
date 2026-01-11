@@ -8,7 +8,7 @@ A fitness/workout planning and tracking application built with Expo (React Nativ
 - **Language**: TypeScript (strict mode)
 - **Routing**: Expo Router (file-based routing)
 - **Styling**: NativeWind v4 (Tailwind CSS for React Native)
-- **Storage**: expo-sqlite (structured data), AsyncStorage (preferences)
+- **Storage**: AsyncStorage (cross-platform data persistence)
 - **Testing**: Jest + React Native Testing Library
 - **Icons**: MaterialIcons from @expo/vector-icons
 - **Fonts**: Lexend (display), Noto Sans (body)

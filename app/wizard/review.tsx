@@ -100,6 +100,20 @@ export default function PlanReviewScreen() {
       {/* Action Buttons (Fixed at bottom) */}
       <View className="absolute bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 p-4 pb-8">
         <View className="gap-3">
+          {/* Temporary Test Session Button (for Story 9 testing) */}
+          <Pressable
+            onPress={() => router.push("/session/1")}
+            testID="test-session-button"
+            accessibilityRole="button"
+            accessibilityLabel="Test session tracking (temporary)"
+            className="flex-row items-center justify-center gap-2 bg-primary/20 border border-primary/40 rounded-xl px-6 py-3 active:scale-[0.98]"
+          >
+            <MaterialIcons name="play-arrow" size={20} color="#13ec6d" />
+            <Text className="text-primary text-sm font-bold">
+              Test Session 1 (Dev Only)
+            </Text>
+          </Pressable>
+
           {/* Accept Plan Button */}
           <Pressable
             onPress={handleAcceptPlan}

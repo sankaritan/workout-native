@@ -3,8 +3,12 @@
  * Core algorithm for creating personalized workout programs
  */
 
-import { getDatabase } from "@/lib/storage/database";
-import { getAllExercises } from "@/lib/storage/db-utils";
+import {
+  getAllExercises,
+  insertWorkoutPlan,
+  insertSessionTemplate,
+  insertExerciseTemplate,
+} from "@/lib/storage/storage";
 import { distributeMuscleGroups } from "./muscle-groups";
 import {
   filterExercisesByEquipment,
@@ -101,57 +105,41 @@ export function generateWorkoutProgram(
 }
 
 /**
- * Save workout program to database
+ * Save workout program to storage
  * Returns the created plan ID
  */
 export function saveWorkoutProgram(program: WorkoutProgram): number {
-  const db = getDatabase();
-
   // Insert workout plan
-  const planResult = db.runSync(
-    `INSERT INTO workout_plans (name, focus, duration_weeks, sessions_per_week, created_at)
-     VALUES (?, ?, ?, ?, ?)`,
-    [
-      program.name,
-      program.focus,
-      program.durationWeeks,
-      program.sessionsPerWeek,
-      new Date().toISOString(),
-    ]
-  );
-
-  const planId = planResult.lastInsertRowId;
+  const planId = insertWorkoutPlan({
+    name: program.name,
+    description: `${program.focus} training program`,
+    weekly_frequency: program.sessionsPerWeek,
+    duration_weeks: program.durationWeeks,
+    estimated_duration_minutes: 60,
+    created_at: new Date().toISOString(),
+    is_active: true,
+  });
 
   // Insert session templates
-  program.sessions.forEach((session) => {
-    const sessionResult = db.runSync(
-      `INSERT INTO workout_session_templates (plan_id, name, day_of_week, session_order)
-       VALUES (?, ?, ?, ?)`,
-      [planId, session.name, session.dayOfWeek, session.dayOfWeek]
-    );
-
-    const sessionTemplateId = sessionResult.lastInsertRowId;
+  program.sessions.forEach((session, sessionIndex) => {
+    const sessionTemplateId = insertSessionTemplate({
+      workout_plan_id: planId,
+      sequence_order: sessionIndex + 1,
+      name: session.name,
+      target_muscle_groups: JSON.stringify(session.primaryMuscles),
+      estimated_duration_minutes: 60,
+    });
 
     // Insert exercises for this session
     session.exercises.forEach((programEx) => {
-      db.runSync(
-        `INSERT INTO session_exercise_templates (
-          session_template_id,
-          exercise_id,
-          sets,
-          reps_min,
-          reps_max,
-          exercise_order
-        ) VALUES (?, ?, ?, ?, ?, ?)`,
-        [
-          sessionTemplateId,
-          programEx.exercise.id,
-          programEx.sets,
-          programEx.repsMin,
-          programEx.repsMax,
-          programEx.order,
-        ]
-      );
+      insertExerciseTemplate({
+        session_template_id: sessionTemplateId,
+        exercise_id: programEx.exercise.id,
+        exercise_order: programEx.order,
+        sets: programEx.sets,
+        reps: programEx.repsMax, // Use max reps as target
+        is_warmup: false,
+      });
     });
   });
 

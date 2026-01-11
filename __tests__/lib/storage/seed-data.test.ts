@@ -1,39 +1,35 @@
-import { openDatabaseSync } from "expo-sqlite";
-import { initDatabase, resetDatabase } from "@/lib/storage/database";
-import { seedExercises, EXERCISES } from "@/lib/storage/seed-data";
+import { EXERCISES, seedExercises } from "@/lib/storage/seed-data";
 import {
+  initStorage,
   getAllExercises,
   getExercisesByMuscleGroup,
   getCompoundExercises,
-} from "@/lib/storage/db-utils";
+  resetStorage,
+} from "@/lib/storage/storage";
 import type { MuscleGroup } from "@/lib/storage/types";
 
-// Mock expo-sqlite
-jest.mock("expo-sqlite");
+// Mock AsyncStorage
+jest.mock("@react-native-async-storage/async-storage", () => ({
+  multiGet: jest.fn(() => Promise.resolve([
+    ["workout_exercises", null],
+    ["workout_plans", null],
+    ["workout_session_templates", null],
+    ["workout_exercise_templates", null],
+    ["workout_completed_sessions", null],
+    ["workout_completed_sets", null],
+    ["workout_id_counters", null],
+  ])),
+  multiSet: jest.fn(() => Promise.resolve()),
+}));
 
 describe("Seed Data", () => {
-  let mockDb: any;
-
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
+    await initStorage();
+  });
 
-    // Create mock database
-    mockDb = {
-      execSync: jest.fn(),
-      runSync: jest.fn((query: string) => {
-        // Return incrementing IDs for inserts
-        const idCounter = mockDb.runSync.mock.calls.length;
-        return {
-          lastInsertRowId: idCounter,
-          changes: 1,
-        };
-      }),
-      getFirstSync: jest.fn(),
-      getAllSync: jest.fn(() => []),
-    };
-
-    (openDatabaseSync as jest.Mock).mockReturnValue(mockDb);
-    initDatabase();
+  afterEach(async () => {
+    await resetStorage();
   });
 
   describe("Exercise Data", () => {
@@ -92,93 +88,42 @@ describe("Seed Data", () => {
   });
 
   describe("seedExercises", () => {
-    it("inserts all exercises into database", () => {
+    it("inserts all exercises into storage", () => {
       seedExercises();
 
-      // Should have called runSync for each exercise
-      expect(mockDb.runSync).toHaveBeenCalledTimes(EXERCISES.length);
+      const exercises = getAllExercises();
+      expect(exercises.length).toBe(EXERCISES.length);
     });
 
-    it("inserts exercises with correct data", () => {
+    it("exercises have correct properties", () => {
       seedExercises();
 
-      // Check first call to verify data structure
-      const firstCall = mockDb.runSync.mock.calls[0];
-      expect(firstCall[0]).toContain("INSERT INTO exercises");
-      expect(firstCall[1]).toHaveLength(5); // 5 parameters: name, muscle_group, equipment, is_compound, description
-    });
+      const exercises = getAllExercises();
+      const benchPress = exercises.find((ex) => ex.name === "Bench Press");
 
-    it("handles compound exercises correctly", () => {
-      seedExercises();
-
-      // Find a compound exercise call
-      const compoundExercise = EXERCISES.find((ex) => ex.is_compound);
-      const compoundCall = mockDb.runSync.mock.calls.find((call: any[]) =>
-        call[1].includes(compoundExercise?.name)
-      );
-
-      expect(compoundCall).toBeDefined();
-      expect(compoundCall[1][3]).toBe(1); // is_compound should be 1 (true)
-    });
-
-    it("handles isolation exercises correctly", () => {
-      seedExercises();
-
-      // Find an isolation exercise call
-      const isolationExercise = EXERCISES.find((ex) => !ex.is_compound);
-      const isolationCall = mockDb.runSync.mock.calls.find((call: any[]) =>
-        call[1].includes(isolationExercise?.name)
-      );
-
-      expect(isolationCall).toBeDefined();
-      expect(isolationCall[1][3]).toBe(0); // is_compound should be 0 (false)
+      expect(benchPress).toBeDefined();
+      expect(benchPress?.muscle_group).toBe("Chest");
+      expect(benchPress?.is_compound).toBe(true);
+      expect(benchPress?.equipment_required).toBe("Barbell");
     });
 
     it("does not insert duplicates on subsequent calls", () => {
-      // Mock getAllSync to return existing exercises
-      mockDb.getAllSync.mockReturnValue(EXERCISES.map((ex, idx) => ({ ...ex, id: idx + 1 })));
+      seedExercises();
+      const countAfterFirst = getAllExercises().length;
 
       seedExercises();
+      const countAfterSecond = getAllExercises().length;
 
-      // Should not call runSync when exercises already exist
-      expect(mockDb.runSync).not.toHaveBeenCalled();
-    });
-
-    it("only inserts missing exercises", () => {
-      // Mock getAllSync to return only first 10 exercises
-      mockDb.getAllSync.mockReturnValue(
-        EXERCISES.slice(0, 10).map((ex, idx) => ({ ...ex, id: idx + 1 }))
-      );
-
-      seedExercises();
-
-      // Should only insert the remaining exercises
-      expect(mockDb.runSync).toHaveBeenCalledTimes(EXERCISES.length - 10);
+      expect(countAfterSecond).toBe(countAfterFirst);
     });
   });
 
   describe("Query Functions with Seeded Data", () => {
     beforeEach(() => {
-      // Mock getAllSync to return seeded data
-      mockDb.getAllSync.mockImplementation((query: string) => {
-        if (query.includes("WHERE muscle_group")) {
-          // Extract muscle group from query parameters
-          return EXERCISES.filter((ex) => ex.muscle_group === "Chest").map(
-            (ex, idx) => ({ ...ex, id: idx + 1 })
-          );
-        }
-        return EXERCISES.map((ex, idx) => ({ ...ex, id: idx + 1 }));
-      });
+      seedExercises();
     });
 
     it("can query exercises by muscle group", () => {
-      mockDb.getAllSync.mockReturnValue(
-        EXERCISES.filter((ex) => ex.muscle_group === "Chest").map((ex, idx) => ({
-          ...ex,
-          id: idx + 1,
-        }))
-      );
-
       const chestExercises = getExercisesByMuscleGroup("Chest");
       expect(chestExercises.length).toBeGreaterThan(0);
       expect(chestExercises.every((ex) => ex.muscle_group === "Chest")).toBe(
@@ -187,13 +132,6 @@ describe("Seed Data", () => {
     });
 
     it("can query compound exercises", () => {
-      mockDb.getAllSync.mockReturnValue(
-        EXERCISES.filter((ex) => ex.is_compound).map((ex, idx) => ({
-          ...ex,
-          id: idx + 1,
-        }))
-      );
-
       const compound = getCompoundExercises();
       expect(compound.length).toBeGreaterThanOrEqual(15);
       expect(compound.every((ex) => ex.is_compound === true)).toBe(true);
@@ -202,6 +140,11 @@ describe("Seed Data", () => {
     it("returns all exercises sorted by name", () => {
       const exercises = getAllExercises();
       expect(exercises.length).toBe(EXERCISES.length);
+
+      // Check sorting
+      for (let i = 1; i < exercises.length; i++) {
+        expect(exercises[i].name.localeCompare(exercises[i - 1].name)).toBeGreaterThanOrEqual(0);
+      }
     });
   });
 
