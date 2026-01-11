@@ -1,6 +1,7 @@
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Whenever you make an update to the codebase, check whether CLAUDE.md should not be updated (such as describing project overview and current state) and if so, make updates there too.
 
 ## Project Overview
 
@@ -26,7 +27,7 @@ The mockups use:
 
 ### Color Palette
 
-```
+```text
 primary: #13ec6d (bright green)
 background-light: #f6f8f7
 background-dark: #102218
