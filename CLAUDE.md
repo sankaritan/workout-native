@@ -8,11 +8,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Workout App - A fitness/workout planning and tracking application built with Expo (React Native) for web and iOS platforms.
 
-## Coding and Engineering principles
+## Coding and Engineering and General principles and instructions
 
 - Build for extensibility by default if possible. If there is part of app that use very similar building block twice, consider generalizing it and reusing it in those places.
 - Use TDD approach when building new features. Create new tests first, then build logic to make them pass. Always run all tests at the end of building a feature to ensure nothing got broken and there are no regressions.
 - **All features must work on both web and iOS.** Even if iOS is the primary end-user platform, developers test features on web during development. If a feature doesn't work on web, it's useless for development workflow. Never make features "mobile-only".
+- Update README.md whenever setup changes
+- Whenever we add a feature or tweak to requirements that modify existing implementation plan (in IMPLEMENTATION_PLAN.md), update this plan accordingly to ensure future, not yet implemented, stories account for these modifications
 
 ## Tech Stack
 
@@ -26,20 +28,13 @@ Workout App - A fitness/workout planning and tracking application built with Exp
 
 ## Development Commands
 
-```bash
-npm start              # Start Expo dev server
-npm run web            # Start for web
-npm test               # Run tests
-npm run test:watch     # Run tests in watch mode
-npm run test:coverage  # Run tests with coverage
-npm run typecheck      # TypeScript type check
-```
+documented in package.json
 
 **Note**: Project requires Node.js >= 20 (current v18 works but may have issues).
 
 ## Project Structure
 
-```
+```text
 app/                    # Expo Router routes (file-based)
   (tabs)/               # Route groups (parentheses don't affect URL)
   +html.tsx             # Special routes (plus sign = HTML customization)
@@ -59,13 +54,6 @@ design-assets/          # Original HTML mockups for reference
 ## Design System
 
 Configured in `tailwind.config.js` with colors from mockups:
-
-```
-primary: #13ec6d (bright green)
-background-dark: #102218
-surface-dark: #1c2e24
-text-muted: #9db9a8
-```
 
 **Fonts**: Lexend (display), Noto Sans (body) - loaded via @expo-google-fonts
 
