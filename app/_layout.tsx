@@ -17,7 +17,7 @@ import {
   NotoSans_700Bold,
 } from "@expo-google-fonts/noto-sans";
 import { initStorage } from "@/lib/storage/storage";
-import { seedExercises, seedTestWorkoutPlan } from "@/lib/storage/seed-data";
+import { seedExercises, seedTestWorkoutPlan, seedMockWorkoutHistory } from "@/lib/storage/seed-data";
 
 import "../global.css";
 
@@ -60,6 +60,7 @@ export default function RootLayout() {
         await initStorage();
         seedExercises();
         seedTestWorkoutPlan();
+        seedMockWorkoutHistory();
         setStorageReady(true);
         console.log("Storage initialized successfully");
       } catch (error) {

@@ -44,6 +44,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="reset"
+        options={{
+          title: 'Reset',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="refresh" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

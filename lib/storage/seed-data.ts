@@ -576,3 +576,195 @@ export function seedTestWorkoutPlan(): void {
     throw error;
   }
 }
+
+/**
+ * Seed mock workout history for development/testing
+ * Creates completed sessions with different progression patterns:
+ * - Upward progression (getting stronger)
+ * - Downward progression (losing strength/deload)
+ * - Up-down trends (inconsistent)
+ */
+export function seedMockWorkoutHistory(): void {
+  try {
+    const {
+      getAllWorkoutPlans,
+      getSessionTemplatesByPlanId,
+      getExerciseTemplatesBySessionId,
+      insertCompletedSession,
+      insertCompletedSet,
+      getCompletedSessionsByPlanId,
+    } = require("./storage");
+
+    // Check if there are already completed sessions
+    const plans = getAllWorkoutPlans();
+    if (plans.length === 0) {
+      console.log("No workout plans exist, skipping mock history seed");
+      return;
+    }
+
+    const activePlan = plans[0];
+    const existingSessions = getCompletedSessionsByPlanId(activePlan.id);
+    if (existingSessions.length > 0) {
+      console.log("Mock workout history already exists, skipping seed");
+      return;
+    }
+
+    const sessions = getSessionTemplatesByPlanId(activePlan.id);
+    if (sessions.length === 0) {
+      console.log("No session templates exist, skipping mock history seed");
+      return;
+    }
+
+    // Generate history for the past 8 weeks (simulating an 8-week program)
+    const today = new Date();
+    const weeksToGenerate = 8;
+
+    // Pattern 1: Upward progression - Bench Press (Session 1, Exercise 1)
+    // Starting at 135 lbs, increasing to 175 lbs over 8 weeks
+    const upwardProgression = [135, 140, 145, 150, 155, 160, 165, 170, 175];
+
+    // Pattern 2: Downward progression - Deadlift (Session 2, Exercise 1) - simulating deload
+    // Starting at 315 lbs, decreasing to 275 lbs (intentional deload)
+    const downwardProgression = [315, 310, 305, 300, 290, 285, 280, 275];
+
+    // Pattern 3: Up-down trend - Pull-ups (Session 1, Exercise 2) - inconsistent
+    // Fluctuating between good and bad days
+    const upDownProgression = [50, 55, 52, 58, 54, 60, 56, 62, 58];
+
+    // Generate 2-3 sessions per week for 8 weeks
+    for (let week = 0; week < weeksToGenerate; week++) {
+      // Session 1 (Upper Body A) - 2x per week
+      for (let sessionInWeek = 0; sessionInWeek < 2; sessionInWeek++) {
+        const daysAgo = (weeksToGenerate - week) * 7 - sessionInWeek * 3 - 1;
+        const sessionDate = new Date(today);
+        sessionDate.setDate(sessionDate.getDate() - daysAgo);
+        sessionDate.setHours(10, 0, 0, 0);
+
+        const session1 = sessions[0];
+        const exercises1 = getExerciseTemplatesBySessionId(session1.id);
+
+        const completedSessionId = insertCompletedSession({
+          workout_plan_id: activePlan.id,
+          session_template_id: session1.id,
+          started_at: sessionDate.toISOString(),
+          completed_at: new Date(sessionDate.getTime() + 60 * 60 * 1000).toISOString(),
+          notes: null,
+        });
+
+        // Exercise 1 - Upward progression (Bench Press)
+        if (exercises1[0]) {
+          const weekIndex = week + sessionInWeek * 0.5;
+          const weight = upwardProgression[Math.min(Math.floor(weekIndex), upwardProgression.length - 1)];
+
+          for (let set = 1; set <= 3; set++) {
+            insertCompletedSet({
+              completed_session_id: completedSessionId,
+              exercise_id: exercises1[0].exercise_id,
+              set_number: set,
+              weight: weight,
+              reps: 8 + Math.floor(Math.random() * 3), // 8-10 reps
+              is_warmup: false,
+              completed_at: new Date(sessionDate.getTime() + set * 5 * 60 * 1000).toISOString(),
+            });
+          }
+        }
+
+        // Exercise 2 - Up-down progression (Back exercise)
+        if (exercises1[1]) {
+          const weekIndex = week + sessionInWeek * 0.5;
+          const weight = upDownProgression[Math.min(Math.floor(weekIndex), upDownProgression.length - 1)];
+
+          for (let set = 1; set <= 3; set++) {
+            insertCompletedSet({
+              completed_session_id: completedSessionId,
+              exercise_id: exercises1[1].exercise_id,
+              set_number: set,
+              weight: weight,
+              reps: 10 + Math.floor(Math.random() * 3), // 10-12 reps
+              is_warmup: false,
+              completed_at: new Date(sessionDate.getTime() + (3 + set) * 5 * 60 * 1000).toISOString(),
+            });
+          }
+        }
+      }
+
+      // Session 2 (Lower Body) - 1x per week
+      const daysAgoSession2 = (weeksToGenerate - week) * 7 - 3;
+      const sessionDate2 = new Date(today);
+      sessionDate2.setDate(sessionDate2.getDate() - daysAgoSession2);
+      sessionDate2.setHours(14, 0, 0, 0);
+
+      if (sessions[1]) {
+        const session2 = sessions[1];
+        const exercises2 = getExerciseTemplatesBySessionId(session2.id);
+
+        const completedSessionId2 = insertCompletedSession({
+          workout_plan_id: activePlan.id,
+          session_template_id: session2.id,
+          started_at: sessionDate2.toISOString(),
+          completed_at: new Date(sessionDate2.getTime() + 70 * 60 * 1000).toISOString(),
+          notes: null,
+        });
+
+        // Exercise 1 - Downward progression (Leg exercise - simulating deload)
+        if (exercises2[0]) {
+          const weight = downwardProgression[Math.min(week, downwardProgression.length - 1)];
+
+          for (let set = 1; set <= 4; set++) {
+            insertCompletedSet({
+              completed_session_id: completedSessionId2,
+              exercise_id: exercises2[0].exercise_id,
+              set_number: set,
+              weight: weight,
+              reps: 6 + Math.floor(Math.random() * 3), // 6-8 reps
+              is_warmup: false,
+              completed_at: new Date(sessionDate2.getTime() + set * 6 * 60 * 1000).toISOString(),
+            });
+          }
+        }
+      }
+
+      // Session 3 (Upper Body B) - 1x per week
+      const daysAgoSession3 = (weeksToGenerate - week) * 7 - 5;
+      const sessionDate3 = new Date(today);
+      sessionDate3.setDate(sessionDate3.getDate() - daysAgoSession3);
+      sessionDate3.setHours(16, 0, 0, 0);
+
+      if (sessions[2]) {
+        const session3 = sessions[2];
+        const exercises3 = getExerciseTemplatesBySessionId(session3.id);
+
+        const completedSessionId3 = insertCompletedSession({
+          workout_plan_id: activePlan.id,
+          session_template_id: session3.id,
+          started_at: sessionDate3.toISOString(),
+          completed_at: new Date(sessionDate3.getTime() + 55 * 60 * 1000).toISOString(),
+          notes: null,
+        });
+
+        // Exercises with moderate progression
+        exercises3.forEach((exerciseTemplate: any, idx: number) => {
+          const baseWeight = 50 + idx * 10;
+          const weight = baseWeight + week * 2; // Slow steady progression
+
+          for (let set = 1; set <= 3; set++) {
+            insertCompletedSet({
+              completed_session_id: completedSessionId3,
+              exercise_id: exerciseTemplate.exercise_id,
+              set_number: set,
+              weight: weight,
+              reps: 10 + Math.floor(Math.random() * 3), // 10-12 reps
+              is_warmup: false,
+              completed_at: new Date(sessionDate3.getTime() + (idx * 3 + set) * 5 * 60 * 1000).toISOString(),
+            });
+          }
+        });
+      }
+    }
+
+    console.log("Seeded mock workout history with various progression patterns");
+  } catch (error) {
+    console.error("Failed to seed mock workout history:", error);
+    throw error;
+  }
+}

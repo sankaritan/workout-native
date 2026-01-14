@@ -342,7 +342,7 @@ export default function WorkoutSessionScreen() {
             {/* Exercise Name */}
             <Pressable
               className="flex-1 items-center active:opacity-70"
-              onPress={() => router.push(`/exercise/${currentExercise.exercise_id}/history`)}
+              onPress={() => router.push(`/exercise/${currentExercise.exercise_id}/history` as any)}
               testID="exercise-name-button"
               accessibilityRole="button"
               accessibilityLabel={`View ${currentExercise.exercise.name} history`}
