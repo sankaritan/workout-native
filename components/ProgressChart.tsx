@@ -156,18 +156,20 @@ export function ProgressChart({ data, className }: ProgressChartProps) {
             const length = Math.sqrt(dx * dx + dy * dy);
             const angle = Math.atan2(dy, dx);
 
+            // Calculate center point of the line
+            const centerX = (prevPoint.x + point.x) / 2;
+            const centerY = (prevPoint.y + point.y) / 2;
+
+            // Position line at center, then it rotates correctly
             return (
               <View
                 key={`line-${index}`}
                 className="absolute bg-primary h-[2px]"
                 style={{
-                  left: prevPoint.x,
-                  top: prevPoint.y,
+                  left: centerX - length / 2,
+                  top: centerY - 1, // -1 to center the 2px height
                   width: length,
-                  transform: [
-                    { rotate: `${angle}rad` },
-                    { translateY: -1 },
-                  ],
+                  transform: [{ rotate: `${angle}rad` }],
                 }}
               />
             );
