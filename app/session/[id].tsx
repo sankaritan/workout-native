@@ -340,14 +340,23 @@ export default function WorkoutSessionScreen() {
             </Pressable>
 
             {/* Exercise Name */}
-            <View className="flex-1 items-center">
-              <Text className="text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight text-center">
-                {currentExercise.exercise.name}
-              </Text>
+            <Pressable
+              className="flex-1 items-center active:opacity-70"
+              onPress={() => router.push(`/exercise/${currentExercise.exercise_id}/history`)}
+              testID="exercise-name-button"
+              accessibilityRole="button"
+              accessibilityLabel={`View ${currentExercise.exercise.name} history`}
+            >
+              <View className="flex-row items-center gap-2">
+                <Text className="text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight text-center">
+                  {currentExercise.exercise.name}
+                </Text>
+                <MaterialIcons name="show-chart" size={20} color="#13ec6d" />
+              </View>
               <Text className="text-xs text-text-muted mt-1">
                 Target: {currentExercise.sets} × {currentExercise.reps} reps
               </Text>
-            </View>
+            </Pressable>
 
             {/* Next Button */}
             <Pressable
