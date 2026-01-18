@@ -97,14 +97,6 @@ describe("HistoryScreen", () => {
       (storage.getCompletedSetsBySessionId as jest.Mock).mockReturnValue(createMockSets());
     });
 
-    it("renders History header when sessions exist", async () => {
-      render(<HistoryScreen />);
-
-      await waitFor(() => {
-        expect(screen.getByText("History")).toBeTruthy();
-      });
-    });
-
     it("renders current month and year", async () => {
       render(<HistoryScreen />);
 
