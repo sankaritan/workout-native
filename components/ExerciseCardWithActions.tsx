@@ -19,6 +19,8 @@ export interface ExerciseCardWithActionsProps {
   onRemove: () => void;
   /** Whether the remove button is enabled (false when only 1 exercise in group) */
   canRemove: boolean;
+  /** Whether to show muscle group badges */
+  showMuscleGroupBadges?: boolean;
   /** Optional testID for testing */
   testID?: string;
 }
@@ -32,6 +34,7 @@ export function ExerciseCardWithActions({
   onSwap,
   onRemove,
   canRemove,
+  showMuscleGroupBadges = false,
   testID,
 }: ExerciseCardWithActionsProps) {
   return (
@@ -62,9 +65,33 @@ export function ExerciseCardWithActions({
             </Text>
           </View>
         </View>
-        <Text className="text-xs text-gray-400">
+        <Text className="text-xs text-gray-400 mb-1">
           {exercise.equipment_required || "Bodyweight"}
         </Text>
+
+        {/* Muscle Group Badges */}
+        {showMuscleGroupBadges && (
+          <View className="flex-row gap-1 mt-1 flex-wrap">
+            {exercise.muscle_groups.map((muscle, idx) => (
+              <View
+                key={muscle}
+                className={cn(
+                  "px-2 py-0.5 rounded",
+                  idx === 0 ? "bg-primary/30" : "bg-gray-600/30"
+                )}
+              >
+                <Text
+                  className={cn(
+                    "text-xs font-semibold",
+                    idx === 0 ? "text-primary" : "text-gray-400"
+                  )}
+                >
+                  {muscle}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
 
       {/* Action Buttons */}

@@ -15,7 +15,6 @@ jest.mock("expo-router", () => ({
     back: mockRouterBack,
   }),
   useLocalSearchParams: () => ({
-    muscleGroup: "Chest",
     exerciseId: "1",
   }),
   Stack: {
@@ -31,11 +30,11 @@ jest.mock("@expo/vector-icons", () => ({
 // Mock storage to return test exercises
 jest.mock("@/lib/storage/storage", () => ({
   getAllExercises: jest.fn().mockReturnValue([
-    { id: 1, name: "Bench Press", muscle_group: "Chest", equipment_required: "Barbell", is_compound: true, description: "Compound chest exercise" },
-    { id: 2, name: "Push-up", muscle_group: "Chest", equipment_required: "Bodyweight", is_compound: true, description: "Bodyweight chest exercise" },
-    { id: 3, name: "Dumbbell Fly", muscle_group: "Chest", equipment_required: "Dumbbell", is_compound: false, description: "Isolation chest exercise" },
-    { id: 4, name: "Cable Crossover", muscle_group: "Chest", equipment_required: "Cables", is_compound: false, description: null },
-    { id: 5, name: "Deadlift", muscle_group: "Back", equipment_required: "Barbell", is_compound: true, description: null },
+    { id: 1, name: "Bench Press", muscle_group: "Chest", muscle_groups: ["Chest", "Shoulders", "Arms"], equipment_required: "Barbell", is_compound: true, description: "Compound chest exercise" },
+    { id: 2, name: "Push-up", muscle_group: "Chest", muscle_groups: ["Chest", "Arms"], equipment_required: "Bodyweight", is_compound: true, description: "Bodyweight chest exercise" },
+    { id: 3, name: "Dumbbell Fly", muscle_group: "Chest", muscle_groups: ["Chest"], equipment_required: "Dumbbell", is_compound: false, description: "Isolation chest exercise" },
+    { id: 4, name: "Cable Crossover", muscle_group: "Chest", muscle_groups: ["Chest"], equipment_required: "Cables", is_compound: false, description: null },
+    { id: 5, name: "Deadlift", muscle_group: "Back", muscle_groups: ["Back", "Legs", "Core"], equipment_required: "Barbell", is_compound: true, description: null },
   ]),
 }));
 
@@ -101,7 +100,7 @@ describe("Swap Exercise Screen", () => {
     expect(screen.getByTestId("close-button")).toBeTruthy();
   });
 
-  it("displays muscle group in subtitle", () => {
+  it("displays filter pills for muscle groups", () => {
     const SwapExerciseScreen = require("@/app/wizard/swap-exercise").default;
     render(
       <SafeAreaProvider initialMetrics={initialMetrics}>
@@ -110,7 +109,11 @@ describe("Swap Exercise Screen", () => {
         </WizardProvider>
       </SafeAreaProvider>
     );
-    expect(screen.getByText(/Chest/)).toBeTruthy();
+    // Check that muscle group filter pills are present
+    expect(screen.getAllByText("Chest").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Back").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Shoulders").length).toBeGreaterThan(0);
+    expect(screen.getByText("Compound Only")).toBeTruthy();
   });
 
   it("calls router.back when close button is pressed", () => {

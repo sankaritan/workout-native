@@ -108,11 +108,12 @@ export function generateWorkoutProgram(
 
 /**
  * Generate workout program from user-customized exercises
- * Uses the exercises the user selected for each muscle group
+ * Uses flat array of exercises selected by the user
+ * Intelligently distributes compound exercises across sessions
  */
 export function generateWorkoutProgramFromCustomExercises(
   input: GenerationInput,
-  customExercises: MuscleGroupExercises[]
+  customExercises: Exercise[]
 ): WorkoutProgram {
   const { frequency, focus } = input;
 
@@ -122,32 +123,45 @@ export function generateWorkoutProgramFromCustomExercises(
   // Get sets/reps scheme
   const scheme = getSetsRepsScheme(focus);
 
-  // Create a map for quick lookup of exercises by muscle group
-  const exercisesByMuscle = new Map<MuscleGroup, Exercise[]>();
-  customExercises.forEach((entry) => {
-    exercisesByMuscle.set(entry.muscleGroup, entry.exercises);
-  });
+  // Validate muscle group coverage (soft validation - warning only)
+  validateMuscleGroupCoverage(customExercises, frequency);
 
   // Generate sessions
   const sessions: ProgramSession[] = sessionTemplates.map((template) => {
-    // Get all exercises for muscles targeted in this session
-    const sessionExercises: Exercise[] = [];
-    template.muscles.forEach((muscle) => {
-      const muscleExercises = exercisesByMuscle.get(muscle) || [];
-      sessionExercises.push(...muscleExercises);
+    // Get exercises that work ANY of the target muscles
+    const sessionExercises = customExercises.filter((exercise) =>
+      exercise.muscle_groups.some((mg) => template.muscles.includes(mg))
+    );
+
+    // Sort exercises: prioritize primary muscle matches, then compounds
+    const sorted = sessionExercises.sort((a, b) => {
+      // Check if primary muscle matches session targets
+      const aPrimaryMatch = template.muscles.includes(a.muscle_groups[0]);
+      const bPrimaryMatch = template.muscles.includes(b.muscle_groups[0]);
+
+      if (aPrimaryMatch && !bPrimaryMatch) return -1;
+      if (!aPrimaryMatch && bPrimaryMatch) return 1;
+
+      // Both primary or both secondary - sort by compound
+      if (a.is_compound && !b.is_compound) return -1;
+      if (!a.is_compound && b.is_compound) return 1;
+
+      return 0;
     });
 
-    // Order exercises (compound first)
-    const orderedExercises = orderExercises(sessionExercises);
+    // Limit exercises per session to avoid bloat (max 7)
+    const MAX_EXERCISES_PER_SESSION = 7;
+    const limitedExercises = sorted.slice(0, MAX_EXERCISES_PER_SESSION);
 
-    // Create program exercises with sets/reps
+    // Order and create program exercises
+    const orderedExercises = orderExercises(limitedExercises);
     const programExercises: ProgramExercise[] = orderedExercises.map(
       (exercise, index) => ({
         exercise,
         sets: scheme.sets,
         repsMin: scheme.repsMin,
         repsMax: scheme.repsMax,
-        order: index + 1, // 1-based ordering
+        order: index + 1,
       })
     );
 
@@ -169,6 +183,33 @@ export function generateWorkoutProgramFromCustomExercises(
     sessionsPerWeek: frequency,
     sessions,
   };
+}
+
+/**
+ * Validate muscle group coverage (soft validation - warning only)
+ */
+function validateMuscleGroupCoverage(
+  exercises: Exercise[],
+  frequency: number
+): boolean {
+  const { getMuscleGroupsForFrequency } = require("./muscle-groups");
+  const requiredMuscleGroups = getMuscleGroupsForFrequency(frequency);
+  const coveredMuscleGroups = new Set<MuscleGroup>();
+
+  exercises.forEach((ex) => {
+    ex.muscle_groups.forEach((mg) => coveredMuscleGroups.add(mg));
+  });
+
+  const missingGroups = requiredMuscleGroups.filter(
+    (mg) => !coveredMuscleGroups.has(mg)
+  );
+
+  if (missingGroups.length > 0) {
+    console.warn(`Warning: Missing coverage for: ${missingGroups.join(", ")}`);
+    return false;
+  }
+
+  return true;
 }
 
 /**

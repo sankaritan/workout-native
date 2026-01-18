@@ -1,6 +1,6 @@
 import { generateWorkoutProgram, getSetsRepsScheme, generateWorkoutProgramFromCustomExercises } from "@/lib/workout-generator/engine";
 import * as storage from "@/lib/storage/storage";
-import type { GenerationInput, MuscleGroupExercises } from "@/lib/workout-generator/types";
+import type { GenerationInput } from "@/lib/workout-generator/types";
 import type { Exercise, MuscleGroup } from "@/lib/storage/types";
 
 // Mock storage utilities
@@ -12,6 +12,7 @@ describe("Workout Generation Engine", () => {
       id: 1,
       name: "Bench Press",
       muscle_group: "Chest",
+      muscle_groups: ["Chest", "Shoulders", "Arms"],
       equipment_required: "Barbell",
       is_compound: true,
       description: "Compound chest exercise",
@@ -20,6 +21,7 @@ describe("Workout Generation Engine", () => {
       id: 2,
       name: "Squat",
       muscle_group: "Legs",
+      muscle_groups: ["Legs", "Core"],
       equipment_required: "Barbell",
       is_compound: true,
       description: "Compound leg exercise",
@@ -28,6 +30,7 @@ describe("Workout Generation Engine", () => {
       id: 3,
       name: "Deadlift",
       muscle_group: "Back",
+      muscle_groups: ["Back", "Legs", "Core"],
       equipment_required: "Barbell",
       is_compound: true,
       description: "Compound back exercise",
@@ -36,6 +39,7 @@ describe("Workout Generation Engine", () => {
       id: 4,
       name: "Overhead Press",
       muscle_group: "Shoulders",
+      muscle_groups: ["Shoulders", "Arms", "Core"],
       equipment_required: "Barbell",
       is_compound: true,
       description: "Compound shoulder exercise",
@@ -44,6 +48,7 @@ describe("Workout Generation Engine", () => {
       id: 5,
       name: "Bicep Curl",
       muscle_group: "Arms",
+      muscle_groups: ["Arms"],
       equipment_required: "Dumbbell",
       is_compound: false,
       description: "Isolation arm exercise",
@@ -52,6 +57,7 @@ describe("Workout Generation Engine", () => {
       id: 6,
       name: "Push-up",
       muscle_group: "Chest",
+      muscle_groups: ["Chest", "Shoulders", "Arms"],
       equipment_required: "Bodyweight",
       is_compound: true,
       description: "Bodyweight chest exercise",
@@ -60,6 +66,7 @@ describe("Workout Generation Engine", () => {
       id: 7,
       name: "Pull-up",
       muscle_group: "Back",
+      muscle_groups: ["Back", "Arms"],
       equipment_required: "Bodyweight",
       is_compound: true,
       description: "Bodyweight back exercise",
@@ -68,6 +75,7 @@ describe("Workout Generation Engine", () => {
       id: 8,
       name: "Dumbbell Fly",
       muscle_group: "Chest",
+      muscle_groups: ["Chest"],
       equipment_required: "Dumbbell",
       is_compound: false,
       description: "Isolation chest exercise",
@@ -76,6 +84,7 @@ describe("Workout Generation Engine", () => {
       id: 9,
       name: "Leg Press",
       muscle_group: "Legs",
+      muscle_groups: ["Legs"],
       equipment_required: "Machines",
       is_compound: true,
       description: "Machine leg exercise",
@@ -84,6 +93,7 @@ describe("Workout Generation Engine", () => {
       id: 10,
       name: "Lat Pulldown",
       muscle_group: "Back",
+      muscle_groups: ["Back", "Arms"],
       equipment_required: "Cables",
       is_compound: true,
       description: "Cable back exercise",
@@ -287,49 +297,19 @@ describe("Workout Generation Engine", () => {
   });
 
   describe("generateWorkoutProgramFromCustomExercises", () => {
-    // Custom exercises for testing - one per muscle group
-    const customExercises: MuscleGroupExercises[] = [
-      {
-        muscleGroup: "Chest",
-        exercises: [
-          { id: 1, name: "Bench Press", muscle_group: "Chest", equipment_required: "Barbell", is_compound: true, description: null },
-          { id: 2, name: "Dumbbell Fly", muscle_group: "Chest", equipment_required: "Dumbbell", is_compound: false, description: null },
-        ],
-      },
-      {
-        muscleGroup: "Back",
-        exercises: [
-          { id: 3, name: "Deadlift", muscle_group: "Back", equipment_required: "Barbell", is_compound: true, description: null },
-          { id: 4, name: "Pull-up", muscle_group: "Back", equipment_required: "Bodyweight", is_compound: true, description: null },
-        ],
-      },
-      {
-        muscleGroup: "Legs",
-        exercises: [
-          { id: 5, name: "Squat", muscle_group: "Legs", equipment_required: "Barbell", is_compound: true, description: null },
-          { id: 6, name: "Leg Curl", muscle_group: "Legs", equipment_required: "Machines", is_compound: false, description: null },
-        ],
-      },
-      {
-        muscleGroup: "Shoulders",
-        exercises: [
-          { id: 7, name: "Overhead Press", muscle_group: "Shoulders", equipment_required: "Barbell", is_compound: true, description: null },
-          { id: 8, name: "Lateral Raise", muscle_group: "Shoulders", equipment_required: "Dumbbell", is_compound: false, description: null },
-        ],
-      },
-      {
-        muscleGroup: "Arms",
-        exercises: [
-          { id: 9, name: "Bicep Curl", muscle_group: "Arms", equipment_required: "Dumbbell", is_compound: false, description: null },
-          { id: 10, name: "Tricep Dips", muscle_group: "Arms", equipment_required: "Bodyweight", is_compound: true, description: null },
-        ],
-      },
-      {
-        muscleGroup: "Core",
-        exercises: [
-          { id: 11, name: "Plank", muscle_group: "Core", equipment_required: "Bodyweight", is_compound: false, description: null },
-        ],
-      },
+    // Custom exercises for testing - flat array with muscle_groups
+    const customExercises: Exercise[] = [
+      { id: 1, name: "Bench Press", muscle_group: "Chest", muscle_groups: ["Chest", "Shoulders", "Arms"], equipment_required: "Barbell", is_compound: true, description: null },
+      { id: 2, name: "Dumbbell Fly", muscle_group: "Chest", muscle_groups: ["Chest"], equipment_required: "Dumbbell", is_compound: false, description: null },
+      { id: 3, name: "Deadlift", muscle_group: "Back", muscle_groups: ["Back", "Legs", "Core"], equipment_required: "Barbell", is_compound: true, description: null },
+      { id: 4, name: "Pull-up", muscle_group: "Back", muscle_groups: ["Back", "Arms"], equipment_required: "Bodyweight", is_compound: true, description: null },
+      { id: 5, name: "Squat", muscle_group: "Legs", muscle_groups: ["Legs", "Core"], equipment_required: "Barbell", is_compound: true, description: null },
+      { id: 6, name: "Leg Curl", muscle_group: "Legs", muscle_groups: ["Legs"], equipment_required: "Machines", is_compound: false, description: null },
+      { id: 7, name: "Overhead Press", muscle_group: "Shoulders", muscle_groups: ["Shoulders", "Arms", "Core"], equipment_required: "Barbell", is_compound: true, description: null },
+      { id: 8, name: "Lateral Raise", muscle_group: "Shoulders", muscle_groups: ["Shoulders"], equipment_required: "Dumbbell", is_compound: false, description: null },
+      { id: 9, name: "Bicep Curl", muscle_group: "Arms", muscle_groups: ["Arms"], equipment_required: "Dumbbell", is_compound: false, description: null },
+      { id: 10, name: "Tricep Dips", muscle_group: "Arms", muscle_groups: ["Arms", "Chest"], equipment_required: "Bodyweight", is_compound: true, description: null },
+      { id: 11, name: "Plank", muscle_group: "Core", muscle_groups: ["Core", "Shoulders"], equipment_required: "Bodyweight", is_compound: false, description: null },
     ];
 
     it("generates program with correct number of sessions for frequency 2", () => {
@@ -367,7 +347,7 @@ describe("Workout Generation Engine", () => {
 
       const program = generateWorkoutProgramFromCustomExercises(input, customExercises);
       const allExercises = program.sessions.flatMap((s) => s.exercises.map((e) => e.exercise));
-      const customExerciseIds = customExercises.flatMap((ce) => ce.exercises.map((e) => e.id));
+      const customExerciseIds = customExercises.map((e) => e.id);
 
       allExercises.forEach((exercise) => {
         expect(customExerciseIds).toContain(exercise.id);
@@ -427,7 +407,7 @@ describe("Workout Generation Engine", () => {
       });
     });
 
-    it("includes exercises only for muscles targeted in each session", () => {
+    it("includes exercises that work muscles targeted in each session", () => {
       const input: GenerationInput = {
         frequency: 4, // Upper/Lower split
         equipment: ["Barbell", "Dumbbell", "Bodyweight"],
@@ -438,8 +418,11 @@ describe("Workout Generation Engine", () => {
 
       program.sessions.forEach((session) => {
         session.exercises.forEach((programEx) => {
-          // Exercise muscle group should be in session's primary muscles
-          expect(session.primaryMuscles).toContain(programEx.exercise.muscle_group);
+          // Exercise should work at least one of the session's target muscles
+          const worksTargetMuscle = programEx.exercise.muscle_groups.some((mg) =>
+            session.primaryMuscles.includes(mg)
+          );
+          expect(worksTargetMuscle).toBe(true);
         });
       });
     });
@@ -457,14 +440,11 @@ describe("Workout Generation Engine", () => {
       expect(program.focus).toBe("Endurance");
     });
 
-    it("handles empty exercises for a muscle group gracefully", () => {
-      const customWithEmpty: MuscleGroupExercises[] = [
-        { muscleGroup: "Chest", exercises: [{ id: 1, name: "Bench Press", muscle_group: "Chest", equipment_required: "Barbell", is_compound: true, description: null }] },
-        { muscleGroup: "Back", exercises: [] }, // Empty
-        { muscleGroup: "Legs", exercises: [{ id: 2, name: "Squat", muscle_group: "Legs", equipment_required: "Barbell", is_compound: true, description: null }] },
-        { muscleGroup: "Shoulders", exercises: [] }, // Empty
-        { muscleGroup: "Arms", exercises: [] }, // Empty
-        { muscleGroup: "Core", exercises: [] }, // Empty
+    it("handles limited exercise selection gracefully", () => {
+      // Only 2 exercises - one chest, one legs
+      const customWithLimited: Exercise[] = [
+        { id: 1, name: "Bench Press", muscle_group: "Chest", muscle_groups: ["Chest", "Shoulders", "Arms"], equipment_required: "Barbell", is_compound: true, description: null },
+        { id: 2, name: "Squat", muscle_group: "Legs", muscle_groups: ["Legs", "Core"], equipment_required: "Barbell", is_compound: true, description: null },
       ];
 
       const input: GenerationInput = {
@@ -474,7 +454,7 @@ describe("Workout Generation Engine", () => {
       };
 
       // Should not throw
-      const program = generateWorkoutProgramFromCustomExercises(input, customWithEmpty);
+      const program = generateWorkoutProgramFromCustomExercises(input, customWithLimited);
 
       // Sessions should exist but might have limited exercises
       expect(program.sessions).toHaveLength(3);

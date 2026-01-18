@@ -244,6 +244,16 @@ export function insertExercise(exercise: ExerciseInsert): number {
   return id;
 }
 
+export function updateExercise(id: number, exercise: Exercise): void {
+  ensureInitialized();
+  const index = cache.exercises.findIndex((e) => e.id === id);
+  if (index !== -1) {
+    cache.exercises[index] = exercise;
+    // Fire and forget persist - won't block
+    persistCache().catch(console.error);
+  }
+}
+
 // ============================================================================
 // Workout Plan queries
 // ============================================================================

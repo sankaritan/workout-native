@@ -13,6 +13,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Bench Press",
     muscle_group: "Chest",
+    muscle_groups: ["Chest", "Shoulders", "Arms"],
     equipment_required: "Barbell",
     is_compound: true,
     description: "Classic compound chest exercise performed lying on a flat bench",
@@ -20,6 +21,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Incline Bench Press",
     muscle_group: "Chest",
+    muscle_groups: ["Chest", "Shoulders", "Arms"],
     equipment_required: "Barbell",
     is_compound: true,
     description: "Bench press variation targeting upper chest",
@@ -27,6 +29,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Dumbbell Bench Press",
     muscle_group: "Chest",
+    muscle_groups: ["Chest", "Shoulders", "Arms"],
     equipment_required: "Dumbbell",
     is_compound: true,
     description: "Chest press with dumbbells for greater range of motion",
@@ -34,6 +37,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Incline Dumbbell Press",
     muscle_group: "Chest",
+    muscle_groups: ["Chest", "Shoulders", "Arms"],
     equipment_required: "Dumbbell",
     is_compound: true,
     description: "Dumbbell press on incline bench for upper chest emphasis",
@@ -41,6 +45,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Push-ups",
     muscle_group: "Chest",
+    muscle_groups: ["Chest", "Shoulders", "Arms"],
     equipment_required: "Bodyweight",
     is_compound: true,
     description: "Bodyweight chest exercise that can be done anywhere",
@@ -48,6 +53,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Dumbbell Flyes",
     muscle_group: "Chest",
+    muscle_groups: ["Chest"],
     equipment_required: "Dumbbell",
     is_compound: false,
     description: "Isolation exercise for chest stretch and contraction",
@@ -55,6 +61,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Cable Flyes",
     muscle_group: "Chest",
+    muscle_groups: ["Chest"],
     equipment_required: "Cables",
     is_compound: false,
     description: "Cable variation of flyes for constant tension",
@@ -62,6 +69,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Chest Dips",
     muscle_group: "Chest",
+    muscle_groups: ["Chest", "Arms"],
     equipment_required: "Bodyweight",
     is_compound: true,
     description: "Bodyweight exercise emphasizing lower chest",
@@ -73,6 +81,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Deadlift",
     muscle_group: "Back",
+    muscle_groups: ["Back", "Legs", "Core"],
     equipment_required: "Barbell",
     is_compound: true,
     description: "King of back exercises, works entire posterior chain",
@@ -80,6 +89,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Barbell Row",
     muscle_group: "Back",
+    muscle_groups: ["Back", "Arms"],
     equipment_required: "Barbell",
     is_compound: true,
     description: "Bent-over row for mid-back thickness",
@@ -87,6 +97,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Pull-ups",
     muscle_group: "Back",
+    muscle_groups: ["Back", "Arms"],
     equipment_required: "Bodyweight",
     is_compound: true,
     description: "Bodyweight vertical pull for back width",
@@ -94,6 +105,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Chin-ups",
     muscle_group: "Back",
+    muscle_groups: ["Back", "Arms"],
     equipment_required: "Bodyweight",
     is_compound: true,
     description: "Underhand grip pull-up variation",
@@ -101,6 +113,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Lat Pulldown",
     muscle_group: "Back",
+    muscle_groups: ["Back", "Arms"],
     equipment_required: "Cables",
     is_compound: true,
     description: "Cable machine exercise for back width",
@@ -108,6 +121,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Dumbbell Row",
     muscle_group: "Back",
+    muscle_groups: ["Back", "Arms"],
     equipment_required: "Dumbbell",
     is_compound: true,
     description: "Single-arm row for unilateral back development",
@@ -115,6 +129,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Seated Cable Row",
     muscle_group: "Back",
+    muscle_groups: ["Back", "Arms"],
     equipment_required: "Cables",
     is_compound: true,
     description: "Horizontal cable pull for mid-back",
@@ -122,6 +137,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Face Pulls",
     muscle_group: "Back",
+    muscle_groups: ["Back", "Shoulders"],
     equipment_required: "Cables",
     is_compound: false,
     description: "Cable exercise for rear delts and upper back",
@@ -129,6 +145,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "T-Bar Row",
     muscle_group: "Back",
+    muscle_groups: ["Back", "Arms"],
     equipment_required: "Barbell",
     is_compound: true,
     description: "Compound row variation for back thickness",
@@ -140,6 +157,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Squat",
     muscle_group: "Legs",
+    muscle_groups: ["Legs", "Core"],
     equipment_required: "Barbell",
     is_compound: true,
     description: "King of leg exercises, works entire lower body",
@@ -147,6 +165,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Front Squat",
     muscle_group: "Legs",
+    muscle_groups: ["Legs", "Core"],
     equipment_required: "Barbell",
     is_compound: true,
     description: "Squat variation with bar in front, emphasizes quads",
@@ -154,6 +173,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Romanian Deadlift",
     muscle_group: "Legs",
+    muscle_groups: ["Legs", "Back"],
     equipment_required: "Barbell",
     is_compound: true,
     description: "Hamstring-focused deadlift variation",
@@ -161,6 +181,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Leg Press",
     muscle_group: "Legs",
+    muscle_groups: ["Legs"],
     equipment_required: "Machines",
     is_compound: true,
     description: "Machine-based compound leg exercise",
@@ -168,6 +189,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Lunges",
     muscle_group: "Legs",
+    muscle_groups: ["Legs", "Core"],
     equipment_required: "Dumbbell",
     is_compound: true,
     description: "Unilateral leg exercise for balance and strength",
@@ -175,6 +197,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Bulgarian Split Squat",
     muscle_group: "Legs",
+    muscle_groups: ["Legs", "Core"],
     equipment_required: "Dumbbell",
     is_compound: true,
     description: "Single-leg squat variation with rear foot elevated",
@@ -182,6 +205,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Leg Extension",
     muscle_group: "Legs",
+    muscle_groups: ["Legs"],
     equipment_required: "Machines",
     is_compound: false,
     description: "Isolation exercise for quadriceps",
@@ -189,6 +213,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Leg Curl",
     muscle_group: "Legs",
+    muscle_groups: ["Legs"],
     equipment_required: "Machines",
     is_compound: false,
     description: "Isolation exercise for hamstrings",
@@ -196,6 +221,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Calf Raises",
     muscle_group: "Legs",
+    muscle_groups: ["Legs"],
     equipment_required: "Machines",
     is_compound: false,
     description: "Isolation exercise for calf development",
@@ -207,6 +233,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Overhead Press",
     muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders", "Arms", "Core"],
     equipment_required: "Barbell",
     is_compound: true,
     description: "Standing barbell press for overall shoulder development",
@@ -214,6 +241,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Dumbbell Shoulder Press",
     muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders", "Arms"],
     equipment_required: "Dumbbell",
     is_compound: true,
     description: "Seated or standing dumbbell press for shoulders",
@@ -221,6 +249,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Arnold Press",
     muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders", "Arms"],
     equipment_required: "Dumbbell",
     is_compound: true,
     description: "Rotating dumbbell press hitting all three deltoid heads",
@@ -228,6 +257,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Lateral Raises",
     muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders"],
     equipment_required: "Dumbbell",
     is_compound: false,
     description: "Isolation exercise for side deltoids",
@@ -235,6 +265,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Front Raises",
     muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders"],
     equipment_required: "Dumbbell",
     is_compound: false,
     description: "Isolation exercise for front deltoids",
@@ -242,6 +273,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Rear Delt Flyes",
     muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders"],
     equipment_required: "Dumbbell",
     is_compound: false,
     description: "Isolation exercise for rear deltoids",
@@ -249,6 +281,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Upright Row",
     muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders", "Back"],
     equipment_required: "Barbell",
     is_compound: true,
     description: "Compound exercise for shoulders and traps",
@@ -256,6 +289,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Pike Push-ups",
     muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders", "Arms"],
     equipment_required: "Bodyweight",
     is_compound: true,
     description: "Bodyweight exercise targeting shoulders",
@@ -267,6 +301,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Barbell Curl",
     muscle_group: "Arms",
+    muscle_groups: ["Arms"],
     equipment_required: "Barbell",
     is_compound: false,
     description: "Classic bicep exercise with barbell",
@@ -274,6 +309,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Dumbbell Curl",
     muscle_group: "Arms",
+    muscle_groups: ["Arms"],
     equipment_required: "Dumbbell",
     is_compound: false,
     description: "Bicep curl with dumbbells for unilateral work",
@@ -281,6 +317,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Hammer Curl",
     muscle_group: "Arms",
+    muscle_groups: ["Arms"],
     equipment_required: "Dumbbell",
     is_compound: false,
     description: "Neutral grip curl for biceps and brachialis",
@@ -288,6 +325,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Tricep Dips",
     muscle_group: "Arms",
+    muscle_groups: ["Arms", "Chest"],
     equipment_required: "Bodyweight",
     is_compound: true,
     description: "Bodyweight exercise for triceps",
@@ -295,6 +333,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Close-Grip Bench Press",
     muscle_group: "Arms",
+    muscle_groups: ["Arms", "Chest"],
     equipment_required: "Barbell",
     is_compound: true,
     description: "Bench press variation emphasizing triceps",
@@ -302,6 +341,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Skull Crushers",
     muscle_group: "Arms",
+    muscle_groups: ["Arms"],
     equipment_required: "Barbell",
     is_compound: false,
     description: "Lying tricep extension exercise",
@@ -309,6 +349,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Tricep Pushdown",
     muscle_group: "Arms",
+    muscle_groups: ["Arms"],
     equipment_required: "Cables",
     is_compound: false,
     description: "Cable isolation exercise for triceps",
@@ -316,6 +357,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Overhead Tricep Extension",
     muscle_group: "Arms",
+    muscle_groups: ["Arms"],
     equipment_required: "Dumbbell",
     is_compound: false,
     description: "Overhead extension for long head of triceps",
@@ -323,6 +365,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Preacher Curl",
     muscle_group: "Arms",
+    muscle_groups: ["Arms"],
     equipment_required: "Barbell",
     is_compound: false,
     description: "Bicep curl on preacher bench for isolation",
@@ -334,6 +377,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Plank",
     muscle_group: "Core",
+    muscle_groups: ["Core", "Shoulders"],
     equipment_required: "Bodyweight",
     is_compound: true,
     description: "Isometric core exercise for stability",
@@ -341,6 +385,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Crunches",
     muscle_group: "Core",
+    muscle_groups: ["Core"],
     equipment_required: "Bodyweight",
     is_compound: false,
     description: "Basic abdominal exercise",
@@ -348,6 +393,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Hanging Leg Raises",
     muscle_group: "Core",
+    muscle_groups: ["Core", "Back"],
     equipment_required: "Bodyweight",
     is_compound: true,
     description: "Advanced core exercise hanging from bar",
@@ -355,6 +401,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Russian Twists",
     muscle_group: "Core",
+    muscle_groups: ["Core"],
     equipment_required: "Bodyweight",
     is_compound: false,
     description: "Rotational core exercise for obliques",
@@ -362,6 +409,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Cable Crunches",
     muscle_group: "Core",
+    muscle_groups: ["Core"],
     equipment_required: "Cables",
     is_compound: false,
     description: "Cable machine crunch for progressive overload",
@@ -369,6 +417,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Ab Wheel Rollout",
     muscle_group: "Core",
+    muscle_groups: ["Core", "Shoulders"],
     equipment_required: "Bodyweight",
     is_compound: true,
     description: "Advanced core exercise with ab wheel",
@@ -376,6 +425,7 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Mountain Climbers",
     muscle_group: "Core",
+    muscle_groups: ["Core", "Shoulders"],
     equipment_required: "Bodyweight",
     is_compound: true,
     description: "Dynamic core exercise with cardio element",
@@ -383,11 +433,58 @@ export const EXERCISES: ExerciseInsert[] = [
   {
     name: "Dead Bug",
     muscle_group: "Core",
+    muscle_groups: ["Core"],
     equipment_required: "Bodyweight",
     is_compound: false,
     description: "Core stability exercise performed on back",
   },
 ];
+
+/**
+ * Migrate existing exercises to add muscle_groups field
+ * This ensures backward compatibility with exercises stored before the multi-muscle group update
+ */
+export function migrateExerciseMuscleGroups(): void {
+  try {
+    const { updateExercise } = require("./storage");
+    const existingExercises = getAllExercises() || [];
+
+    let updatedCount = 0;
+
+    for (const existingEx of existingExercises) {
+      // Skip if already has muscle_groups
+      if (existingEx.muscle_groups && existingEx.muscle_groups.length > 0) {
+        continue;
+      }
+
+      // Find matching exercise in seed data to get muscle_groups
+      const seedEx = EXERCISES.find((ex) => ex.name === existingEx.name);
+
+      if (seedEx && seedEx.muscle_groups) {
+        // Update with muscle_groups from seed data
+        updateExercise(existingEx.id, {
+          ...existingEx,
+          muscle_groups: seedEx.muscle_groups,
+        });
+        updatedCount++;
+      } else {
+        // Fallback: create muscle_groups from muscle_group
+        updateExercise(existingEx.id, {
+          ...existingEx,
+          muscle_groups: [existingEx.muscle_group],
+        });
+        updatedCount++;
+      }
+    }
+
+    if (updatedCount > 0) {
+      console.log(`Migrated ${updatedCount} exercises to multi-muscle group system`);
+    }
+  } catch (error) {
+    console.error("Failed to migrate exercises:", error);
+    // Don't throw - migration is optional
+  }
+}
 
 /**
  * Seed the exercises table with initial data
@@ -413,6 +510,9 @@ export function seedExercises(): void {
     } else {
       console.log("All exercises already exist in database");
     }
+
+    // Run migration to add muscle_groups to existing exercises
+    migrateExerciseMuscleGroups();
   } catch (error) {
     console.error("Failed to seed exercises:", error);
     throw error;

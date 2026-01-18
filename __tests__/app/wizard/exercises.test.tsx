@@ -102,11 +102,11 @@ describe("Exercises Screen", () => {
 
   it("renders empty state when no wizard context is set", () => {
     renderWithContext();
-    // Without frequency and equipment in wizard context, no muscle groups will show
+    // Without frequency and equipment in wizard context, no exercises will be loaded
     // This is expected - the screen is meant to be reached after going through
     // frequency and equipment screens
     expect(screen.getByText("Review Exercises")).toBeTruthy();
-    expect(screen.getByText("Customize which exercises you want for each muscle group.")).toBeTruthy();
+    expect(screen.getByText(/Customize your exercise selection/)).toBeTruthy();
   });
 
   it("renders continue button", () => {

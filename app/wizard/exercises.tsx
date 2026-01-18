@@ -1,7 +1,7 @@
 /**
  * Exercise Review Screen
  * Step 4 of 5 in workout wizard
- * Allows users to customize exercises by muscle group
+ * Allows users to customize selected exercises (flat list with muscle group badges)
  */
 
 import React, { useEffect, useState } from "react";
@@ -11,20 +11,19 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useWizard } from "@/lib/wizard-context";
 import { cn } from "@/lib/utils/cn";
-import { MuscleGroupSection } from "@/components/MuscleGroupSection";
-import { selectInitialExercisesByMuscleGroup } from "@/lib/workout-generator/exercise-selector";
-import { getMuscleGroupsForFrequency } from "@/lib/workout-generator/muscle-groups";
+import { ExerciseCardWithActions } from "@/components/ExerciseCardWithActions";
+import { selectInitialExercises } from "@/lib/workout-generator/exercise-selector";
 import { getAllExercises } from "@/lib/storage/storage";
-import type { MuscleGroup } from "@/lib/storage/types";
-import type { MuscleGroupExercises } from "@/lib/workout-generator/types";
+import type { Exercise } from "@/lib/storage/types";
 
-// Maximum exercises per muscle group
-const MAX_EXERCISES_PER_GROUP = 5;
+// Exercise count limits
+const MIN_EXERCISES = 6;
+const MAX_EXERCISES = 20;
 
 export default function ExercisesScreen() {
   const insets = useSafeAreaInsets();
   const { state, updateState } = useWizard();
-  const [customExercises, setCustomExercises] = useState<MuscleGroupExercises[]>(
+  const [customExercises, setCustomExercises] = useState<Exercise[]>(
     state.customExercises || []
   );
 
@@ -32,7 +31,7 @@ export default function ExercisesScreen() {
   useEffect(() => {
     if (!state.customExercises && state.equipment && state.frequency) {
       const allExercises = getAllExercises();
-      const initialExercises = selectInitialExercisesByMuscleGroup(
+      const initialExercises = selectInitialExercises(
         allExercises,
         state.equipment,
         state.frequency
@@ -52,26 +51,18 @@ export default function ExercisesScreen() {
   /**
    * Handle swap exercise - navigate to swap screen
    */
-  const handleSwap = (muscleGroup: MuscleGroup, exerciseId: number) => {
+  const handleSwap = (exerciseId: number) => {
     router.push({
       pathname: "/wizard/swap-exercise",
-      params: { muscleGroup, exerciseId: String(exerciseId) },
+      params: { exerciseId: String(exerciseId) },
     });
   };
 
   /**
    * Handle remove exercise
    */
-  const handleRemove = (muscleGroup: MuscleGroup, exerciseId: number) => {
-    const updated = customExercises.map((entry) => {
-      if (entry.muscleGroup === muscleGroup) {
-        return {
-          ...entry,
-          exercises: entry.exercises.filter((e) => e.id !== exerciseId),
-        };
-      }
-      return entry;
-    });
+  const handleRemove = (exerciseId: number) => {
+    const updated = customExercises.filter((e) => e.id !== exerciseId);
     setCustomExercises(updated);
     updateState({ customExercises: updated });
   };
@@ -79,11 +70,8 @@ export default function ExercisesScreen() {
   /**
    * Handle add exercise - navigate to add screen
    */
-  const handleAdd = (muscleGroup: MuscleGroup) => {
-    router.push({
-      pathname: "/wizard/add-exercise",
-      params: { muscleGroup },
-    });
+  const handleAdd = () => {
+    router.push("/wizard/add-exercise");
   };
 
   /**
@@ -102,26 +90,10 @@ export default function ExercisesScreen() {
     router.back();
   };
 
-  // Get relevant muscle groups based on frequency
-  const relevantMuscleGroups = state.frequency
-    ? getMuscleGroupsForFrequency(state.frequency)
-    : [];
-
-  // Check if we can continue (at least one exercise in any group)
-  const hasAnyExercise = customExercises.some((entry) => entry.exercises.length > 0);
-  const isContinueDisabled = !hasAnyExercise;
-
-  // Get exercises for a muscle group
-  const getExercisesForMuscle = (muscleGroup: MuscleGroup) => {
-    const entry = customExercises.find((e) => e.muscleGroup === muscleGroup);
-    return entry?.exercises || [];
-  };
-
-  // Check if can add more exercises for a muscle group
-  const canAddForMuscle = (muscleGroup: MuscleGroup) => {
-    const exercises = getExercisesForMuscle(muscleGroup);
-    return exercises.length < MAX_EXERCISES_PER_GROUP;
-  };
+  // Check if we can continue (min 6 exercises)
+  const isContinueDisabled =
+    customExercises.length < MIN_EXERCISES ||
+    customExercises.length > MAX_EXERCISES;
 
   return (
     <View className="flex-1 bg-background-dark w-full">
@@ -176,23 +148,73 @@ export default function ExercisesScreen() {
             Review Exercises
           </Text>
           <Text className="text-gray-400 text-base font-normal leading-relaxed">
-            Customize which exercises you want for each muscle group.
+            Customize your exercise selection. Minimum {MIN_EXERCISES}, maximum{" "}
+            {MAX_EXERCISES} exercises.
           </Text>
         </View>
 
-        {/* Muscle Group Sections */}
-        {relevantMuscleGroups.map((muscleGroup) => (
-          <MuscleGroupSection
-            key={muscleGroup}
-            muscleGroup={muscleGroup}
-            exercises={getExercisesForMuscle(muscleGroup)}
-            onSwap={(exerciseId) => handleSwap(muscleGroup, exerciseId)}
-            onRemove={(exerciseId) => handleRemove(muscleGroup, exerciseId)}
-            onAdd={() => handleAdd(muscleGroup)}
-            canAdd={canAddForMuscle(muscleGroup)}
-            testID={`muscle-group-${muscleGroup.toLowerCase()}`}
+        {/* Exercise Count */}
+        <View className="flex-row items-center justify-between mb-4">
+          <Text className="text-lg font-semibold text-white">
+            Selected Exercises ({customExercises.length})
+          </Text>
+          <View
+            className={cn(
+              "px-3 py-1 rounded-full",
+              customExercises.length < MIN_EXERCISES
+                ? "bg-red-500/20"
+                : customExercises.length > MAX_EXERCISES
+                ? "bg-red-500/20"
+                : "bg-primary/20"
+            )}
+          >
+            <Text
+              className={cn(
+                "text-xs font-semibold",
+                customExercises.length < MIN_EXERCISES
+                  ? "text-red-500"
+                  : customExercises.length > MAX_EXERCISES
+                  ? "text-red-500"
+                  : "text-primary"
+              )}
+            >
+              {customExercises.length < MIN_EXERCISES
+                ? `Need ${MIN_EXERCISES - customExercises.length} more`
+                : customExercises.length > MAX_EXERCISES
+                ? `Remove ${customExercises.length - MAX_EXERCISES}`
+                : "Ready"}
+            </Text>
+          </View>
+        </View>
+
+        {/* Flat Exercise List */}
+        {customExercises.map((exercise) => (
+          <ExerciseCardWithActions
+            key={exercise.id}
+            exercise={exercise}
+            onSwap={() => handleSwap(exercise.id)}
+            onRemove={() => handleRemove(exercise.id)}
+            canRemove={customExercises.length > MIN_EXERCISES}
+            showMuscleGroupBadges={true}
+            testID={`exercise-card-${exercise.id}`}
           />
         ))}
+
+        {/* Add Exercise Button */}
+        {customExercises.length < MAX_EXERCISES && (
+          <Pressable
+            onPress={handleAdd}
+            testID="add-exercise-button"
+            accessibilityRole="button"
+            accessibilityLabel="Add exercise"
+            className="flex-row items-center justify-center bg-surface-dark rounded-xl p-4 mt-2 active:bg-surface-dark-highlight"
+          >
+            <MaterialIcons name="add-circle-outline" size={24} color="#6b8779" />
+            <Text className="text-primary font-semibold text-base ml-2">
+              Add Exercise
+            </Text>
+          </Pressable>
+        )}
       </ScrollView>
 
       {/* Continue Button (Fixed at bottom) */}

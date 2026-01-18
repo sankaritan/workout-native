@@ -25,12 +25,39 @@ export function filterExercisesByEquipment(
 
 /**
  * Filter exercises by muscle group
+ * Checks if exercise works the specified muscle (either primary or secondary)
  */
 export function filterExercisesByMuscleGroup(
   exercises: Exercise[],
   muscleGroup: MuscleGroup
 ): Exercise[] {
-  return exercises.filter((exercise) => exercise.muscle_group === muscleGroup);
+  return exercises.filter((exercise) =>
+    exercise.muscle_groups.includes(muscleGroup)
+  );
+}
+
+/**
+ * Filter exercises that work ANY of the specified muscle groups
+ */
+export function filterExercisesByMuscleGroups(
+  exercises: Exercise[],
+  muscleGroups: MuscleGroup[]
+): Exercise[] {
+  return exercises.filter((exercise) =>
+    exercise.muscle_groups.some((mg) => muscleGroups.includes(mg))
+  );
+}
+
+/**
+ * Filter exercises where PRIMARY muscle matches
+ */
+export function filterExercisesByPrimaryMuscle(
+  exercises: Exercise[],
+  muscleGroup: MuscleGroup
+): Exercise[] {
+  return exercises.filter((exercise) =>
+    exercise.muscle_groups[0] === muscleGroup
+  );
 }
 
 /**
@@ -85,6 +112,42 @@ export function orderExercises(exercises: Exercise[]): Exercise[] {
 }
 
 /**
+ * Select initial exercises based on training frequency
+ * Returns flat array of exercises (2 per relevant muscle group)
+ * Prioritizes compound exercises, filters by available equipment
+ */
+export function selectInitialExercises(
+  availableExercises: Exercise[],
+  equipment: Equipment[],
+  frequency: number
+): Exercise[] {
+  // First filter by equipment
+  const filteredByEquipment = filterExercisesByEquipment(availableExercises, equipment);
+
+  // Get only the muscle groups that will be used based on frequency
+  const relevantMuscleGroups = getMuscleGroupsForFrequency(frequency);
+
+  const selected: Exercise[] = [];
+
+  // Select 2 exercises per relevant muscle group (by primary muscle)
+  for (const muscleGroup of relevantMuscleGroups) {
+    const muscleExercises = filterExercisesByPrimaryMuscle(
+      filteredByEquipment,
+      muscleGroup
+    );
+
+    // Sort: compound first
+    const sorted = orderExercises(muscleExercises);
+
+    // Take 2 exercises per muscle group
+    selected.push(...sorted.slice(0, 2));
+  }
+
+  return selected;
+}
+
+/**
+ * @deprecated Use selectInitialExercises instead. This function is kept for backward compatibility.
  * Select initial exercises for each muscle group based on training frequency
  * Only returns exercises for muscle groups that will be used in the workout plan
  * Prioritizes compound exercises, filters by available equipment
@@ -102,8 +165,8 @@ export function selectInitialExercisesByMuscleGroup(
 
   // Create entry for each relevant muscle group
   return relevantMuscleGroups.map((muscleGroup) => {
-    // Get exercises for this muscle group
-    const muscleExercises = filterExercisesByMuscleGroup(filteredByEquipment, muscleGroup);
+    // Get exercises for this muscle group (primary only for backward compatibility)
+    const muscleExercises = filterExercisesByPrimaryMuscle(filteredByEquipment, muscleGroup);
 
     // Sort by compound first
     const sorted = orderExercises(muscleExercises);

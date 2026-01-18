@@ -6,7 +6,8 @@
 export interface Exercise {
   id: number;
   name: string;
-  muscle_group: MuscleGroup;
+  muscle_group: MuscleGroup; // DEPRECATED: Keep for compatibility, always matches muscle_groups[0]
+  muscle_groups: MuscleGroup[]; // Array of muscles worked: [primary, ...secondaries]
   equipment_required: Equipment | null;
   is_compound: boolean;
   description: string | null;

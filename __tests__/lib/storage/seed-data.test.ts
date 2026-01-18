@@ -179,4 +179,97 @@ describe("Seed Data", () => {
       expect(compoundByGroup["Legs"]).toBeGreaterThan(0);
     });
   });
+
+  describe("Multi-Muscle Group Support", () => {
+    it("all exercises have muscle_groups array", () => {
+      for (const exercise of EXERCISES) {
+        expect(exercise.muscle_groups).toBeDefined();
+        expect(Array.isArray(exercise.muscle_groups)).toBe(true);
+        expect(exercise.muscle_groups.length).toBeGreaterThan(0);
+      }
+    });
+
+    it("muscle_groups[0] matches muscle_group for backward compatibility", () => {
+      for (const exercise of EXERCISES) {
+        expect(exercise.muscle_groups[0]).toBe(exercise.muscle_group);
+      }
+    });
+
+    it("compound exercises have appropriate multi-muscle mappings", () => {
+      const compoundExercises = EXERCISES.filter((ex) => ex.is_compound);
+
+      // At least 30% of compound exercises should work multiple muscle groups
+      const multiMuscleCompounds = compoundExercises.filter(
+        (ex) => ex.muscle_groups.length > 1
+      );
+      expect(multiMuscleCompounds.length).toBeGreaterThan(
+        compoundExercises.length * 0.3
+      );
+    });
+
+    it("key compound exercises have correct muscle group mappings", () => {
+      const deadlift = EXERCISES.find((ex) => ex.name === "Deadlift");
+      expect(deadlift?.muscle_groups).toEqual(["Back", "Legs", "Core"]);
+
+      const benchPress = EXERCISES.find((ex) => ex.name === "Bench Press");
+      expect(benchPress?.muscle_groups).toEqual(["Chest", "Shoulders", "Arms"]);
+
+      const squat = EXERCISES.find((ex) => ex.name === "Squat");
+      expect(squat?.muscle_groups).toEqual(["Legs", "Core"]);
+
+      const pullups = EXERCISES.find((ex) => ex.name === "Pull-ups");
+      expect(pullups?.muscle_groups).toEqual(["Back", "Arms"]);
+
+      const overheadPress = EXERCISES.find((ex) => ex.name === "Overhead Press");
+      expect(overheadPress?.muscle_groups).toEqual([
+        "Shoulders",
+        "Arms",
+        "Core",
+      ]);
+    });
+
+    it("isolation exercises have single muscle group", () => {
+      const isolationExercises = EXERCISES.filter((ex) => !ex.is_compound);
+
+      // Most isolation exercises should target a single muscle group
+      const singleMuscleIsolation = isolationExercises.filter(
+        (ex) => ex.muscle_groups.length === 1
+      );
+
+      // At least 80% of isolation exercises should be single muscle
+      expect(singleMuscleIsolation.length).toBeGreaterThan(
+        isolationExercises.length * 0.8
+      );
+    });
+
+    it("muscle_groups contain valid muscle group values", () => {
+      const validMuscleGroups: MuscleGroup[] = [
+        "Chest",
+        "Back",
+        "Legs",
+        "Shoulders",
+        "Arms",
+        "Core",
+      ];
+
+      for (const exercise of EXERCISES) {
+        for (const muscleGroup of exercise.muscle_groups) {
+          expect(validMuscleGroups).toContain(muscleGroup);
+        }
+      }
+    });
+
+    it("muscle_groups arrays have no duplicates", () => {
+      for (const exercise of EXERCISES) {
+        const uniqueMuscles = new Set(exercise.muscle_groups);
+        expect(uniqueMuscles.size).toBe(exercise.muscle_groups.length);
+      }
+    });
+
+    it("muscle_groups arrays are limited to 3 or fewer muscles", () => {
+      for (const exercise of EXERCISES) {
+        expect(exercise.muscle_groups.length).toBeLessThanOrEqual(3);
+      }
+    });
+  });
 });

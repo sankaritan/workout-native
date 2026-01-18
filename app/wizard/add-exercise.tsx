@@ -1,37 +1,38 @@
 /**
  * Add Exercise Screen
- * Full screen picker to add a new exercise to a muscle group
+ * Unified full-screen picker to add exercises with muscle group filters
  */
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useWizard } from "@/lib/wizard-context";
 import { ExercisePickerItem } from "@/components/ExercisePickerItem";
+import { FilterPill } from "@/components/FilterPill";
 import { getAllExercises } from "@/lib/storage/storage";
-import { filterExercisesByEquipment, filterExercisesByMuscleGroup } from "@/lib/workout-generator/exercise-selector";
+import { filterExercisesByEquipment, filterExercisesByMuscleGroups } from "@/lib/workout-generator/exercise-selector";
 import type { Exercise, MuscleGroup } from "@/lib/storage/types";
 
-// Maximum exercises per muscle group
-const MAX_EXERCISES_PER_GROUP = 5;
+// All muscle groups for filtering
+const MUSCLE_GROUPS: MuscleGroup[] = ["Chest", "Back", "Shoulders", "Arms", "Legs", "Core"];
+
+// Maximum total exercises
+const MAX_EXERCISES = 20;
 
 export default function AddExerciseScreen() {
   const insets = useSafeAreaInsets();
   const { state, updateState } = useWizard();
-  const params = useLocalSearchParams<{ muscleGroup: MuscleGroup }>();
 
-  const muscleGroup = params.muscleGroup;
+  // Filter state
+  const [selectedMuscleFilters, setSelectedMuscleFilters] = useState<MuscleGroup[]>([]);
+  const [compoundOnly, setCompoundOnly] = useState(false);
 
-  // Get current exercise count for this muscle group
-  const currentExerciseCount = useMemo(() => {
-    const entry = state.customExercises?.find((e) => e.muscleGroup === muscleGroup);
-    return entry?.exercises.length || 0;
-  }, [state.customExercises, muscleGroup]);
+  const customExercises = state.customExercises || [];
 
   // Check if at max limit
-  const isAtMaxLimit = currentExerciseCount >= MAX_EXERCISES_PER_GROUP;
+  const isAtMaxLimit = customExercises.length >= MAX_EXERCISES;
 
   // Get available exercises for adding
   const availableExercises = useMemo(() => {
@@ -44,41 +45,48 @@ export default function AddExerciseScreen() {
       ? filterExercisesByEquipment(allExercises, state.equipment)
       : allExercises;
 
-    // Filter by muscle group
-    const muscleFiltered = filterExercisesByMuscleGroup(equipmentFiltered, muscleGroup);
+    // Filter by selected muscle groups (if any)
+    let filtered = equipmentFiltered;
+    if (selectedMuscleFilters.length > 0) {
+      filtered = filterExercisesByMuscleGroups(filtered, selectedMuscleFilters);
+    }
 
-    // Get IDs of exercises already selected for this muscle group
-    const selectedEntry = state.customExercises?.find((e) => e.muscleGroup === muscleGroup);
-    const selectedIds = selectedEntry?.exercises.map((e) => e.id) || [];
+    // Filter compound only
+    if (compoundOnly) {
+      filtered = filtered.filter((ex) => ex.is_compound);
+    }
 
     // Exclude already-selected exercises
-    const filtered = muscleFiltered.filter((exercise) => !selectedIds.includes(exercise.id));
+    const selectedIds = customExercises.map((e) => e.id);
+    filtered = filtered.filter((exercise) => !selectedIds.includes(exercise.id));
 
-    // Sort: compounds first
+    // Sort: compounds first, then by name
     return filtered.sort((a, b) => {
       if (a.is_compound && !b.is_compound) return -1;
       if (!a.is_compound && b.is_compound) return 1;
       return a.name.localeCompare(b.name);
     });
-  }, [state.equipment, state.customExercises, muscleGroup, isAtMaxLimit]);
+  }, [state.equipment, customExercises, selectedMuscleFilters, compoundOnly, isAtMaxLimit]);
+
+  /**
+   * Toggle muscle group filter
+   */
+  const toggleMuscleFilter = (muscle: MuscleGroup) => {
+    setSelectedMuscleFilters((prev) =>
+      prev.includes(muscle)
+        ? prev.filter((m) => m !== muscle)
+        : [...prev, muscle]
+    );
+  };
 
   /**
    * Handle exercise selection - add and go back
    */
   const handleSelectExercise = (exercise: Exercise) => {
-    if (!state.customExercises || isAtMaxLimit) return;
+    if (isAtMaxLimit) return;
 
-    // Update the custom exercises, adding the selected exercise
-    const updated = state.customExercises.map((entry) => {
-      if (entry.muscleGroup === muscleGroup) {
-        return {
-          ...entry,
-          exercises: [...entry.exercises, exercise],
-        };
-      }
-      return entry;
-    });
-
+    // Add to flat array
+    const updated = [...customExercises, exercise];
     updateState({ customExercises: updated });
     router.back();
   };
@@ -97,14 +105,14 @@ export default function AddExerciseScreen() {
         className="bg-background-dark px-4 pb-4 border-b border-white/5 w-full"
         style={{ paddingTop: insets.top + 16 }}
       >
-        <View className="flex-row items-center justify-between">
+        <View className="flex-row items-center justify-between mb-4">
           {/* Title */}
           <View className="flex-1">
             <Text className="text-2xl font-bold text-white">
               Add Exercise
             </Text>
             <Text className="text-gray-400 mt-1">
-              Add a {muscleGroup} exercise ({currentExerciseCount}/{MAX_EXERCISES_PER_GROUP})
+              {customExercises.length}/{MAX_EXERCISES} exercises selected
             </Text>
           </View>
 
@@ -119,6 +127,27 @@ export default function AddExerciseScreen() {
             <MaterialIcons name="close" size={24} color="#ffffff" />
           </Pressable>
         </View>
+
+        {/* Filter Pills */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingRight: 16 }}
+        >
+          {MUSCLE_GROUPS.map((muscle) => (
+            <FilterPill
+              key={muscle}
+              label={muscle}
+              selected={selectedMuscleFilters.includes(muscle)}
+              onToggle={() => toggleMuscleFilter(muscle)}
+            />
+          ))}
+          <FilterPill
+            label="Compound Only"
+            selected={compoundOnly}
+            onToggle={() => setCompoundOnly(!compoundOnly)}
+          />
+        </ScrollView>
       </View>
 
       {/* Exercise List */}
@@ -134,7 +163,7 @@ export default function AddExerciseScreen() {
           <View className="items-center justify-center py-12">
             <MaterialIcons name="block" size={48} color="#6b8779" />
             <Text className="text-gray-400 text-center mt-4">
-              Maximum of {MAX_EXERCISES_PER_GROUP} exercises reached for {muscleGroup}.
+              Maximum of {MAX_EXERCISES} exercises reached.
             </Text>
             <Text className="text-gray-500 text-center text-sm mt-2">
               Remove an exercise to add a new one.
@@ -144,7 +173,10 @@ export default function AddExerciseScreen() {
           <View className="items-center justify-center py-12">
             <MaterialIcons name="search-off" size={48} color="#6b8779" />
             <Text className="text-gray-400 text-center mt-4">
-              No more exercises available for {muscleGroup} with your equipment.
+              No exercises available with the selected filters.
+            </Text>
+            <Text className="text-gray-500 text-center text-sm mt-2">
+              Try adjusting your filters or equipment selection.
             </Text>
           </View>
         ) : (

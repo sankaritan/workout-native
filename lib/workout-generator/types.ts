@@ -69,7 +69,8 @@ export type SplitType = "Full Body" | "Upper/Lower" | "Push/Pull/Legs" | "Body P
 
 /**
  * Exercises grouped by muscle group
- * Used for customizing exercises before plan generation
+ * @deprecated Use flat Exercise[] array instead. This type is kept for backward compatibility only.
+ * The new multi-muscle group system uses Exercise.muscle_groups array for compound exercises.
  */
 export interface MuscleGroupExercises {
   muscleGroup: MuscleGroup;
