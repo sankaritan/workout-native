@@ -1,6 +1,7 @@
 /**
  * Exercise library seed data
- * Contains 50+ exercises covering all major muscle groups
+ * Contains comprehensive exercises covering all major muscle groups for all equipment types
+ * Minimum 3 exercises per muscle group per equipment type (6 muscle groups × 6 equipment types × 3 = 108+ exercises)
  */
 
 import { insertExercise, getAllExercises } from "./storage";
@@ -10,6 +11,8 @@ export const EXERCISES: ExerciseInsert[] = [
   // ============================================================================
   // CHEST EXERCISES
   // ============================================================================
+
+  // Chest - Barbell (3)
   {
     name: "Bench Press",
     muscle_group: "Chest",
@@ -27,6 +30,16 @@ export const EXERCISES: ExerciseInsert[] = [
     description: "Bench press variation targeting upper chest",
   },
   {
+    name: "Decline Bench Press",
+    muscle_group: "Chest",
+    muscle_groups: ["Chest", "Shoulders", "Arms"],
+    equipment_required: "Barbell",
+    is_compound: true,
+    description: "Bench press variation targeting lower chest",
+  },
+
+  // Chest - Dumbbell (4)
+  {
     name: "Dumbbell Bench Press",
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Shoulders", "Arms"],
@@ -43,6 +56,24 @@ export const EXERCISES: ExerciseInsert[] = [
     description: "Dumbbell press on incline bench for upper chest emphasis",
   },
   {
+    name: "Dumbbell Flyes",
+    muscle_group: "Chest",
+    muscle_groups: ["Chest"],
+    equipment_required: "Dumbbell",
+    is_compound: false,
+    description: "Isolation exercise for chest stretch and contraction",
+  },
+  {
+    name: "Dumbbell Pullover",
+    muscle_group: "Chest",
+    muscle_groups: ["Chest", "Back"],
+    equipment_required: "Dumbbell",
+    is_compound: true,
+    description: "Pullover movement targeting chest and lats",
+  },
+
+  // Chest - Bodyweight (3)
+  {
     name: "Push-ups",
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Shoulders", "Arms"],
@@ -51,13 +82,23 @@ export const EXERCISES: ExerciseInsert[] = [
     description: "Bodyweight chest exercise that can be done anywhere",
   },
   {
-    name: "Dumbbell Flyes",
+    name: "Chest Dips",
     muscle_group: "Chest",
-    muscle_groups: ["Chest"],
-    equipment_required: "Dumbbell",
-    is_compound: false,
-    description: "Isolation exercise for chest stretch and contraction",
+    muscle_groups: ["Chest", "Arms"],
+    equipment_required: "Bodyweight",
+    is_compound: true,
+    description: "Bodyweight exercise emphasizing lower chest with forward lean",
   },
+  {
+    name: "Diamond Push-ups",
+    muscle_group: "Chest",
+    muscle_groups: ["Chest", "Arms"],
+    equipment_required: "Bodyweight",
+    is_compound: true,
+    description: "Push-up variation with hands close together for inner chest",
+  },
+
+  // Chest - Cables (3)
   {
     name: "Cable Flyes",
     muscle_group: "Chest",
@@ -67,17 +108,79 @@ export const EXERCISES: ExerciseInsert[] = [
     description: "Cable variation of flyes for constant tension",
   },
   {
-    name: "Chest Dips",
+    name: "Cable Crossover",
     muscle_group: "Chest",
-    muscle_groups: ["Chest", "Arms"],
-    equipment_required: "Bodyweight",
+    muscle_groups: ["Chest"],
+    equipment_required: "Cables",
+    is_compound: false,
+    description: "High-to-low cable movement for lower chest definition",
+  },
+  {
+    name: "Low Cable Flyes",
+    muscle_group: "Chest",
+    muscle_groups: ["Chest", "Shoulders"],
+    equipment_required: "Cables",
+    is_compound: false,
+    description: "Low-to-high cable movement targeting upper chest",
+  },
+
+  // Chest - Machines (3)
+  {
+    name: "Chest Press Machine",
+    muscle_group: "Chest",
+    muscle_groups: ["Chest", "Shoulders", "Arms"],
+    equipment_required: "Machines",
     is_compound: true,
-    description: "Bodyweight exercise emphasizing lower chest",
+    description: "Machine-based chest press for controlled movement",
+  },
+  {
+    name: "Pec Deck Machine",
+    muscle_group: "Chest",
+    muscle_groups: ["Chest"],
+    equipment_required: "Machines",
+    is_compound: false,
+    description: "Machine fly for chest isolation and squeeze",
+  },
+  {
+    name: "Smith Machine Bench Press",
+    muscle_group: "Chest",
+    muscle_groups: ["Chest", "Shoulders", "Arms"],
+    equipment_required: "Machines",
+    is_compound: true,
+    description: "Guided barbell press for stable chest work",
+  },
+
+  // Chest - Bands (3)
+  {
+    name: "Banded Push-ups",
+    muscle_group: "Chest",
+    muscle_groups: ["Chest", "Shoulders", "Arms"],
+    equipment_required: "Bands",
+    is_compound: true,
+    description: "Push-ups with band resistance across back",
+  },
+  {
+    name: "Banded Chest Press",
+    muscle_group: "Chest",
+    muscle_groups: ["Chest", "Shoulders", "Arms"],
+    equipment_required: "Bands",
+    is_compound: true,
+    description: "Standing chest press using resistance band",
+  },
+  {
+    name: "Banded Chest Flyes",
+    muscle_group: "Chest",
+    muscle_groups: ["Chest"],
+    equipment_required: "Bands",
+    is_compound: false,
+    description: "Fly movement with bands anchored behind",
   },
 
   // ============================================================================
   // BACK EXERCISES
   // ============================================================================
+
+  // Back - Barbell (4)
   {
     name: "Deadlift",
     muscle_group: "Back",
@@ -95,6 +198,50 @@ export const EXERCISES: ExerciseInsert[] = [
     description: "Bent-over row for mid-back thickness",
   },
   {
+    name: "T-Bar Row",
+    muscle_group: "Back",
+    muscle_groups: ["Back", "Arms"],
+    equipment_required: "Barbell",
+    is_compound: true,
+    description: "Compound row variation for back thickness",
+  },
+  {
+    name: "Pendlay Row",
+    muscle_group: "Back",
+    muscle_groups: ["Back", "Arms"],
+    equipment_required: "Barbell",
+    is_compound: true,
+    description: "Explosive row from dead stop for power and thickness",
+  },
+
+  // Back - Dumbbell (3)
+  {
+    name: "Dumbbell Row",
+    muscle_group: "Back",
+    muscle_groups: ["Back", "Arms"],
+    equipment_required: "Dumbbell",
+    is_compound: true,
+    description: "Single-arm row for unilateral back development",
+  },
+  {
+    name: "Dumbbell Pullover",
+    muscle_group: "Back",
+    muscle_groups: ["Back", "Chest"],
+    equipment_required: "Dumbbell",
+    is_compound: true,
+    description: "Pullover emphasizing lat stretch and contraction",
+  },
+  {
+    name: "Chest-Supported Dumbbell Row",
+    muscle_group: "Back",
+    muscle_groups: ["Back", "Arms"],
+    equipment_required: "Dumbbell",
+    is_compound: true,
+    description: "Row with chest on incline bench to isolate back",
+  },
+
+  // Back - Bodyweight (3)
+  {
     name: "Pull-ups",
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
@@ -108,8 +255,18 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Bodyweight",
     is_compound: true,
-    description: "Underhand grip pull-up variation",
+    description: "Underhand grip pull-up variation with bicep emphasis",
   },
+  {
+    name: "Inverted Row",
+    muscle_group: "Back",
+    muscle_groups: ["Back", "Arms"],
+    equipment_required: "Bodyweight",
+    is_compound: true,
+    description: "Horizontal pull using body weight on low bar",
+  },
+
+  // Back - Cables (4)
   {
     name: "Lat Pulldown",
     muscle_group: "Back",
@@ -119,20 +276,12 @@ export const EXERCISES: ExerciseInsert[] = [
     description: "Cable machine exercise for back width",
   },
   {
-    name: "Dumbbell Row",
-    muscle_group: "Back",
-    muscle_groups: ["Back", "Arms"],
-    equipment_required: "Dumbbell",
-    is_compound: true,
-    description: "Single-arm row for unilateral back development",
-  },
-  {
     name: "Seated Cable Row",
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Cables",
     is_compound: true,
-    description: "Horizontal cable pull for mid-back",
+    description: "Horizontal cable pull for mid-back thickness",
   },
   {
     name: "Face Pulls",
@@ -140,20 +289,74 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_groups: ["Back", "Shoulders"],
     equipment_required: "Cables",
     is_compound: false,
-    description: "Cable exercise for rear delts and upper back",
+    description: "Cable exercise for rear delts and upper back health",
   },
   {
-    name: "T-Bar Row",
+    name: "Straight Arm Pulldown",
+    muscle_group: "Back",
+    muscle_groups: ["Back"],
+    equipment_required: "Cables",
+    is_compound: false,
+    description: "Isolation exercise for lat engagement",
+  },
+
+  // Back - Machines (3)
+  {
+    name: "Lat Pulldown Machine",
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
-    equipment_required: "Barbell",
+    equipment_required: "Machines",
     is_compound: true,
-    description: "Compound row variation for back thickness",
+    description: "Machine-based pulldown for consistent lat work",
+  },
+  {
+    name: "Seated Row Machine",
+    muscle_group: "Back",
+    muscle_groups: ["Back", "Arms"],
+    equipment_required: "Machines",
+    is_compound: true,
+    description: "Machine row for controlled back development",
+  },
+  {
+    name: "Assisted Pull-up Machine",
+    muscle_group: "Back",
+    muscle_groups: ["Back", "Arms"],
+    equipment_required: "Machines",
+    is_compound: true,
+    description: "Counterweight machine for pull-up progression",
+  },
+
+  // Back - Bands (3)
+  {
+    name: "Banded Lat Pulldown",
+    muscle_group: "Back",
+    muscle_groups: ["Back", "Arms"],
+    equipment_required: "Bands",
+    is_compound: true,
+    description: "Pulldown movement with band anchored overhead",
+  },
+  {
+    name: "Banded Row",
+    muscle_group: "Back",
+    muscle_groups: ["Back", "Arms"],
+    equipment_required: "Bands",
+    is_compound: true,
+    description: "Seated or standing row with resistance band",
+  },
+  {
+    name: "Banded Face Pull",
+    muscle_group: "Back",
+    muscle_groups: ["Back", "Shoulders"],
+    equipment_required: "Bands",
+    is_compound: false,
+    description: "Face pull using band for rear delt and upper back",
   },
 
   // ============================================================================
   // LEG EXERCISES
   // ============================================================================
+
+  // Legs - Barbell (4)
   {
     name: "Squat",
     muscle_group: "Legs",
@@ -179,15 +382,17 @@ export const EXERCISES: ExerciseInsert[] = [
     description: "Hamstring-focused deadlift variation",
   },
   {
-    name: "Leg Press",
+    name: "Barbell Hip Thrust",
     muscle_group: "Legs",
-    muscle_groups: ["Legs"],
-    equipment_required: "Machines",
+    muscle_groups: ["Legs", "Core"],
+    equipment_required: "Barbell",
     is_compound: true,
-    description: "Machine-based compound leg exercise",
+    description: "Glute-focused hip extension with barbell",
   },
+
+  // Legs - Dumbbell (3)
   {
-    name: "Lunges",
+    name: "Dumbbell Lunges",
     muscle_group: "Legs",
     muscle_groups: ["Legs", "Core"],
     equipment_required: "Dumbbell",
@@ -201,6 +406,76 @@ export const EXERCISES: ExerciseInsert[] = [
     equipment_required: "Dumbbell",
     is_compound: true,
     description: "Single-leg squat variation with rear foot elevated",
+  },
+  {
+    name: "Dumbbell Romanian Deadlift",
+    muscle_group: "Legs",
+    muscle_groups: ["Legs", "Back"],
+    equipment_required: "Dumbbell",
+    is_compound: true,
+    description: "Dumbbell RDL for hamstring development",
+  },
+
+  // Legs - Bodyweight (3)
+  {
+    name: "Bodyweight Squat",
+    muscle_group: "Legs",
+    muscle_groups: ["Legs", "Core"],
+    equipment_required: "Bodyweight",
+    is_compound: true,
+    description: "Foundational squat pattern without weights",
+  },
+  {
+    name: "Walking Lunges",
+    muscle_group: "Legs",
+    muscle_groups: ["Legs", "Core"],
+    equipment_required: "Bodyweight",
+    is_compound: true,
+    description: "Dynamic lunge variation for leg strength and balance",
+  },
+  {
+    name: "Glute Bridge",
+    muscle_group: "Legs",
+    muscle_groups: ["Legs", "Core"],
+    equipment_required: "Bodyweight",
+    is_compound: true,
+    description: "Hip extension exercise for glutes",
+  },
+
+  // Legs - Cables (3)
+  {
+    name: "Cable Pull-Through",
+    muscle_group: "Legs",
+    muscle_groups: ["Legs", "Core"],
+    equipment_required: "Cables",
+    is_compound: true,
+    description: "Hip hinge movement for glutes and hamstrings",
+  },
+  {
+    name: "Cable Kickback",
+    muscle_group: "Legs",
+    muscle_groups: ["Legs"],
+    equipment_required: "Cables",
+    is_compound: false,
+    description: "Isolated glute exercise with ankle strap",
+  },
+  {
+    name: "Cable Romanian Deadlift",
+    muscle_group: "Legs",
+    muscle_groups: ["Legs", "Back"],
+    equipment_required: "Cables",
+    is_compound: true,
+    description: "RDL variation with cable for constant tension",
+  },
+
+  // Legs - Machines (5)
+  {
+    name: "Leg Press",
+    muscle_group: "Legs",
+    muscle_groups: ["Legs"],
+    equipment_required: "Machines",
+    is_compound: true,
+    description: "Machine-based compound leg exercise",
   },
   {
     name: "Leg Extension",
@@ -226,10 +501,46 @@ export const EXERCISES: ExerciseInsert[] = [
     is_compound: false,
     description: "Isolation exercise for calf development",
   },
+  {
+    name: "Hack Squat",
+    muscle_group: "Legs",
+    muscle_groups: ["Legs"],
+    equipment_required: "Machines",
+    is_compound: true,
+    description: "Machine squat for quad-focused leg development",
+  },
+
+  // Legs - Bands (3)
+  {
+    name: "Banded Squat",
+    muscle_group: "Legs",
+    muscle_groups: ["Legs", "Core"],
+    equipment_required: "Bands",
+    is_compound: true,
+    description: "Squat with band around thighs for glute activation",
+  },
+  {
+    name: "Banded Glute Bridge",
+    muscle_group: "Legs",
+    muscle_groups: ["Legs", "Core"],
+    equipment_required: "Bands",
+    is_compound: true,
+    description: "Hip bridge with band above knees for glute work",
+  },
+  {
+    name: "Banded Lateral Walk",
+    muscle_group: "Legs",
+    muscle_groups: ["Legs"],
+    equipment_required: "Bands",
+    is_compound: true,
+    description: "Side steps with band for hip abductor strength",
+  },
 
   // ============================================================================
   // SHOULDER EXERCISES
   // ============================================================================
+
+  // Shoulders - Barbell (3)
   {
     name: "Overhead Press",
     muscle_group: "Shoulders",
@@ -238,6 +549,24 @@ export const EXERCISES: ExerciseInsert[] = [
     is_compound: true,
     description: "Standing barbell press for overall shoulder development",
   },
+  {
+    name: "Push Press",
+    muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders", "Arms", "Legs"],
+    equipment_required: "Barbell",
+    is_compound: true,
+    description: "Explosive overhead press with leg drive",
+  },
+  {
+    name: "Barbell Upright Row",
+    muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders", "Back"],
+    equipment_required: "Barbell",
+    is_compound: true,
+    description: "Compound exercise for shoulders and traps",
+  },
+
+  // Shoulders - Dumbbell (5)
   {
     name: "Dumbbell Shoulder Press",
     muscle_group: "Shoulders",
@@ -278,14 +607,8 @@ export const EXERCISES: ExerciseInsert[] = [
     is_compound: false,
     description: "Isolation exercise for rear deltoids",
   },
-  {
-    name: "Upright Row",
-    muscle_group: "Shoulders",
-    muscle_groups: ["Shoulders", "Back"],
-    equipment_required: "Barbell",
-    is_compound: true,
-    description: "Compound exercise for shoulders and traps",
-  },
+
+  // Shoulders - Bodyweight (3)
   {
     name: "Pike Push-ups",
     muscle_group: "Shoulders",
@@ -294,10 +617,106 @@ export const EXERCISES: ExerciseInsert[] = [
     is_compound: true,
     description: "Bodyweight exercise targeting shoulders",
   },
+  {
+    name: "Handstand Push-ups",
+    muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders", "Arms", "Core"],
+    equipment_required: "Bodyweight",
+    is_compound: true,
+    description: "Advanced bodyweight shoulder press against wall",
+  },
+  {
+    name: "Wall Walks",
+    muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders", "Core"],
+    equipment_required: "Bodyweight",
+    is_compound: true,
+    description: "Walking hands up wall for shoulder strength",
+  },
+
+  // Shoulders - Cables (3)
+  {
+    name: "Cable Lateral Raise",
+    muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders"],
+    equipment_required: "Cables",
+    is_compound: false,
+    description: "Lateral raise with cable for constant tension",
+  },
+  {
+    name: "Cable Front Raise",
+    muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders"],
+    equipment_required: "Cables",
+    is_compound: false,
+    description: "Front deltoid raise using cable",
+  },
+  {
+    name: "Cable Upright Row",
+    muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders", "Back"],
+    equipment_required: "Cables",
+    is_compound: true,
+    description: "Upright row with cable for smooth resistance",
+  },
+
+  // Shoulders - Machines (3)
+  {
+    name: "Shoulder Press Machine",
+    muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders", "Arms"],
+    equipment_required: "Machines",
+    is_compound: true,
+    description: "Machine-based overhead press for shoulders",
+  },
+  {
+    name: "Lateral Raise Machine",
+    muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders"],
+    equipment_required: "Machines",
+    is_compound: false,
+    description: "Machine for isolated lateral deltoid work",
+  },
+  {
+    name: "Reverse Pec Deck",
+    muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders", "Back"],
+    equipment_required: "Machines",
+    is_compound: false,
+    description: "Reverse fly machine for rear deltoids",
+  },
+
+  // Shoulders - Bands (3)
+  {
+    name: "Banded Shoulder Press",
+    muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders", "Arms"],
+    equipment_required: "Bands",
+    is_compound: true,
+    description: "Overhead press with resistance band",
+  },
+  {
+    name: "Banded Lateral Raise",
+    muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders"],
+    equipment_required: "Bands",
+    is_compound: false,
+    description: "Lateral raise using band stepped under feet",
+  },
+  {
+    name: "Banded Pull-Apart",
+    muscle_group: "Shoulders",
+    muscle_groups: ["Shoulders", "Back"],
+    equipment_required: "Bands",
+    is_compound: false,
+    description: "Band pulled apart at chest level for rear delts",
+  },
 
   // ============================================================================
   // ARM EXERCISES
   // ============================================================================
+
+  // Arms - Barbell (4)
   {
     name: "Barbell Curl",
     muscle_group: "Arms",
@@ -305,30 +724,6 @@ export const EXERCISES: ExerciseInsert[] = [
     equipment_required: "Barbell",
     is_compound: false,
     description: "Classic bicep exercise with barbell",
-  },
-  {
-    name: "Dumbbell Curl",
-    muscle_group: "Arms",
-    muscle_groups: ["Arms"],
-    equipment_required: "Dumbbell",
-    is_compound: false,
-    description: "Bicep curl with dumbbells for unilateral work",
-  },
-  {
-    name: "Hammer Curl",
-    muscle_group: "Arms",
-    muscle_groups: ["Arms"],
-    equipment_required: "Dumbbell",
-    is_compound: false,
-    description: "Neutral grip curl for biceps and brachialis",
-  },
-  {
-    name: "Tricep Dips",
-    muscle_group: "Arms",
-    muscle_groups: ["Arms", "Chest"],
-    equipment_required: "Bodyweight",
-    is_compound: true,
-    description: "Bodyweight exercise for triceps",
   },
   {
     name: "Close-Grip Bench Press",
@@ -347,12 +742,30 @@ export const EXERCISES: ExerciseInsert[] = [
     description: "Lying tricep extension exercise",
   },
   {
-    name: "Tricep Pushdown",
+    name: "Preacher Curl",
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
-    equipment_required: "Cables",
+    equipment_required: "Barbell",
     is_compound: false,
-    description: "Cable isolation exercise for triceps",
+    description: "Bicep curl on preacher bench for isolation",
+  },
+
+  // Arms - Dumbbell (4)
+  {
+    name: "Dumbbell Curl",
+    muscle_group: "Arms",
+    muscle_groups: ["Arms"],
+    equipment_required: "Dumbbell",
+    is_compound: false,
+    description: "Bicep curl with dumbbells for unilateral work",
+  },
+  {
+    name: "Hammer Curl",
+    muscle_group: "Arms",
+    muscle_groups: ["Arms"],
+    equipment_required: "Dumbbell",
+    is_compound: false,
+    description: "Neutral grip curl for biceps and brachialis",
   },
   {
     name: "Overhead Tricep Extension",
@@ -363,17 +776,183 @@ export const EXERCISES: ExerciseInsert[] = [
     description: "Overhead extension for long head of triceps",
   },
   {
-    name: "Preacher Curl",
+    name: "Dumbbell Kickback",
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
-    equipment_required: "Barbell",
+    equipment_required: "Dumbbell",
     is_compound: false,
-    description: "Bicep curl on preacher bench for isolation",
+    description: "Tricep isolation with arm extended behind",
+  },
+
+  // Arms - Bodyweight (3)
+  {
+    name: "Tricep Dips",
+    muscle_group: "Arms",
+    muscle_groups: ["Arms", "Chest"],
+    equipment_required: "Bodyweight",
+    is_compound: true,
+    description: "Bodyweight exercise for triceps on parallel bars",
+  },
+  {
+    name: "Bench Dips",
+    muscle_group: "Arms",
+    muscle_groups: ["Arms"],
+    equipment_required: "Bodyweight",
+    is_compound: true,
+    description: "Tricep dips using a bench for support",
+  },
+  {
+    name: "Close-Grip Push-ups",
+    muscle_group: "Arms",
+    muscle_groups: ["Arms", "Chest"],
+    equipment_required: "Bodyweight",
+    is_compound: true,
+    description: "Push-ups with narrow hand placement for triceps",
+  },
+
+  // Arms - Cables (4)
+  {
+    name: "Tricep Pushdown",
+    muscle_group: "Arms",
+    muscle_groups: ["Arms"],
+    equipment_required: "Cables",
+    is_compound: false,
+    description: "Cable isolation exercise for triceps",
+  },
+  {
+    name: "Cable Curl",
+    muscle_group: "Arms",
+    muscle_groups: ["Arms"],
+    equipment_required: "Cables",
+    is_compound: false,
+    description: "Bicep curl with cable for constant tension",
+  },
+  {
+    name: "Overhead Cable Extension",
+    muscle_group: "Arms",
+    muscle_groups: ["Arms"],
+    equipment_required: "Cables",
+    is_compound: false,
+    description: "Tricep extension with cable behind head",
+  },
+  {
+    name: "Rope Hammer Curl",
+    muscle_group: "Arms",
+    muscle_groups: ["Arms"],
+    equipment_required: "Cables",
+    is_compound: false,
+    description: "Cable curl with rope for neutral grip",
+  },
+
+  // Arms - Machines (3)
+  {
+    name: "Preacher Curl Machine",
+    muscle_group: "Arms",
+    muscle_groups: ["Arms"],
+    equipment_required: "Machines",
+    is_compound: false,
+    description: "Machine-based bicep curl for isolation",
+  },
+  {
+    name: "Tricep Extension Machine",
+    muscle_group: "Arms",
+    muscle_groups: ["Arms"],
+    equipment_required: "Machines",
+    is_compound: false,
+    description: "Machine for isolated tricep work",
+  },
+  {
+    name: "Assisted Dip Machine",
+    muscle_group: "Arms",
+    muscle_groups: ["Arms", "Chest"],
+    equipment_required: "Machines",
+    is_compound: true,
+    description: "Counterweight machine for dip progression",
+  },
+
+  // Arms - Bands (3)
+  {
+    name: "Banded Bicep Curl",
+    muscle_group: "Arms",
+    muscle_groups: ["Arms"],
+    equipment_required: "Bands",
+    is_compound: false,
+    description: "Bicep curl with resistance band",
+  },
+  {
+    name: "Banded Tricep Pushdown",
+    muscle_group: "Arms",
+    muscle_groups: ["Arms"],
+    equipment_required: "Bands",
+    is_compound: false,
+    description: "Tricep pushdown with band anchored above",
+  },
+  {
+    name: "Banded Overhead Extension",
+    muscle_group: "Arms",
+    muscle_groups: ["Arms"],
+    equipment_required: "Bands",
+    is_compound: false,
+    description: "Overhead tricep extension with band",
   },
 
   // ============================================================================
   // CORE EXERCISES
   // ============================================================================
+
+  // Core - Barbell (3)
+  {
+    name: "Barbell Rollout",
+    muscle_group: "Core",
+    muscle_groups: ["Core", "Shoulders"],
+    equipment_required: "Barbell",
+    is_compound: true,
+    description: "Ab rollout using barbell for core stability",
+  },
+  {
+    name: "Landmine Rotation",
+    muscle_group: "Core",
+    muscle_groups: ["Core", "Shoulders"],
+    equipment_required: "Barbell",
+    is_compound: true,
+    description: "Rotational exercise with barbell in landmine",
+  },
+  {
+    name: "Barbell Good Morning",
+    muscle_group: "Core",
+    muscle_groups: ["Core", "Back", "Legs"],
+    equipment_required: "Barbell",
+    is_compound: true,
+    description: "Hip hinge with barbell for posterior chain and core",
+  },
+
+  // Core - Dumbbell (3)
+  {
+    name: "Dumbbell Side Bend",
+    muscle_group: "Core",
+    muscle_groups: ["Core"],
+    equipment_required: "Dumbbell",
+    is_compound: false,
+    description: "Lateral flexion for oblique development",
+  },
+  {
+    name: "Dumbbell Woodchop",
+    muscle_group: "Core",
+    muscle_groups: ["Core", "Shoulders"],
+    equipment_required: "Dumbbell",
+    is_compound: true,
+    description: "Rotational movement pattern for core strength",
+  },
+  {
+    name: "Weighted Crunch",
+    muscle_group: "Core",
+    muscle_groups: ["Core"],
+    equipment_required: "Dumbbell",
+    is_compound: false,
+    description: "Crunch holding dumbbell for added resistance",
+  },
+
+  // Core - Bodyweight (7)
   {
     name: "Plank",
     muscle_group: "Core",
@@ -407,14 +986,6 @@ export const EXERCISES: ExerciseInsert[] = [
     description: "Rotational core exercise for obliques",
   },
   {
-    name: "Cable Crunches",
-    muscle_group: "Core",
-    muscle_groups: ["Core"],
-    equipment_required: "Cables",
-    is_compound: false,
-    description: "Cable machine crunch for progressive overload",
-  },
-  {
     name: "Ab Wheel Rollout",
     muscle_group: "Core",
     muscle_groups: ["Core", "Shoulders"],
@@ -437,6 +1008,84 @@ export const EXERCISES: ExerciseInsert[] = [
     equipment_required: "Bodyweight",
     is_compound: false,
     description: "Core stability exercise performed on back",
+  },
+
+  // Core - Cables (3)
+  {
+    name: "Cable Crunches",
+    muscle_group: "Core",
+    muscle_groups: ["Core"],
+    equipment_required: "Cables",
+    is_compound: false,
+    description: "Cable machine crunch for progressive overload",
+  },
+  {
+    name: "Cable Woodchop",
+    muscle_group: "Core",
+    muscle_groups: ["Core", "Shoulders"],
+    equipment_required: "Cables",
+    is_compound: true,
+    description: "Rotational cable movement for obliques",
+  },
+  {
+    name: "Cable Pallof Press",
+    muscle_group: "Core",
+    muscle_groups: ["Core"],
+    equipment_required: "Cables",
+    is_compound: false,
+    description: "Anti-rotation exercise for core stability",
+  },
+
+  // Core - Machines (3)
+  {
+    name: "Ab Crunch Machine",
+    muscle_group: "Core",
+    muscle_groups: ["Core"],
+    equipment_required: "Machines",
+    is_compound: false,
+    description: "Machine for weighted ab crunches",
+  },
+  {
+    name: "Torso Rotation Machine",
+    muscle_group: "Core",
+    muscle_groups: ["Core"],
+    equipment_required: "Machines",
+    is_compound: false,
+    description: "Machine for rotational oblique work",
+  },
+  {
+    name: "Captain's Chair Leg Raise",
+    muscle_group: "Core",
+    muscle_groups: ["Core"],
+    equipment_required: "Machines",
+    is_compound: false,
+    description: "Leg raise supported by arm rests",
+  },
+
+  // Core - Bands (3)
+  {
+    name: "Banded Pallof Press",
+    muscle_group: "Core",
+    muscle_groups: ["Core"],
+    equipment_required: "Bands",
+    is_compound: false,
+    description: "Anti-rotation press with resistance band",
+  },
+  {
+    name: "Banded Woodchop",
+    muscle_group: "Core",
+    muscle_groups: ["Core", "Shoulders"],
+    equipment_required: "Bands",
+    is_compound: true,
+    description: "Rotational chop pattern with band",
+  },
+  {
+    name: "Banded Dead Bug",
+    muscle_group: "Core",
+    muscle_groups: ["Core"],
+    equipment_required: "Bands",
+    is_compound: false,
+    description: "Dead bug with band resistance for added challenge",
   },
 ];
 
@@ -534,6 +1183,28 @@ export function getExerciseCountByMuscleGroup(): Record<string, number> {
 
   for (const exercise of EXERCISES) {
     counts[exercise.muscle_group]++;
+  }
+
+  return counts;
+}
+
+/**
+ * Get exercise count by equipment type for verification
+ */
+export function getExerciseCountByEquipment(): Record<string, number> {
+  const counts: Record<string, number> = {
+    Barbell: 0,
+    Dumbbell: 0,
+    Bodyweight: 0,
+    Cables: 0,
+    Machines: 0,
+    Bands: 0,
+  };
+
+  for (const exercise of EXERCISES) {
+    if (exercise.equipment_required) {
+      counts[exercise.equipment_required]++;
+    }
   }
 
   return counts;
