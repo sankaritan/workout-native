@@ -15,6 +15,11 @@ export interface WizardState {
   duration?: 4 | 6 | 8 | 12; // Duration in weeks
   customExercises?: Exercise[]; // User-customized exercises (flat array)
   generatedProgram?: WorkoutProgram; // Generated workout program
+  // Track parameters used to generate current exercises (for change detection)
+  exerciseGenerationParams?: {
+    equipment: Equipment[];
+    frequency: number;
+  };
 }
 
 // Context value interface

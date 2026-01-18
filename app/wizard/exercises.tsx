@@ -27,9 +27,28 @@ export default function ExercisesScreen() {
     state.customExercises || []
   );
 
-  // Initialize custom exercises on mount if not already set
+  // Initialize or regenerate exercises when equipment or frequency changes
   useEffect(() => {
-    if (!state.customExercises && state.equipment && state.frequency) {
+    if (!state.equipment || !state.frequency) {
+      return;
+    }
+
+    // Check if equipment or frequency has changed since last generation
+    const params = state.exerciseGenerationParams;
+    const equipmentChanged =
+      !params ||
+      JSON.stringify([...state.equipment].sort()) !==
+        JSON.stringify([...params.equipment].sort());
+    const frequencyChanged = !params || params.frequency !== state.frequency;
+
+    // Generate new exercises if:
+    // 1. No exercises exist yet, OR
+    // 2. Equipment changed, OR
+    // 3. Frequency changed
+    const shouldRegenerate =
+      !state.customExercises || equipmentChanged || frequencyChanged;
+
+    if (shouldRegenerate) {
       const allExercises = getAllExercises();
       const initialExercises = selectInitialExercises(
         allExercises,
@@ -37,16 +56,21 @@ export default function ExercisesScreen() {
         state.frequency
       );
       setCustomExercises(initialExercises);
-      updateState({ customExercises: initialExercises });
-    }
-  }, [state.customExercises, state.equipment, state.frequency, updateState]);
 
-  // Sync local state with wizard context when returning from swap/add screens
-  useEffect(() => {
-    if (state.customExercises) {
+      // Update state with new exercises AND generation params in one call
+      updateState({
+        customExercises: initialExercises,
+        exerciseGenerationParams: {
+          equipment: state.equipment,
+          frequency: state.frequency,
+        },
+      });
+    } else if (state.customExercises) {
+      // Sync local state with wizard context when returning from swap/add screens
       setCustomExercises(state.customExercises);
     }
-  }, [state.customExercises]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.equipment, state.frequency]);
 
   /**
    * Handle swap exercise - navigate to swap screen
