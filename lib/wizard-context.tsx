@@ -11,7 +11,7 @@ import type { WorkoutProgram } from "./workout-generator/types";
 export interface WizardState {
   frequency?: number; // 2-5 days per week
   equipment?: Equipment[]; // Array of equipment types
-  focus?: "Hypertrophy" | "Strength" | "Endurance"; // Training focus
+  focus?: "Balanced" | "Strength" | "Endurance"; // Training focus
   duration?: 4 | 6 | 8 | 12; // Duration in weeks
   generatedProgram?: WorkoutProgram; // Generated workout program
 }

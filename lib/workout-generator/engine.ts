@@ -27,10 +27,10 @@ import type {
  * Get sets/reps scheme based on training focus
  */
 export function getSetsRepsScheme(
-  focus: "Hypertrophy" | "Strength" | "Endurance"
+  focus: "Balanced" | "Strength" | "Endurance"
 ): SetsRepsScheme {
   switch (focus) {
-    case "Hypertrophy":
+    case "Balanced":
       return { sets: 3, repsMin: 8, repsMax: 12 };
     case "Strength":
       return { sets: 5, repsMin: 3, repsMax: 5 };

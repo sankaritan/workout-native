@@ -10,7 +10,7 @@ import type { Exercise, MuscleGroup, Equipment } from "@/lib/storage/types";
 export interface GenerationInput {
   frequency: number; // 2-5 days per week
   equipment: Equipment[]; // Available equipment
-  focus: "Hypertrophy" | "Strength" | "Endurance";
+  focus: "Balanced" | "Strength" | "Endurance";
 }
 
 /**
@@ -48,7 +48,7 @@ export interface ProgramSession {
  */
 export interface WorkoutProgram {
   name: string;
-  focus: "Hypertrophy" | "Strength" | "Endurance";
+  focus: "Balanced" | "Strength" | "Endurance";
   durationWeeks: number;
   sessionsPerWeek: number;
   sessions: ProgramSession[];

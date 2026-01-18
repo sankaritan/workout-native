@@ -8,35 +8,34 @@ import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-nati
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SelectionCard } from "@/components/ui/SelectionCard";
 import { useWizard } from "@/lib/wizard-context";
 import { cn } from "@/lib/utils/cn";
 import { generateWorkoutProgram, saveWorkoutProgram } from "@/lib/workout-generator/engine";
 
-// Focus options based on database types
+// Focus options based on design mock - order: Strength, Balanced, Endurance
 const FOCUS_OPTIONS: Array<{
-  value: "Hypertrophy" | "Strength" | "Endurance";
+  value: "Balanced" | "Strength" | "Endurance";
   label: string;
   description: string;
   icon: keyof typeof MaterialIcons.glyphMap;
 }> = [
   {
-    value: "Hypertrophy",
-    label: "Hypertrophy",
-    description: "Build muscle size",
+    value: "Strength",
+    label: "Strength",
+    description: "Low reps, heavy weight. Focus on power.",
     icon: "fitness-center",
   },
   {
-    value: "Strength",
-    label: "Strength",
-    description: "Increase max lifts",
-    icon: "bolt",
+    value: "Balanced",
+    label: "Balanced",
+    description: "Moderate reps. Focus on muscle size (hypertrophy).",
+    icon: "crop-square",
   },
   {
     value: "Endurance",
     label: "Endurance",
-    description: "Muscular stamina",
-    icon: "trending-up",
+    description: "High reps. Focus on stamina and conditioning.",
+    icon: "directions-run",
   },
 ];
 
@@ -44,14 +43,14 @@ export default function FocusScreen() {
   const insets = useSafeAreaInsets();
   const { state, updateState } = useWizard();
   const [selectedFocus, setSelectedFocus] = useState<
-    "Hypertrophy" | "Strength" | "Endurance" | undefined
+    "Balanced" | "Strength" | "Endurance" | undefined
   >(state.focus);
   const [isGenerating, setIsGenerating] = useState(false);
 
   /**
    * Handle focus selection
    */
-  const handleFocusSelect = (focus: "Hypertrophy" | "Strength" | "Endurance") => {
+  const handleFocusSelect = (focus: "Balanced" | "Strength" | "Endurance") => {
     setSelectedFocus(focus);
     updateState({ focus });
   };
@@ -139,11 +138,14 @@ export default function FocusScreen() {
           <View className="size-10" />
         </View>
 
-        {/* Progress Bar */}
-        <View className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+        {/* Segmented Progress Bar */}
+        <View className="flex-row gap-2">
+          <View className="flex-1 h-1.5 rounded-full bg-primary" />
+          <View className="flex-1 h-1.5 rounded-full bg-primary" />
+          <View className="flex-1 h-1.5 rounded-full bg-primary" />
           <View
             testID="progress-bar"
-            className="h-full w-3/4 rounded-full bg-primary transition-all duration-500"
+            className="flex-1 h-1.5 rounded-full bg-white/10"
           />
         </View>
       </View>
@@ -153,38 +155,80 @@ export default function FocusScreen() {
         className="flex-1 w-full"
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingTop: 16,
+          paddingTop: 24,
           paddingBottom: 120 + insets.bottom,
         }}
       >
         {/* Title and Subtitle */}
         <View className="mb-8">
           <Text className="text-3xl font-bold leading-tight tracking-tight text-white mb-2">
-            What's your goal?
+            Define Your Goal
           </Text>
           <Text className="text-gray-400 text-base font-normal leading-relaxed">
-            Choose your training focus to customize your workout plan.
+            We will optimize sets, reps, and rest periods based on this choice.
           </Text>
         </View>
 
-        {/* Training Focus Options */}
+        {/* Training Focus Options - Compact horizontal cards */}
         <View className="gap-3">
-          {FOCUS_OPTIONS.map((option) => (
-            <SelectionCard
-              key={option.value}
-              label={option.label}
-              value={option.value}
-              subtitle={option.description}
-              icon={option.icon}
-              selected={selectedFocus === option.value}
-              onPress={() => handleFocusSelect(option.value)}
-              testID={`focus-${option.value.toLowerCase()}`}
-            />
-          ))}
+          {FOCUS_OPTIONS.map((option) => {
+            const isSelected = selectedFocus === option.value;
+            return (
+              <Pressable
+                key={option.value}
+                onPress={() => handleFocusSelect(option.value)}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: isSelected }}
+                accessibilityLabel={`${option.label}: ${option.description}`}
+                testID={`focus-${option.value.toLowerCase()}`}
+                className={cn(
+                  "flex-row items-center rounded-xl border-2 p-4",
+                  "bg-surface-dark",
+                  isSelected ? "border-primary bg-primary/5" : "border-surface-dark"
+                )}
+              >
+                {/* Icon */}
+                <View
+                  className={cn(
+                    "h-12 w-12 rounded-lg items-center justify-center mr-4",
+                    isSelected ? "bg-primary/20" : "bg-surface-dark-highlight"
+                  )}
+                >
+                  <MaterialIcons
+                    name={option.icon}
+                    size={24}
+                    color="#13ec6d"
+                  />
+                </View>
+
+                {/* Text content */}
+                <View className="flex-1">
+                  <Text className="text-base font-bold text-white mb-0.5">
+                    {option.label}
+                  </Text>
+                  <Text className="text-sm text-gray-400 leading-snug">
+                    {option.description}
+                  </Text>
+                </View>
+
+                {/* Radio button */}
+                <View
+                  className={cn(
+                    "h-6 w-6 rounded-full border-2 items-center justify-center ml-3",
+                    isSelected ? "border-primary bg-primary" : "border-gray-500"
+                  )}
+                >
+                  {isSelected && (
+                    <View className="h-2.5 w-2.5 rounded-full bg-background-dark" />
+                  )}
+                </View>
+              </Pressable>
+            );
+          })}
         </View>
       </ScrollView>
 
-      {/* Generate Plan Button (Fixed at bottom) */}
+      {/* Create Workout Plan Button (Fixed at bottom) */}
       <View
         className="absolute bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 p-4 w-full"
         style={{ paddingBottom: insets.bottom + 24 }}
@@ -193,11 +237,11 @@ export default function FocusScreen() {
           onPress={handleGeneratePlan}
           disabled={isGenerateDisabled}
           accessibilityRole="button"
-          accessibilityLabel="Generate workout plan"
+          accessibilityLabel="Create workout plan"
           accessibilityState={{ disabled: isGenerateDisabled }}
           testID="generate-button"
           className={cn(
-            "flex w-full items-center justify-center gap-2 rounded-xl px-6 py-4 text-base font-bold shadow-lg transition-transform",
+            "flex-row w-full items-center justify-center gap-2 rounded-xl px-6 py-4 text-base font-bold shadow-lg transition-transform",
             isGenerateDisabled
               ? "bg-surface-dark opacity-50"
               : "bg-primary active:scale-[0.98] shadow-primary/20"
@@ -207,16 +251,11 @@ export default function FocusScreen() {
             <>
               <ActivityIndicator size="small" color="#102218" />
               <Text className="text-base font-bold text-background-dark">
-                Generating...
+                Creating...
               </Text>
             </>
           ) : (
             <>
-              <MaterialIcons
-                name="auto-awesome"
-                size={20}
-                color={isGenerateDisabled ? "#6b8779" : "#102218"}
-              />
               <Text
                 className={cn(
                   "text-base font-bold",
@@ -225,8 +264,13 @@ export default function FocusScreen() {
                     : "text-background-dark"
                 )}
               >
-                Generate Plan
+                Create Workout Plan
               </Text>
+              <MaterialIcons
+                name="bolt"
+                size={20}
+                color={isGenerateDisabled ? "#6b8779" : "#102218"}
+              />
             </>
           )}
         </Pressable>

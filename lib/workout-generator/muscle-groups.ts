@@ -160,14 +160,14 @@ function getDayOfWeek(sessionIndex: number, frequency: number): number {
  * Returns array of sets for each session
  */
 export function calculateSessionVolume(
-  focus: "Hypertrophy" | "Strength" | "Endurance",
+  focus: "Balanced" | "Strength" | "Endurance",
   sessionsPerWeek: number
 ): number[] {
   // Weekly volume targets per muscle (9-20 sets)
   let weeklyVolume: number;
 
   switch (focus) {
-    case "Hypertrophy":
+    case "Balanced":
       weeklyVolume = 16; // Mid-high volume
       break;
     case "Strength":

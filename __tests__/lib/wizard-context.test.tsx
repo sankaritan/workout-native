@@ -33,7 +33,7 @@ function TestComponent() {
       </Pressable>
       <Pressable
         testID="set-focus"
-        onPress={() => updateState({ focus: "Hypertrophy" })}
+        onPress={() => updateState({ focus: "Balanced" })}
       >
         <Text>Set Focus</Text>
       </Pressable>
@@ -99,7 +99,7 @@ describe("WizardContext", () => {
       );
 
       fireEvent.press(screen.getByTestId("set-focus"));
-      expect(screen.getByTestId("focus").props.children).toBe("Hypertrophy");
+      expect(screen.getByTestId("focus").props.children).toBe("Balanced");
     });
 
     it("updates duration", () => {
@@ -149,7 +149,7 @@ describe("WizardContext", () => {
       expect(screen.getByTestId("equipment").props.children).toBe(
         "Barbell,Dumbbell"
       );
-      expect(screen.getByTestId("focus").props.children).toBe("Hypertrophy");
+      expect(screen.getByTestId("focus").props.children).toBe("Balanced");
       expect(screen.getByTestId("duration").props.children).toBe(8);
 
       // Reset

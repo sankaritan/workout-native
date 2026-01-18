@@ -74,7 +74,7 @@ describe("Muscle Groups Distribution", () => {
 
   describe("calculateSessionVolume", () => {
     it("distributes 9-20 sets per muscle per week", () => {
-      const result = calculateSessionVolume("Hypertrophy", 3);
+      const result = calculateSessionVolume("Balanced", 3);
       const totalSetsPerMuscle = result.reduce((sum, sets) => sum + sets, 0);
 
       expect(totalSetsPerMuscle).toBeGreaterThanOrEqual(9);
@@ -82,19 +82,19 @@ describe("Muscle Groups Distribution", () => {
     });
 
     it("returns array matching session count", () => {
-      const result = calculateSessionVolume("Hypertrophy", 4);
+      const result = calculateSessionVolume("Balanced", 4);
       expect(result).toHaveLength(4);
     });
 
     it("adjusts volume for Strength focus", () => {
-      const hypertrophyVolume = calculateSessionVolume("Hypertrophy", 3);
+      const balancedVolume = calculateSessionVolume("Balanced", 3);
       const strengthVolume = calculateSessionVolume("Strength", 3);
 
-      const totalHypertrophy = hypertrophyVolume.reduce((a, b) => a + b, 0);
+      const totalBalanced = balancedVolume.reduce((a, b) => a + b, 0);
       const totalStrength = strengthVolume.reduce((a, b) => a + b, 0);
 
       // Strength typically has slightly lower volume
-      expect(totalStrength).toBeLessThanOrEqual(totalHypertrophy);
+      expect(totalStrength).toBeLessThanOrEqual(totalBalanced);
     });
 
     it("adjusts volume for Endurance focus", () => {

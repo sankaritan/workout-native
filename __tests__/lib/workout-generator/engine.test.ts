@@ -100,8 +100,8 @@ describe("Workout Generation Engine", () => {
   });
 
   describe("getSetsRepsScheme", () => {
-    it("returns 3x8-12 for Hypertrophy", () => {
-      const scheme = getSetsRepsScheme("Hypertrophy");
+    it("returns 3x8-12 for Balanced", () => {
+      const scheme = getSetsRepsScheme("Balanced");
       expect(scheme.sets).toBe(3);
       expect(scheme.repsMin).toBe(8);
       expect(scheme.repsMax).toBe(12);
@@ -127,7 +127,7 @@ describe("Workout Generation Engine", () => {
       const input: GenerationInput = {
         frequency: 2,
         equipment: ["Barbell", "Dumbbell"],
-        focus: "Hypertrophy",
+        focus: "Balanced",
       };
 
       const program = generateWorkoutProgram(input);
@@ -149,11 +149,11 @@ describe("Workout Generation Engine", () => {
       expect(program.sessions).toHaveLength(4);
     });
 
-    it("assigns correct sets/reps for Hypertrophy", () => {
+    it("assigns correct sets/reps for Balanced", () => {
       const input: GenerationInput = {
         frequency: 3,
         equipment: ["Barbell", "Dumbbell"],
-        focus: "Hypertrophy",
+        focus: "Balanced",
       };
 
       const program = generateWorkoutProgram(input);
@@ -187,7 +187,7 @@ describe("Workout Generation Engine", () => {
       const input: GenerationInput = {
         frequency: 3,
         equipment: ["Barbell", "Dumbbell", "Bodyweight"],
-        focus: "Hypertrophy",
+        focus: "Balanced",
       };
 
       const program = generateWorkoutProgram(input);
@@ -201,7 +201,7 @@ describe("Workout Generation Engine", () => {
       const input: GenerationInput = {
         frequency: 3,
         equipment: ["Barbell", "Dumbbell"],
-        focus: "Hypertrophy",
+        focus: "Balanced",
       };
 
       const program = generateWorkoutProgram(input);
@@ -218,7 +218,7 @@ describe("Workout Generation Engine", () => {
       const input: GenerationInput = {
         frequency: 3,
         equipment: ["Barbell"],
-        focus: "Hypertrophy",
+        focus: "Balanced",
       };
 
       const program = generateWorkoutProgram(input);
@@ -233,7 +233,7 @@ describe("Workout Generation Engine", () => {
       const input: GenerationInput = {
         frequency: 3,
         equipment: ["Barbell"],
-        focus: "Hypertrophy",
+        focus: "Balanced",
       };
 
       const program = generateWorkoutProgram(input);
@@ -275,7 +275,7 @@ describe("Workout Generation Engine", () => {
       const input: GenerationInput = {
         frequency: 3,
         equipment: ["Bodyweight"],
-        focus: "Hypertrophy",
+        focus: "Balanced",
       };
 
       const program = generateWorkoutProgram(input);

@@ -65,7 +65,7 @@ describe("HomeScreen", () => {
   describe("Active plan state", () => {
     const mockPlan = {
       id: 1,
-      name: "4-Day Hypertrophy",
+      name: "4-Day Balanced",
       description: "Test plan",
       weekly_frequency: 4,
       duration_weeks: 8,
@@ -116,7 +116,7 @@ describe("HomeScreen", () => {
 
       await waitFor(() => {
         expect(screen.getByText("Your Workout Plan")).toBeTruthy();
-        expect(screen.getByText("4-Day Hypertrophy")).toBeTruthy();
+        expect(screen.getByText("4-Day Balanced")).toBeTruthy();
       });
     });
 

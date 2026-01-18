@@ -57,7 +57,7 @@ describe("Focus Screen", () => {
         </WizardProvider>
       </SafeAreaProvider>
     );
-    expect(screen.getByText("What's your goal?")).toBeTruthy();
+    expect(screen.getByText("Define Your Goal")).toBeTruthy();
   });
 
   it("renders all focus options", () => {
@@ -70,7 +70,7 @@ describe("Focus Screen", () => {
       </SafeAreaProvider>
     );
 
-    expect(screen.getAllByText("Hypertrophy").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Balanced").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Strength").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Endurance").length).toBeGreaterThan(0);
   });
@@ -96,6 +96,6 @@ describe("Focus Screen", () => {
         </WizardProvider>
       </SafeAreaProvider>
     );
-    expect(screen.getByText("Generate Plan")).toBeTruthy();
+    expect(screen.getByText("Create Workout Plan")).toBeTruthy();
   });
 });
