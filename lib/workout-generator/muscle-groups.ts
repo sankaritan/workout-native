@@ -52,6 +52,23 @@ export function distributeMuscleGroups(frequency: number): SessionTemplate[] {
 }
 
 /**
+ * Get all unique muscle groups that will be trained based on frequency
+ * Used to determine which muscle groups to show in exercise selection
+ */
+export function getMuscleGroupsForFrequency(frequency: number): MuscleGroup[] {
+  const sessions = distributeMuscleGroups(frequency);
+  const allMuscles = new Set<MuscleGroup>();
+
+  sessions.forEach((session) => {
+    session.muscles.forEach((muscle) => allMuscles.add(muscle));
+  });
+
+  // Return in consistent order
+  const orderedMuscles: MuscleGroup[] = ["Chest", "Back", "Legs", "Shoulders", "Arms", "Core"];
+  return orderedMuscles.filter((m) => allMuscles.has(m));
+}
+
+/**
  * Create full body split (2-3 days)
  * Each session trains all major muscle groups
  */

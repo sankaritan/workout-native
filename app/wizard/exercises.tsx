@@ -13,12 +13,10 @@ import { useWizard } from "@/lib/wizard-context";
 import { cn } from "@/lib/utils/cn";
 import { MuscleGroupSection } from "@/components/MuscleGroupSection";
 import { selectInitialExercisesByMuscleGroup } from "@/lib/workout-generator/exercise-selector";
+import { getMuscleGroupsForFrequency } from "@/lib/workout-generator/muscle-groups";
 import { getAllExercises } from "@/lib/storage/storage";
 import type { MuscleGroup } from "@/lib/storage/types";
 import type { MuscleGroupExercises } from "@/lib/workout-generator/types";
-
-// All muscle groups in display order
-const ALL_MUSCLE_GROUPS: MuscleGroup[] = ["Chest", "Back", "Legs", "Shoulders", "Arms", "Core"];
 
 // Maximum exercises per muscle group
 const MAX_EXERCISES_PER_GROUP = 5;
@@ -32,16 +30,24 @@ export default function ExercisesScreen() {
 
   // Initialize custom exercises on mount if not already set
   useEffect(() => {
-    if (!state.customExercises && state.equipment) {
+    if (!state.customExercises && state.equipment && state.frequency) {
       const allExercises = getAllExercises();
       const initialExercises = selectInitialExercisesByMuscleGroup(
         allExercises,
-        state.equipment
+        state.equipment,
+        state.frequency
       );
       setCustomExercises(initialExercises);
       updateState({ customExercises: initialExercises });
     }
-  }, [state.customExercises, state.equipment, updateState]);
+  }, [state.customExercises, state.equipment, state.frequency, updateState]);
+
+  // Sync local state with wizard context when returning from swap/add screens
+  useEffect(() => {
+    if (state.customExercises) {
+      setCustomExercises(state.customExercises);
+    }
+  }, [state.customExercises]);
 
   /**
    * Handle swap exercise - navigate to swap screen
@@ -95,6 +101,11 @@ export default function ExercisesScreen() {
   const handleBack = () => {
     router.back();
   };
+
+  // Get relevant muscle groups based on frequency
+  const relevantMuscleGroups = state.frequency
+    ? getMuscleGroupsForFrequency(state.frequency)
+    : [];
 
   // Check if we can continue (at least one exercise in any group)
   const hasAnyExercise = customExercises.some((entry) => entry.exercises.length > 0);
@@ -170,7 +181,7 @@ export default function ExercisesScreen() {
         </View>
 
         {/* Muscle Group Sections */}
-        {ALL_MUSCLE_GROUPS.map((muscleGroup) => (
+        {relevantMuscleGroups.map((muscleGroup) => (
           <MuscleGroupSection
             key={muscleGroup}
             muscleGroup={muscleGroup}

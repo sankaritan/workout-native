@@ -5,9 +5,7 @@
 
 import type { Exercise, MuscleGroup, Equipment } from "@/lib/storage/types";
 import type { MuscleGroupExercises } from "./types";
-
-// All muscle groups in display order
-const ALL_MUSCLE_GROUPS: MuscleGroup[] = ["Chest", "Back", "Legs", "Shoulders", "Arms", "Core"];
+import { getMuscleGroupsForFrequency } from "./muscle-groups";
 
 /**
  * Filter exercises by available equipment
@@ -87,19 +85,23 @@ export function orderExercises(exercises: Exercise[]): Exercise[] {
 }
 
 /**
- * Select initial exercises for each muscle group
- * Returns 6 entries (one per muscle group), each with 2-3 pre-selected exercises
+ * Select initial exercises for each muscle group based on training frequency
+ * Only returns exercises for muscle groups that will be used in the workout plan
  * Prioritizes compound exercises, filters by available equipment
  */
 export function selectInitialExercisesByMuscleGroup(
   availableExercises: Exercise[],
-  equipment: Equipment[]
+  equipment: Equipment[],
+  frequency: number
 ): MuscleGroupExercises[] {
   // First filter by equipment
   const filteredByEquipment = filterExercisesByEquipment(availableExercises, equipment);
 
-  // Create entry for each muscle group
-  return ALL_MUSCLE_GROUPS.map((muscleGroup) => {
+  // Get only the muscle groups that will be used based on frequency
+  const relevantMuscleGroups = getMuscleGroupsForFrequency(frequency);
+
+  // Create entry for each relevant muscle group
+  return relevantMuscleGroups.map((muscleGroup) => {
     // Get exercises for this muscle group
     const muscleExercises = filterExercisesByMuscleGroup(filteredByEquipment, muscleGroup);
 
