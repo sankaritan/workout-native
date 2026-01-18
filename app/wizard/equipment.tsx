@@ -1,6 +1,6 @@
 /**
  * Equipment Selection Screen
- * Step 2 of 4 in workout wizard
+ * Step 2 of 5 in workout wizard
  */
 
 import React, { useState } from "react";
@@ -113,18 +113,22 @@ export default function EquipmentScreen() {
 
           {/* Step indicator */}
           <Text className="text-sm font-semibold uppercase tracking-widest text-gray-400">
-            Step 2 of 4
+            Step 2 of 5
           </Text>
 
           {/* Empty space for balance */}
           <View className="size-10" />
         </View>
 
-        {/* Progress Bar */}
-        <View className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+        {/* Progress Bar - 2 of 5 filled */}
+        <View className="flex-row gap-2">
+          <View className="flex-1 h-1.5 rounded-full bg-primary" />
+          <View className="flex-1 h-1.5 rounded-full bg-primary" />
+          <View className="flex-1 h-1.5 rounded-full bg-white/10" />
+          <View className="flex-1 h-1.5 rounded-full bg-white/10" />
           <View
             testID="progress-bar"
-            className="h-full w-1/2 rounded-full bg-primary transition-all duration-500"
+            className="flex-1 h-1.5 rounded-full bg-white/10"
           />
         </View>
       </View>

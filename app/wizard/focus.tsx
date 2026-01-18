@@ -1,16 +1,15 @@
 /**
  * Focus Selection Screen
- * Step 3 of 4 in workout wizard
+ * Step 3 of 5 in workout wizard
  */
 
 import React, { useState } from "react";
-import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useWizard } from "@/lib/wizard-context";
 import { cn } from "@/lib/utils/cn";
-import { generateWorkoutProgram, saveWorkoutProgram } from "@/lib/workout-generator/engine";
 
 // Focus options based on design mock - order: Strength, Balanced, Endurance
 const FOCUS_OPTIONS: Array<{
@@ -45,7 +44,6 @@ export default function FocusScreen() {
   const [selectedFocus, setSelectedFocus] = useState<
     "Balanced" | "Strength" | "Endurance" | undefined
   >(state.focus);
-  const [isGenerating, setIsGenerating] = useState(false);
 
   /**
    * Handle focus selection
@@ -56,52 +54,14 @@ export default function FocusScreen() {
   };
 
   /**
-   * Handle generate plan button press
+   * Handle continue button press - navigate to exercises screen
    */
-  const handleGeneratePlan = async () => {
-    if (!selectedFocus || !state.frequency || !state.equipment) {
-      console.error("Missing required wizard state", { state, selectedFocus });
-      alert("Missing required information. Please complete all steps.");
+  const handleContinue = () => {
+    if (!selectedFocus) {
       return;
     }
-
-    setIsGenerating(true);
-
-    try {
-      console.log("Starting workout generation...");
-      console.log("Input:", {
-        frequency: state.frequency,
-        equipment: state.equipment,
-        focus: selectedFocus,
-      });
-
-      // Generate workout program (works on both web and mobile)
-      const program = generateWorkoutProgram({
-        frequency: state.frequency,
-        equipment: state.equipment,
-        focus: selectedFocus,
-      });
-
-      console.log("Program generated:", program);
-
-      // Save to storage
-      const planId = saveWorkoutProgram(program);
-      console.log("Plan saved with ID:", planId);
-
-      // Store generated program in wizard context for display
-      updateState({ generatedProgram: program });
-
-      // Navigate to review screen
-      router.push("/wizard/review");
-    } catch (error) {
-      console.error("Failed to generate workout plan:");
-      console.error("Error details:", error);
-      console.error("Error message:", error instanceof Error ? error.message : String(error));
-      console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
-      alert(`Failed to generate workout plan: ${error instanceof Error ? error.message : String(error)}`);
-    } finally {
-      setIsGenerating(false);
-    }
+    // Navigate to exercise review screen
+    router.push("/wizard/exercises");
   };
 
   /**
@@ -111,7 +71,7 @@ export default function FocusScreen() {
     router.back();
   };
 
-  const isGenerateDisabled = !selectedFocus || isGenerating;
+  const isContinueDisabled = !selectedFocus;
 
   return (
     <View className="flex-1 bg-background-dark w-full">
@@ -131,18 +91,19 @@ export default function FocusScreen() {
 
           {/* Step indicator */}
           <Text className="text-sm font-semibold uppercase tracking-widest text-gray-400">
-            Step 3 of 4
+            Step 3 of 5
           </Text>
 
           {/* Empty space for balance */}
           <View className="size-10" />
         </View>
 
-        {/* Segmented Progress Bar */}
+        {/* Segmented Progress Bar - 3 of 5 filled */}
         <View className="flex-row gap-2">
           <View className="flex-1 h-1.5 rounded-full bg-primary" />
           <View className="flex-1 h-1.5 rounded-full bg-primary" />
           <View className="flex-1 h-1.5 rounded-full bg-primary" />
+          <View className="flex-1 h-1.5 rounded-full bg-white/10" />
           <View
             testID="progress-bar"
             className="flex-1 h-1.5 rounded-full bg-white/10"
@@ -228,51 +189,40 @@ export default function FocusScreen() {
         </View>
       </ScrollView>
 
-      {/* Create Workout Plan Button (Fixed at bottom) */}
+      {/* Continue Button (Fixed at bottom) */}
       <View
         className="absolute bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 p-4 w-full"
         style={{ paddingBottom: insets.bottom + 24 }}
       >
         <Pressable
-          onPress={handleGeneratePlan}
-          disabled={isGenerateDisabled}
+          onPress={handleContinue}
+          disabled={isContinueDisabled}
           accessibilityRole="button"
-          accessibilityLabel="Create workout plan"
-          accessibilityState={{ disabled: isGenerateDisabled }}
-          testID="generate-button"
+          accessibilityLabel="Continue to exercises"
+          accessibilityState={{ disabled: isContinueDisabled }}
+          testID="continue-button"
           className={cn(
             "flex-row w-full items-center justify-center gap-2 rounded-xl px-6 py-4 text-base font-bold shadow-lg transition-transform",
-            isGenerateDisabled
+            isContinueDisabled
               ? "bg-surface-dark opacity-50"
               : "bg-primary active:scale-[0.98] shadow-primary/20"
           )}
         >
-          {isGenerating ? (
-            <>
-              <ActivityIndicator size="small" color="#102218" />
-              <Text className="text-base font-bold text-background-dark">
-                Creating...
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text
-                className={cn(
-                  "text-base font-bold",
-                  isGenerateDisabled
-                    ? "text-gray-400"
-                    : "text-background-dark"
-                )}
-              >
-                Create Workout Plan
-              </Text>
-              <MaterialIcons
-                name="bolt"
-                size={20}
-                color={isGenerateDisabled ? "#6b8779" : "#102218"}
-              />
-            </>
-          )}
+          <Text
+            className={cn(
+              "text-base font-bold",
+              isContinueDisabled
+                ? "text-gray-400"
+                : "text-background-dark"
+            )}
+          >
+            Continue
+          </Text>
+          <MaterialIcons
+            name="arrow-forward"
+            size={20}
+            color={isContinueDisabled ? "#6b8779" : "#102218"}
+          />
         </Pressable>
       </View>
     </View>

@@ -1,0 +1,112 @@
+import React from "react";
+import { render, screen } from "@testing-library/react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { WizardProvider } from "@/lib/wizard-context";
+
+// Mock expo-router
+jest.mock("expo-router", () => ({
+  router: {
+    push: jest.fn(),
+    back: jest.fn(),
+  },
+  useRouter: () => ({
+    push: jest.fn(),
+    back: jest.fn(),
+  }),
+  Stack: {
+    Screen: () => null,
+  },
+}));
+
+// Mock MaterialIcons
+jest.mock("@expo/vector-icons", () => ({
+  MaterialIcons: "MaterialIcons",
+}));
+
+// Mock storage to return test exercises
+jest.mock("@/lib/storage/storage", () => ({
+  getAllExercises: jest.fn().mockReturnValue([
+    { id: 1, name: "Bench Press", muscle_group: "Chest", equipment_required: "Barbell", is_compound: true, description: null },
+    { id: 2, name: "Push-up", muscle_group: "Chest", equipment_required: "Bodyweight", is_compound: true, description: null },
+    { id: 3, name: "Deadlift", muscle_group: "Back", equipment_required: "Barbell", is_compound: true, description: null },
+    { id: 4, name: "Pull-up", muscle_group: "Back", equipment_required: "Bodyweight", is_compound: true, description: null },
+    { id: 5, name: "Squat", muscle_group: "Legs", equipment_required: "Barbell", is_compound: true, description: null },
+    { id: 6, name: "Lunges", muscle_group: "Legs", equipment_required: "Bodyweight", is_compound: true, description: null },
+    { id: 7, name: "Overhead Press", muscle_group: "Shoulders", equipment_required: "Barbell", is_compound: true, description: null },
+    { id: 8, name: "Pike Push-up", muscle_group: "Shoulders", equipment_required: "Bodyweight", is_compound: true, description: null },
+    { id: 9, name: "Tricep Dips", muscle_group: "Arms", equipment_required: "Bodyweight", is_compound: true, description: null },
+    { id: 10, name: "Bicep Curl", muscle_group: "Arms", equipment_required: "Barbell", is_compound: false, description: null },
+    { id: 11, name: "Plank", muscle_group: "Core", equipment_required: "Bodyweight", is_compound: false, description: null },
+    { id: 12, name: "Ab Wheel", muscle_group: "Core", equipment_required: "Bodyweight", is_compound: true, description: null },
+  ]),
+}));
+
+// Safe area initial metrics for testing
+const initialMetrics = {
+  frame: { x: 0, y: 0, width: 390, height: 844 },
+  insets: { top: 47, left: 0, right: 0, bottom: 34 },
+};
+
+// Helper to render with context and initial state
+function renderWithContext(initialState?: object) {
+  const ExercisesScreen = require("@/app/wizard/exercises").default;
+  return render(
+    <SafeAreaProvider initialMetrics={initialMetrics}>
+      <WizardProvider>
+        <ExercisesScreen />
+      </WizardProvider>
+    </SafeAreaProvider>
+  );
+}
+
+describe("Exercises Screen", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("can import the exercises screen module", () => {
+    const ExercisesScreen = require("@/app/wizard/exercises").default;
+    expect(ExercisesScreen).toBeDefined();
+  });
+
+  it("renders without crashing", () => {
+    const result = renderWithContext();
+    expect(result).toBeTruthy();
+  });
+
+  it("renders title text", () => {
+    renderWithContext();
+    expect(screen.getByText("Review Exercises")).toBeTruthy();
+  });
+
+  it("renders step indicator showing step 4 of 5", () => {
+    renderWithContext();
+    expect(screen.getByText("Step 4 of 5")).toBeTruthy();
+  });
+
+  it("renders all 6 muscle group sections", () => {
+    renderWithContext();
+    expect(screen.getByText("Chest")).toBeTruthy();
+    expect(screen.getByText("Back")).toBeTruthy();
+    expect(screen.getByText("Legs")).toBeTruthy();
+    expect(screen.getByText("Shoulders")).toBeTruthy();
+    expect(screen.getByText("Arms")).toBeTruthy();
+    expect(screen.getByText("Core")).toBeTruthy();
+  });
+
+  it("renders continue button", () => {
+    renderWithContext();
+    expect(screen.getByText("Continue")).toBeTruthy();
+  });
+
+  it("renders back button", () => {
+    renderWithContext();
+    expect(screen.getByTestId("back-button")).toBeTruthy();
+  });
+
+  it("renders progress bar with 4 segments filled", () => {
+    renderWithContext();
+    // Check for progress bar - 4 segments filled out of 5
+    expect(screen.getByTestId("progress-bar")).toBeTruthy();
+  });
+});

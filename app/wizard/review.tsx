@@ -1,21 +1,56 @@
 /**
  * Plan Review Screen
- * Shows generated workout plan with accept/regenerate options
+ * Step 5 of 5 - Shows generated workout plan with accept/regenerate options
  */
 
-import React from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useWizard } from "@/lib/wizard-context";
 import { WorkoutPlanCard } from "@/components/WorkoutPlanCard";
 import { SessionCard } from "@/components/SessionCard";
+import { generateWorkoutProgramFromCustomExercises, saveWorkoutProgram } from "@/lib/workout-generator/engine";
 
 export default function PlanReviewScreen() {
   const insets = useSafeAreaInsets();
-  const { state, resetState } = useWizard();
-  const { generatedProgram } = state;
+  const { state, updateState, resetState } = useWizard();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { generatedProgram, customExercises, frequency, equipment, focus } = state;
+
+  // Generate program from custom exercises on mount if needed
+  useEffect(() => {
+    const generateProgram = async () => {
+      // Only generate if we have custom exercises but no program yet
+      if (customExercises && !generatedProgram && frequency && equipment && focus) {
+        setIsGenerating(true);
+        setError(null);
+
+        try {
+          const program = generateWorkoutProgramFromCustomExercises(
+            { frequency, equipment, focus },
+            customExercises
+          );
+
+          // Save to storage
+          saveWorkoutProgram(program);
+
+          // Update state with generated program
+          updateState({ generatedProgram: program });
+        } catch (err) {
+          console.error("Failed to generate program:", err);
+          setError(err instanceof Error ? err.message : "Failed to generate program");
+        } finally {
+          setIsGenerating(false);
+        }
+      }
+    };
+
+    generateProgram();
+  }, [customExercises, generatedProgram, frequency, equipment, focus, updateState]);
 
   /**
    * Handle accept plan button press
@@ -32,14 +67,62 @@ export default function PlanReviewScreen() {
 
   /**
    * Handle regenerate button press
-   * Go back to wizard start
+   * Go back to exercises screen to modify
    */
   const handleRegenerate = () => {
-    resetState();
-    router.push("/wizard/frequency");
+    // Clear generated program so it regenerates when coming back
+    updateState({ generatedProgram: undefined });
+    router.back();
   };
 
-  // Handle missing program
+  /**
+   * Handle back button press
+   */
+  const handleBack = () => {
+    // Clear generated program so it regenerates when coming back
+    updateState({ generatedProgram: undefined });
+    router.back();
+  };
+
+  // Handle loading state
+  if (isGenerating) {
+    return (
+      <View className="flex-1 bg-background-dark items-center justify-center px-6">
+        <ActivityIndicator size="large" color="#13ec6d" />
+        <Text className="text-xl font-bold text-white mt-4 mb-2">
+          Creating Your Plan
+        </Text>
+        <Text className="text-gray-400 text-center">
+          Building your personalized workout program...
+        </Text>
+      </View>
+    );
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <View className="flex-1 bg-background-dark items-center justify-center px-6">
+        <MaterialIcons name="error-outline" size={64} color="#ef4444" />
+        <Text className="text-xl font-bold text-white mt-4 mb-2">
+          Generation Failed
+        </Text>
+        <Text className="text-gray-400 text-center mb-6">
+          {error}
+        </Text>
+        <Pressable
+          onPress={() => router.back()}
+          className="bg-primary rounded-xl px-6 py-3"
+        >
+          <Text className="text-background-dark font-bold">
+            Go Back
+          </Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  // Handle missing program (no custom exercises provided)
   if (!generatedProgram) {
     return (
       <View className="flex-1 bg-background-dark items-center justify-center px-6">
@@ -66,15 +149,47 @@ export default function PlanReviewScreen() {
     <View className="flex-1 bg-background-dark w-full">
       {/* Header */}
       <View className="bg-background-dark/80 px-4 pb-2 w-full" style={{ paddingTop: insets.top + 16 }}>
-        <View className="flex-row items-center mb-4">
-          <View className="flex-1">
-            <Text className="text-2xl font-bold text-white">
-              Your Workout Plan
-            </Text>
-            <Text className="text-sm text-gray-400">
-              Review and accept to start training
-            </Text>
-          </View>
+        <View className="flex-row items-center justify-between mb-4">
+          {/* Back button */}
+          <Pressable
+            onPress={handleBack}
+            className="flex size-10 items-center justify-center rounded-full active:bg-white/10"
+            testID="back-button"
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+          >
+            <MaterialIcons name="arrow-back" size={24} color="#ffffff" />
+          </Pressable>
+
+          {/* Step indicator */}
+          <Text className="text-sm font-semibold uppercase tracking-widest text-gray-400">
+            Step 5 of 5
+          </Text>
+
+          {/* Empty space for balance */}
+          <View className="size-10" />
+        </View>
+
+        {/* Segmented Progress Bar - 5 of 5 filled */}
+        <View className="flex-row gap-2 mb-4">
+          <View className="flex-1 h-1.5 rounded-full bg-primary" />
+          <View className="flex-1 h-1.5 rounded-full bg-primary" />
+          <View className="flex-1 h-1.5 rounded-full bg-primary" />
+          <View className="flex-1 h-1.5 rounded-full bg-primary" />
+          <View
+            testID="progress-bar"
+            className="flex-1 h-1.5 rounded-full bg-primary"
+          />
+        </View>
+
+        {/* Title */}
+        <View>
+          <Text className="text-2xl font-bold text-white">
+            Your Workout Plan
+          </Text>
+          <Text className="text-sm text-gray-400">
+            Review and accept to start training
+          </Text>
         </View>
       </View>
 
@@ -126,17 +241,17 @@ export default function PlanReviewScreen() {
             </Text>
           </Pressable>
 
-          {/* Regenerate Button */}
+          {/* Edit Exercises Button */}
           <Pressable
             onPress={handleRegenerate}
-            testID="regenerate-button"
+            testID="edit-button"
             accessibilityRole="button"
-            accessibilityLabel="Regenerate workout plan"
+            accessibilityLabel="Edit exercises"
             className="flex-row items-center justify-center gap-2 bg-surface-dark border border-white/10 rounded-xl px-6 py-4 active:scale-[0.98]"
           >
-            <MaterialIcons name="refresh" size={20} color="#ffffff" />
+            <MaterialIcons name="edit" size={20} color="#ffffff" />
             <Text className="text-white text-base font-bold">
-              Regenerate
+              Edit Exercises
             </Text>
           </Pressable>
         </View>

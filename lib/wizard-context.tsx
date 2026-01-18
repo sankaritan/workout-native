@@ -5,7 +5,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import type { Equipment } from "./storage/types";
-import type { WorkoutProgram } from "./workout-generator/types";
+import type { WorkoutProgram, MuscleGroupExercises } from "./workout-generator/types";
 
 // Wizard state interface
 export interface WizardState {
@@ -13,6 +13,7 @@ export interface WizardState {
   equipment?: Equipment[]; // Array of equipment types
   focus?: "Balanced" | "Strength" | "Endurance"; // Training focus
   duration?: 4 | 6 | 8 | 12; // Duration in weeks
+  customExercises?: MuscleGroupExercises[]; // User-customized exercises by muscle group
   generatedProgram?: WorkoutProgram; // Generated workout program
 }
 
@@ -32,6 +33,7 @@ const initialState: WizardState = {
   equipment: undefined,
   focus: undefined,
   duration: undefined,
+  customExercises: undefined,
 };
 
 // Provider props

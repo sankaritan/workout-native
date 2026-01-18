@@ -66,3 +66,12 @@ export interface MuscleVolume {
  * Training split type
  */
 export type SplitType = "Full Body" | "Upper/Lower" | "Push/Pull/Legs" | "Body Part Split";
+
+/**
+ * Exercises grouped by muscle group
+ * Used for customizing exercises before plan generation
+ */
+export interface MuscleGroupExercises {
+  muscleGroup: MuscleGroup;
+  exercises: Exercise[];
+}

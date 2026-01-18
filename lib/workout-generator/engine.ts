@@ -21,7 +21,9 @@ import type {
   ProgramSession,
   ProgramExercise,
   SetsRepsScheme,
+  MuscleGroupExercises,
 } from "./types";
+import type { Exercise, MuscleGroup } from "@/lib/storage/types";
 
 /**
  * Get sets/reps scheme based on training focus
@@ -99,6 +101,71 @@ export function generateWorkoutProgram(
     name: programName,
     focus,
     durationWeeks: 8, // Default 8 weeks (can be made configurable later)
+    sessionsPerWeek: frequency,
+    sessions,
+  };
+}
+
+/**
+ * Generate workout program from user-customized exercises
+ * Uses the exercises the user selected for each muscle group
+ */
+export function generateWorkoutProgramFromCustomExercises(
+  input: GenerationInput,
+  customExercises: MuscleGroupExercises[]
+): WorkoutProgram {
+  const { frequency, focus } = input;
+
+  // Get training split and muscle distribution
+  const sessionTemplates = distributeMuscleGroups(frequency);
+
+  // Get sets/reps scheme
+  const scheme = getSetsRepsScheme(focus);
+
+  // Create a map for quick lookup of exercises by muscle group
+  const exercisesByMuscle = new Map<MuscleGroup, Exercise[]>();
+  customExercises.forEach((entry) => {
+    exercisesByMuscle.set(entry.muscleGroup, entry.exercises);
+  });
+
+  // Generate sessions
+  const sessions: ProgramSession[] = sessionTemplates.map((template) => {
+    // Get all exercises for muscles targeted in this session
+    const sessionExercises: Exercise[] = [];
+    template.muscles.forEach((muscle) => {
+      const muscleExercises = exercisesByMuscle.get(muscle) || [];
+      sessionExercises.push(...muscleExercises);
+    });
+
+    // Order exercises (compound first)
+    const orderedExercises = orderExercises(sessionExercises);
+
+    // Create program exercises with sets/reps
+    const programExercises: ProgramExercise[] = orderedExercises.map(
+      (exercise, index) => ({
+        exercise,
+        sets: scheme.sets,
+        repsMin: scheme.repsMin,
+        repsMax: scheme.repsMax,
+        order: index + 1, // 1-based ordering
+      })
+    );
+
+    return {
+      name: template.name,
+      dayOfWeek: template.dayOfWeek,
+      exercises: programExercises,
+      primaryMuscles: template.muscles,
+    };
+  });
+
+  // Create program name
+  const programName = `${focus} Program (${frequency}x/week)`;
+
+  return {
+    name: programName,
+    focus,
+    durationWeeks: 8,
     sessionsPerWeek: frequency,
     sessions,
   };

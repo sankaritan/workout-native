@@ -1,6 +1,6 @@
 /**
  * Workout Frequency Selection Screen
- * Step 1 of 4 in workout wizard
+ * Step 1 of 5 in workout wizard
  */
 
 import React, { useState } from "react";
@@ -78,7 +78,7 @@ export default function FrequencyScreen() {
         {/* Step indicator */}
         <View className="flex-1 items-center">
           <Text className="text-sm font-medium text-gray-400 uppercase tracking-wider">
-            Step 1 of 4
+            Step 1 of 5
           </Text>
         </View>
 
@@ -86,7 +86,7 @@ export default function FrequencyScreen() {
         <View className="size-10" />
       </View>
 
-      {/* Progress Bar */}
+      {/* Progress Bar - 1 of 5 filled */}
       <View className="flex-row items-center justify-center gap-2 px-6 pb-2">
         <View
           testID="progress-step-1"
@@ -102,6 +102,10 @@ export default function FrequencyScreen() {
         />
         <View
           testID="progress-step-4"
+          className="h-1.5 flex-1 rounded-full bg-surface-dark"
+        />
+        <View
+          testID="progress-step-5"
           className="h-1.5 flex-1 rounded-full bg-surface-dark"
         />
       </View>

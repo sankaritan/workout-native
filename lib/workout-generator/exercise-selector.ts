@@ -4,6 +4,10 @@
  */
 
 import type { Exercise, MuscleGroup, Equipment } from "@/lib/storage/types";
+import type { MuscleGroupExercises } from "./types";
+
+// All muscle groups in display order
+const ALL_MUSCLE_GROUPS: MuscleGroup[] = ["Chest", "Back", "Legs", "Shoulders", "Arms", "Core"];
 
 /**
  * Filter exercises by available equipment
@@ -79,5 +83,35 @@ export function orderExercises(exercises: Exercise[]): Exercise[] {
     if (!a.is_compound && b.is_compound) return 1;
     // Maintain original order within same type
     return 0;
+  });
+}
+
+/**
+ * Select initial exercises for each muscle group
+ * Returns 6 entries (one per muscle group), each with 2-3 pre-selected exercises
+ * Prioritizes compound exercises, filters by available equipment
+ */
+export function selectInitialExercisesByMuscleGroup(
+  availableExercises: Exercise[],
+  equipment: Equipment[]
+): MuscleGroupExercises[] {
+  // First filter by equipment
+  const filteredByEquipment = filterExercisesByEquipment(availableExercises, equipment);
+
+  // Create entry for each muscle group
+  return ALL_MUSCLE_GROUPS.map((muscleGroup) => {
+    // Get exercises for this muscle group
+    const muscleExercises = filterExercisesByMuscleGroup(filteredByEquipment, muscleGroup);
+
+    // Sort by compound first
+    const sorted = orderExercises(muscleExercises);
+
+    // Take up to 3 exercises (preferring 2-3)
+    const selected = sorted.slice(0, 3);
+
+    return {
+      muscleGroup,
+      exercises: selected,
+    };
   });
 }

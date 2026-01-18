@@ -85,7 +85,7 @@ describe("Frequency Screen", () => {
         </WizardProvider>
       </SafeAreaProvider>
     );
-    expect(screen.getByText("Step 1 of 4")).toBeTruthy();
+    expect(screen.getByText("Step 1 of 5")).toBeTruthy();
   });
 
   it("renders continue button", () => {

@@ -84,10 +84,10 @@ describe("Focus Screen", () => {
         </WizardProvider>
       </SafeAreaProvider>
     );
-    expect(screen.getByText("Step 3 of 4")).toBeTruthy();
+    expect(screen.getByText("Step 3 of 5")).toBeTruthy();
   });
 
-  it("renders generate plan button", () => {
+  it("renders continue button", () => {
     const FocusScreen = require("@/app/wizard/focus").default;
     render(
       <SafeAreaProvider initialMetrics={initialMetrics}>
@@ -96,6 +96,6 @@ describe("Focus Screen", () => {
         </WizardProvider>
       </SafeAreaProvider>
     );
-    expect(screen.getByText("Create Workout Plan")).toBeTruthy();
+    expect(screen.getByText("Continue")).toBeTruthy();
   });
 });

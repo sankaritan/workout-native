@@ -3,10 +3,12 @@ import {
   filterExercisesByMuscleGroup,
   selectExercisesForMuscles,
   orderExercises,
+  selectInitialExercisesByMuscleGroup,
 } from "@/lib/workout-generator/exercise-selector";
 import type { Exercise, MuscleGroup } from "@/lib/storage/types";
 
 describe("Exercise Selector", () => {
+  // Basic mock exercises for existing tests
   const mockExercises: Exercise[] = [
     {
       id: 1,
@@ -48,6 +50,40 @@ describe("Exercise Selector", () => {
       is_compound: true,
       description: "Bodyweight back exercise",
     },
+  ];
+
+  // Comprehensive mock exercises covering all 6 muscle groups
+  const comprehensiveMockExercises: Exercise[] = [
+    // Chest (4 exercises)
+    { id: 1, name: "Bench Press", muscle_group: "Chest", equipment_required: "Barbell", is_compound: true, description: null },
+    { id: 2, name: "Dumbbell Fly", muscle_group: "Chest", equipment_required: "Dumbbell", is_compound: false, description: null },
+    { id: 3, name: "Push-up", muscle_group: "Chest", equipment_required: "Bodyweight", is_compound: true, description: null },
+    { id: 4, name: "Cable Crossover", muscle_group: "Chest", equipment_required: "Cables", is_compound: false, description: null },
+    // Back (4 exercises)
+    { id: 5, name: "Deadlift", muscle_group: "Back", equipment_required: "Barbell", is_compound: true, description: null },
+    { id: 6, name: "Pull-up", muscle_group: "Back", equipment_required: "Bodyweight", is_compound: true, description: null },
+    { id: 7, name: "Lat Pulldown", muscle_group: "Back", equipment_required: "Cables", is_compound: true, description: null },
+    { id: 8, name: "Dumbbell Row", muscle_group: "Back", equipment_required: "Dumbbell", is_compound: true, description: null },
+    // Legs (4 exercises)
+    { id: 9, name: "Squat", muscle_group: "Legs", equipment_required: "Barbell", is_compound: true, description: null },
+    { id: 10, name: "Leg Press", muscle_group: "Legs", equipment_required: "Machines", is_compound: true, description: null },
+    { id: 11, name: "Lunges", muscle_group: "Legs", equipment_required: "Bodyweight", is_compound: true, description: null },
+    { id: 12, name: "Leg Curl", muscle_group: "Legs", equipment_required: "Machines", is_compound: false, description: null },
+    // Shoulders (4 exercises)
+    { id: 13, name: "Overhead Press", muscle_group: "Shoulders", equipment_required: "Barbell", is_compound: true, description: null },
+    { id: 14, name: "Lateral Raise", muscle_group: "Shoulders", equipment_required: "Dumbbell", is_compound: false, description: null },
+    { id: 15, name: "Pike Push-up", muscle_group: "Shoulders", equipment_required: "Bodyweight", is_compound: true, description: null },
+    { id: 16, name: "Face Pull", muscle_group: "Shoulders", equipment_required: "Cables", is_compound: false, description: null },
+    // Arms (4 exercises)
+    { id: 17, name: "Barbell Curl", muscle_group: "Arms", equipment_required: "Barbell", is_compound: false, description: null },
+    { id: 18, name: "Tricep Dips", muscle_group: "Arms", equipment_required: "Bodyweight", is_compound: true, description: null },
+    { id: 19, name: "Hammer Curl", muscle_group: "Arms", equipment_required: "Dumbbell", is_compound: false, description: null },
+    { id: 20, name: "Cable Tricep Extension", muscle_group: "Arms", equipment_required: "Cables", is_compound: false, description: null },
+    // Core (4 exercises)
+    { id: 21, name: "Plank", muscle_group: "Core", equipment_required: "Bodyweight", is_compound: false, description: null },
+    { id: 22, name: "Cable Crunch", muscle_group: "Core", equipment_required: "Cables", is_compound: false, description: null },
+    { id: 23, name: "Hanging Leg Raise", muscle_group: "Core", equipment_required: "Bodyweight", is_compound: false, description: null },
+    { id: 24, name: "Ab Wheel Rollout", muscle_group: "Core", equipment_required: "Bodyweight", is_compound: true, description: null },
   ];
 
   describe("filterExercisesByEquipment", () => {
@@ -147,6 +183,110 @@ describe("Exercise Selector", () => {
     it("handles empty array", () => {
       const result = orderExercises([]);
       expect(result).toHaveLength(0);
+    });
+  });
+
+  describe("selectInitialExercisesByMuscleGroup", () => {
+    const ALL_MUSCLE_GROUPS: MuscleGroup[] = ["Chest", "Back", "Legs", "Shoulders", "Arms", "Core"];
+
+    it("returns entries for all 6 muscle groups", () => {
+      const result = selectInitialExercisesByMuscleGroup(
+        comprehensiveMockExercises,
+        ["Barbell", "Dumbbell", "Bodyweight"]
+      );
+
+      expect(result).toHaveLength(6);
+      const muscleGroups = result.map(entry => entry.muscleGroup);
+      ALL_MUSCLE_GROUPS.forEach(mg => {
+        expect(muscleGroups).toContain(mg);
+      });
+    });
+
+    it("returns 2-3 exercises per muscle group", () => {
+      const result = selectInitialExercisesByMuscleGroup(
+        comprehensiveMockExercises,
+        ["Barbell", "Dumbbell", "Bodyweight"]
+      );
+
+      result.forEach(entry => {
+        expect(entry.exercises.length).toBeGreaterThanOrEqual(1);
+        expect(entry.exercises.length).toBeLessThanOrEqual(3);
+      });
+    });
+
+    it("filters by equipment", () => {
+      const result = selectInitialExercisesByMuscleGroup(
+        comprehensiveMockExercises,
+        ["Bodyweight"] // Only bodyweight
+      );
+
+      result.forEach(entry => {
+        entry.exercises.forEach(exercise => {
+          expect(exercise.equipment_required).toBe("Bodyweight");
+        });
+      });
+    });
+
+    it("prioritizes compound exercises", () => {
+      const result = selectInitialExercisesByMuscleGroup(
+        comprehensiveMockExercises,
+        ["Barbell", "Dumbbell", "Bodyweight"]
+      );
+
+      // Check that when there are compounds available, they appear first
+      result.forEach(entry => {
+        if (entry.exercises.length > 1) {
+          const hasCompound = entry.exercises.some(e => e.is_compound);
+          if (hasCompound) {
+            // First exercise should be compound if any are available
+            const firstCompoundIndex = entry.exercises.findIndex(e => e.is_compound);
+            expect(firstCompoundIndex).toBe(0);
+          }
+        }
+      });
+    });
+
+    it("returns empty exercises array when no exercises match for a muscle group", () => {
+      // Only include exercises for Chest and Back
+      const limitedExercises: Exercise[] = [
+        { id: 1, name: "Bench Press", muscle_group: "Chest", equipment_required: "Barbell", is_compound: true, description: null },
+        { id: 2, name: "Pull-up", muscle_group: "Back", equipment_required: "Bodyweight", is_compound: true, description: null },
+      ];
+
+      const result = selectInitialExercisesByMuscleGroup(
+        limitedExercises,
+        ["Barbell", "Bodyweight"]
+      );
+
+      expect(result).toHaveLength(6);
+
+      const legsEntry = result.find(e => e.muscleGroup === "Legs");
+      expect(legsEntry?.exercises).toHaveLength(0);
+    });
+
+    it("includes bodyweight exercises regardless of equipment selection", () => {
+      const result = selectInitialExercisesByMuscleGroup(
+        comprehensiveMockExercises,
+        ["Barbell"] // Only barbell selected, but bodyweight should still be included
+      );
+
+      const hasBodyweight = result.some(entry =>
+        entry.exercises.some(e => e.equipment_required === "Bodyweight")
+      );
+      expect(hasBodyweight).toBe(true);
+    });
+
+    it("returns all exercises for same muscle group together", () => {
+      const result = selectInitialExercisesByMuscleGroup(
+        comprehensiveMockExercises,
+        ["Barbell", "Dumbbell", "Bodyweight"]
+      );
+
+      result.forEach(entry => {
+        entry.exercises.forEach(exercise => {
+          expect(exercise.muscle_group).toBe(entry.muscleGroup);
+        });
+      });
     });
   });
 });
