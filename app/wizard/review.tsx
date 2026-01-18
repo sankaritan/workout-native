@@ -33,12 +33,14 @@ export default function PlanReviewScreen() {
           let program;
 
           // Determine if exercises were modified compared to initial selection
+          // Compare exercise IDs as sets (order doesn't matter)
+          const currentExerciseIds = new Set(customExercises.map((ex) => ex.id));
+          const initialExerciseIds = new Set(initialCustomExercises?.map((ex) => ex.id) || []);
+
           const exercisesWereModified =
             !initialCustomExercises ||
-            customExercises.length !== initialCustomExercises.length ||
-            customExercises.some(
-              (ex, idx) => ex.id !== initialCustomExercises[idx].id
-            );
+            currentExerciseIds.size !== initialExerciseIds.size ||
+            Array.from(currentExerciseIds).some((id) => !initialExerciseIds.has(id));
 
           // Check if exercises were modified
           if (!exercisesWereModified && initialGeneratedProgram) {
