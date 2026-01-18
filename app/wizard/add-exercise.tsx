@@ -60,10 +60,22 @@ export default function AddExerciseScreen() {
     const selectedIds = customExercises.map((e) => e.id);
     filtered = filtered.filter((exercise) => !selectedIds.includes(exercise.id));
 
-    // Sort: compounds first, then by name
+    // Sort: best matches first (primary muscle matches), then secondary matches, then compound, then alphabetically
     return filtered.sort((a, b) => {
+      // If filters are selected, prioritize primary muscle matches
+      if (selectedMuscleFilters.length > 0) {
+        const aPrimaryMatch = selectedMuscleFilters.includes(a.muscle_groups[0]);
+        const bPrimaryMatch = selectedMuscleFilters.includes(b.muscle_groups[0]);
+
+        if (aPrimaryMatch && !bPrimaryMatch) return -1;
+        if (!aPrimaryMatch && bPrimaryMatch) return 1;
+      }
+
+      // Within same match level, compound exercises first
       if (a.is_compound && !b.is_compound) return -1;
       if (!a.is_compound && b.is_compound) return 1;
+
+      // Finally sort alphabetically
       return a.name.localeCompare(b.name);
     });
   }, [state.equipment, customExercises, selectedMuscleFilters, compoundOnly, isAtMaxLimit]);
