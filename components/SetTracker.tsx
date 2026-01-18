@@ -3,10 +3,10 @@
  * Tracks sets, reps, and weight for an exercise during workout
  */
 
-import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Pressable } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
 import { cn } from "@/lib/utils/cn";
+import { MaterialIcons } from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
+import { Pressable, Text, TextInput, View } from "react-native";
 
 export interface SetData {
   setNumber: number;
@@ -45,36 +45,44 @@ export function SetTracker({
   const lastNotifiedSets = React.useRef<SetData[] | undefined>(undefined);
 
   // Initialize sets state - use initialSets if provided, otherwise create empty sets
+  // First set gets prefilled with previous exercise values
   const [sets, setSets] = useState<SetData[]>(() =>
     initialSets && initialSets.length > 0
       ? initialSets
       : Array.from({ length: targetSets }, (_, i) => ({
           setNumber: i + 1,
-          weight: null,
-          reps: null,
+          weight: i === 0 ? (previousWeight ?? null) : null,
+          reps: i === 0 ? (previousReps ?? null) : null,
           isCompleted: false,
           isWarmup: false,
-        }))
+        })),
   );
 
   // Update sets when initialSets changes (when navigating between exercises)
   // Only sync if initialSets is a different reference than what we last sent to parent
   useEffect(() => {
-    if (initialSets && initialSets.length > 0 && initialSets !== lastNotifiedSets.current) {
+    if (
+      initialSets &&
+      initialSets.length > 0 &&
+      initialSets !== lastNotifiedSets.current
+    ) {
       setSets(initialSets);
-    } else if (!initialSets || (initialSets.length === 0 && initialSets !== lastNotifiedSets.current)) {
-      // Reset to empty sets for new exercise
+    } else if (
+      !initialSets ||
+      (initialSets.length === 0 && initialSets !== lastNotifiedSets.current)
+    ) {
+      // Reset to empty sets for new exercise - first set gets prefilled with previous values
       setSets(
         Array.from({ length: targetSets }, (_, i) => ({
           setNumber: i + 1,
-          weight: null,
-          reps: null,
+          weight: i === 0 ? (previousWeight ?? null) : null,
+          reps: i === 0 ? (previousReps ?? null) : null,
           isCompleted: false,
           isWarmup: false,
-        }))
+        })),
       );
     }
-  }, [initialSets, targetSets]);
+  }, [initialSets, targetSets, previousWeight, previousReps]);
 
   // Notify parent of changes
   useEffect(() => {
@@ -91,12 +99,53 @@ export function SetTracker({
   const updateSet = (
     index: number,
     field: keyof SetData,
-    value: number | boolean | null
+    value: number | boolean | null,
   ) => {
     setSets((prev) =>
-      prev.map((set, i) =>
-        i === index ? { ...set, [field]: value } : set
-      )
+      prev.map((set, i) => (i === index ? { ...set, [field]: value } : set)),
+    );
+  };
+
+  /**
+   * Complete a set and prefill the next set with current values
+   */
+  const completeSet = (index: number) => {
+    setSets((prev) => {
+      const currentSet = prev[index];
+      if (currentSet.weight === null || currentSet.reps === null) {
+        return prev;
+      }
+
+      return prev.map((set, i) => {
+        if (i === index) {
+          // Mark current set as completed
+          return { ...set, isCompleted: true };
+        } else if (i === index + 1 && !set.isCompleted) {
+          // Prefill next set with current set's values (only if not already completed)
+          return {
+            ...set,
+            weight: set.weight ?? currentSet.weight,
+            reps: set.reps ?? currentSet.reps,
+          };
+        }
+        return set;
+      });
+    });
+  };
+
+  /**
+   * Adjust weight by delta (for +/- buttons)
+   */
+  const adjustWeight = (index: number, delta: number) => {
+    setSets((prev) =>
+      prev.map((set, i) => {
+        if (i === index) {
+          const currentWeight = set.weight ?? 0;
+          const newWeight = Math.max(0, currentWeight + delta);
+          return { ...set, weight: newWeight };
+        }
+        return set;
+      }),
     );
   };
 
@@ -119,15 +168,10 @@ export function SetTracker({
   return (
     <View testID={testID} className="gap-2">
       {/* Header Row */}
-      <View className="flex-row items-center gap-3 px-2">
-        <View style={{ width: 50 }}>
+      <View className="flex-row items-center gap-2 px-2">
+        <View style={{ width: 64 }}>
           <Text className="text-[10px] uppercase tracking-wider font-bold text-text-muted text-center">
-            Set
-          </Text>
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text className="text-[10px] uppercase tracking-wider font-bold text-text-muted text-left pl-2">
-            Previous
+            Adjust Wt
           </Text>
         </View>
         <View style={{ width: 80 }}>
@@ -153,53 +197,59 @@ export function SetTracker({
         const isCompleted = set.isCompleted;
         const isFuture = index > activeSetIndex && activeSetIndex !== -1;
 
-        // Format previous performance text
-        const prevText =
-          previousWeight && previousReps
-            ? `${previousWeight} × ${previousReps}`
-            : "—";
-
         return (
           <View
             key={set.setNumber}
             className={cn(
-              "flex-row items-center gap-3 rounded-lg p-3",
+              "flex-row items-center gap-2 rounded-lg p-3",
               isCompleted && "bg-surface-dark/40 opacity-60",
               isActive && "bg-surface-dark border border-primary/40 shadow-lg",
               isFuture && "bg-surface-dark/20",
-              !isActive && !isCompleted && !isFuture && "bg-surface-dark/20"
+              !isActive && !isCompleted && !isFuture && "bg-surface-dark/20",
             )}
             testID={`set-row-${set.setNumber}`}
           >
-            {/* Set Number */}
-            <View style={{ width: 50 }} className="flex flex-col items-center justify-center">
-              <Text
+            {/* +/- Weight Adjustment Buttons */}
+            <View
+              style={{ width: 64 }}
+              className="flex-row items-center justify-center gap-1"
+            >
+              <Pressable
+                onPress={() => adjustWeight(index, -5)}
+                disabled={isCompleted}
+                testID={`weight-minus-${set.setNumber}`}
                 className={cn(
-                  "font-bold",
-                  isActive && "text-lg text-white",
-                  isCompleted && "text-sm text-white/50",
-                  isFuture && "text-sm text-white/70"
+                  "h-8 w-8 rounded items-center justify-center",
+                  isCompleted && "opacity-30",
+                  isActive
+                    ? "bg-surface-dark border border-border-light active:bg-primary/20"
+                    : "bg-surface-dark/60 border border-border active:bg-surface-dark",
                 )}
               >
-                {set.setNumber}
-              </Text>
-              {set.isWarmup && (
-                <Text className="text-[9px] text-primary uppercase">Warm</Text>
-              )}
-            </View>
-
-            {/* Previous Performance */}
-            <View style={{ flex: 1 }}>
-              <Text
+                <MaterialIcons
+                  name="remove"
+                  size={18}
+                  color={isActive ? "#9db9a8" : "#6b8779"}
+                />
+              </Pressable>
+              <Pressable
+                onPress={() => adjustWeight(index, 5)}
+                disabled={isCompleted}
+                testID={`weight-plus-${set.setNumber}`}
                 className={cn(
-                  "text-sm pl-2",
-                  isCompleted && "text-white/50",
-                  isActive && "text-text-muted font-medium",
-                  isFuture && "text-white/50"
+                  "h-8 w-8 rounded items-center justify-center",
+                  isCompleted && "opacity-30",
+                  isActive
+                    ? "bg-surface-dark border border-border-light active:bg-primary/20"
+                    : "bg-surface-dark/60 border border-border active:bg-surface-dark",
                 )}
               >
-                {prevText}
-              </Text>
+                <MaterialIcons
+                  name="add"
+                  size={18}
+                  color={isActive ? "#9db9a8" : "#6b8779"}
+                />
+              </Pressable>
             </View>
 
             {/* Weight Input */}
@@ -210,7 +260,7 @@ export function SetTracker({
                   const num = text ? parseFloat(text) : null;
                   updateSet(index, "weight", num);
                 }}
-                placeholder={previousWeight?.toString() || "-"}
+                placeholder="-"
                 placeholderTextColor={isActive ? "#ffffff33" : "#ffffff20"}
                 keyboardType="numeric"
                 editable={!isCompleted}
@@ -218,8 +268,9 @@ export function SetTracker({
                 className={cn(
                   "h-10 rounded border text-center font-medium text-base p-0",
                   isCompleted && "bg-[#111814] border-border text-white/50",
-                  isActive && "h-12 bg-[#111814] border-border-light text-white font-bold text-lg",
-                  isFuture && "bg-transparent border-border text-white/70"
+                  isActive &&
+                    "h-12 bg-[#111814] border-border-light text-white font-bold text-lg",
+                  isFuture && "bg-transparent border-border text-white/70",
                 )}
               />
             </View>
@@ -232,7 +283,7 @@ export function SetTracker({
                   const num = text ? parseInt(text, 10) : null;
                   updateSet(index, "reps", num);
                 }}
-                placeholder={previousReps?.toString() || "-"}
+                placeholder="-"
                 placeholderTextColor={isActive ? "#ffffff33" : "#ffffff20"}
                 keyboardType="number-pad"
                 editable={!isCompleted}
@@ -240,29 +291,31 @@ export function SetTracker({
                 className={cn(
                   "h-10 rounded border text-center font-medium text-base p-0",
                   isCompleted && "bg-[#111814] border-border text-white/50",
-                  isActive && "h-12 bg-[#111814] border-border-light text-white font-bold text-lg",
-                  isFuture && "bg-transparent border-border text-white/70"
+                  isActive &&
+                    "h-12 bg-[#111814] border-border-light text-white font-bold text-lg",
+                  isFuture && "bg-transparent border-border text-white/70",
                 )}
               />
             </View>
 
             {/* Completed Checkbox */}
-            <View style={{ width: 50 }} className="flex items-center justify-center">
+            <View
+              style={{ width: 50 }}
+              className="flex items-center justify-center"
+            >
               {isCompleted ? (
                 <MaterialIcons name="check-circle" size={20} color="#13ec6d" />
               ) : (
                 <Pressable
-                  onPress={() => {
-                    if (set.weight !== null && set.reps !== null) {
-                      updateSet(index, "isCompleted", true);
-                    }
-                  }}
+                  onPress={() => completeSet(index)}
                   disabled={set.weight === null || set.reps === null}
                   testID={`complete-checkbox-${set.setNumber}`}
                   className={cn(
                     "h-6 w-6 rounded border items-center justify-center",
                     isActive ? "border-border-light" : "border-border",
-                    set.weight === null || set.reps === null ? "opacity-30" : "opacity-100"
+                    set.weight === null || set.reps === null
+                      ? "opacity-30"
+                      : "opacity-100",
                   )}
                 >
                   {set.weight !== null && set.reps !== null && (
