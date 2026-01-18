@@ -12,6 +12,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useWizard } from "@/lib/wizard-context";
 import { cn } from "@/lib/utils/cn";
 import { ExerciseCardWithActions } from "@/components/ExerciseCardWithActions";
+import {
+  generateWorkoutProgramFromCustomExercises,
+  extractExercisesFromProgram,
+} from "@/lib/workout-generator/engine";
 import { selectInitialExercises } from "@/lib/workout-generator/exercise-selector";
 import { getAllExercises } from "@/lib/storage/storage";
 import type { Exercise } from "@/lib/storage/types";
@@ -27,9 +31,9 @@ export default function ExercisesScreen() {
     state.customExercises || []
   );
 
-  // Initialize or regenerate exercises when equipment or frequency changes
+  // Initialize or regenerate workout program when equipment or frequency changes
   useEffect(() => {
-    if (!state.equipment || !state.frequency) {
+    if (!state.equipment || !state.frequency || !state.focus) {
       return;
     }
 
@@ -41,25 +45,42 @@ export default function ExercisesScreen() {
         JSON.stringify([...params.equipment].sort());
     const frequencyChanged = !params || params.frequency !== state.frequency;
 
-    // Generate new exercises if:
-    // 1. No exercises exist yet, OR
+    // Generate new program if:
+    // 1. No initial program exists yet, OR
     // 2. Equipment changed, OR
     // 3. Frequency changed
     const shouldRegenerate =
-      !state.customExercises || equipmentChanged || frequencyChanged;
+      !state.initialGeneratedProgram || equipmentChanged || frequencyChanged;
 
     if (shouldRegenerate) {
+      // Step 1: Select initial exercises (2 per muscle group)
       const allExercises = getAllExercises();
       const initialExercises = selectInitialExercises(
         allExercises,
         state.equipment,
         state.frequency
       );
-      setCustomExercises(initialExercises);
 
-      // Update state with new exercises AND generation params in one call
+      // Step 2: Generate full workout program from these exercises
+      const program = generateWorkoutProgramFromCustomExercises(
+        {
+          frequency: state.frequency,
+          equipment: state.equipment,
+          focus: state.focus,
+        },
+        initialExercises
+      );
+
+      // Step 3: Extract exercises from program (may differ from input due to distribution logic)
+      const programExercises = extractExercisesFromProgram(program);
+
+      setCustomExercises(programExercises);
+
+      // Update state with program, exercises, and generation params
       updateState({
-        customExercises: initialExercises,
+        customExercises: programExercises,
+        initialGeneratedProgram: program,
+        initialCustomExercises: programExercises,
         exerciseGenerationParams: {
           equipment: state.equipment,
           frequency: state.frequency,
@@ -70,7 +91,7 @@ export default function ExercisesScreen() {
       setCustomExercises(state.customExercises);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.equipment, state.frequency]);
+  }, [state.equipment, state.frequency, state.focus]);
 
   /**
    * Handle swap exercise - navigate to swap screen

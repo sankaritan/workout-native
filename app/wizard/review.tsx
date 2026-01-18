@@ -19,9 +19,9 @@ export default function PlanReviewScreen() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { generatedProgram, customExercises, frequency, equipment, focus } = state;
+  const { generatedProgram, customExercises, initialGeneratedProgram, initialCustomExercises, frequency, equipment, focus } = state;
 
-  // Generate program from custom exercises on mount if needed
+  // Generate or use pre-generated program
   useEffect(() => {
     const generateProgram = async () => {
       // Only generate if we have custom exercises but no program yet
@@ -30,10 +30,29 @@ export default function PlanReviewScreen() {
         setError(null);
 
         try {
-          const program = generateWorkoutProgramFromCustomExercises(
-            { frequency, equipment, focus },
-            customExercises
-          );
+          let program;
+
+          // Determine if exercises were modified compared to initial selection
+          const exercisesWereModified =
+            !initialCustomExercises ||
+            customExercises.length !== initialCustomExercises.length ||
+            customExercises.some(
+              (ex, idx) => ex.id !== initialCustomExercises[idx].id
+            );
+
+          // Check if exercises were modified
+          if (!exercisesWereModified && initialGeneratedProgram) {
+            // Use pre-generated program from step 4 (no modifications)
+            console.log("Using pre-generated program (no modifications)");
+            program = initialGeneratedProgram;
+          } else {
+            // Regenerate program with modified exercises
+            console.log("Regenerating program (exercises modified)");
+            program = generateWorkoutProgramFromCustomExercises(
+              { frequency, equipment, focus },
+              customExercises
+            );
+          }
 
           // Save to storage
           saveWorkoutProgram(program);
@@ -50,7 +69,7 @@ export default function PlanReviewScreen() {
     };
 
     generateProgram();
-  }, [customExercises, generatedProgram, frequency, equipment, focus, updateState]);
+  }, [customExercises, generatedProgram, initialGeneratedProgram, initialCustomExercises, frequency, equipment, focus, updateState]);
 
   /**
    * Handle accept plan button press

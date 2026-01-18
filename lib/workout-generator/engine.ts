@@ -107,9 +107,215 @@ export function generateWorkoutProgram(
 }
 
 /**
+ * Build a balanced pool of exercises for repetition across sessions
+ * Prioritizes compound exercises and maintains muscle group balance
+ */
+function buildBalancedRepetitionPool(
+  candidatesForRepetition: Exercise[],
+  totalNeeded: number,
+  sessionTemplates: Array<{ muscles: MuscleGroup[] }>
+): Exercise[] {
+  const repetitionPool: Exercise[] = [];
+  const repetitionCounts = new Map<number, number>();
+
+  // Count how many times each exercise appears in candidates
+  candidatesForRepetition.forEach((ex) => {
+    repetitionCounts.set(ex.id, 0);
+  });
+
+  // Build pool by cycling through candidates until we have enough
+  let currentIndex = 0;
+  while (repetitionPool.length < totalNeeded && candidatesForRepetition.length > 0) {
+    const exercise = candidatesForRepetition[currentIndex % candidatesForRepetition.length];
+    const currentCount = repetitionCounts.get(exercise.id) || 0;
+
+    // Limit repetitions per exercise (max 2 times to avoid over-representation)
+    if (currentCount < 2) {
+      repetitionPool.push(exercise);
+      repetitionCounts.set(exercise.id, currentCount + 1);
+    }
+
+    currentIndex++;
+
+    // Prevent infinite loop if we can't fill the pool
+    if (currentIndex > candidatesForRepetition.length * 3) {
+      break;
+    }
+  }
+
+  return repetitionPool;
+}
+
+/**
+ * Distribute exercises from the repetition pool to sessions needing more exercises
+ * Ensures minimum exercises per session while respecting maximum limit
+ */
+function distributeRepetitionsToSessions(
+  repetitionPool: Exercise[],
+  sessionExerciseLists: Exercise[][],
+  sessionTemplates: Array<{ muscles: MuscleGroup[] }>,
+  minExercises: number,
+  maxExercises: number
+): void {
+  if (repetitionPool.length === 0) {
+    return; // No exercises to distribute
+  }
+
+  // Keep distributing until all sessions meet minimum or we can't add more
+  let maxIterations = 100;
+  let iteration = 0;
+
+  while (iteration < maxIterations) {
+    iteration++;
+
+    // Find sessions that need more exercises
+    const sessionsNeedingExercises = sessionTemplates
+      .map((_, idx) => idx)
+      .filter((idx) => sessionExerciseLists[idx].length < minExercises)
+      .sort((a, b) => sessionExerciseLists[a].length - sessionExerciseLists[b].length);
+
+    if (sessionsNeedingExercises.length === 0) {
+      // All sessions meet minimum
+      return;
+    }
+
+    let addedExercise = false;
+
+    // Try to add exercises to sessions needing them
+    for (const sessionIdx of sessionsNeedingExercises) {
+      const sessionList = sessionExerciseLists[sessionIdx];
+      const template = sessionTemplates[sessionIdx];
+
+      if (sessionList.length >= maxExercises) {
+        continue; // Session is at max capacity
+      }
+
+      // First pass: Try to find a compatible exercise
+      let foundExercise = false;
+      for (const exercise of repetitionPool) {
+        const isCompatible = exercise.muscle_groups.some((mg) =>
+          template.muscles.includes(mg)
+        );
+
+        const alreadyInSession = sessionList.some((ex) => ex.id === exercise.id);
+
+        if (isCompatible && !alreadyInSession) {
+          sessionList.push(exercise);
+          addedExercise = true;
+          foundExercise = true;
+          break; // Move to next session
+        }
+      }
+
+      // Second pass: If no compatible exercise found, add any exercise not already in session
+      // This ensures we meet minimum requirements even with less-than-ideal muscle matching
+      if (!foundExercise) {
+        for (const exercise of repetitionPool) {
+          const alreadyInSession = sessionList.some((ex) => ex.id === exercise.id);
+
+          if (!alreadyInSession) {
+            sessionList.push(exercise);
+            addedExercise = true;
+            break; // Move to next session
+          }
+        }
+      }
+    }
+
+    // If we couldn't add any exercises, we're done
+    if (!addedExercise) {
+      return;
+    }
+  }
+}
+
+/**
+ * Rebalance exercises across sessions to ensure even distribution
+ * Prefers balanced distributions like [4,4,5] over [3,3,6]
+ */
+function rebalanceExercisesAcrossSessions(
+  sessionExerciseLists: Exercise[][],
+  sessionTemplates: Array<{ muscles: MuscleGroup[] }>
+): void {
+  // Keep rebalancing until distribution is within 1 exercise difference
+  let maxIterations = 10; // Prevent infinite loops
+  let iteration = 0;
+
+  while (iteration < maxIterations) {
+    iteration++;
+
+    // Calculate current distribution
+    const counts = sessionExerciseLists.map((list) => list.length);
+    const minCount = Math.min(...counts);
+    const maxCount = Math.max(...counts);
+
+    // Stop if balanced (difference <= 1)
+    if (maxCount - minCount <= 1) {
+      return;
+    }
+
+    // Find sessions that are over-represented and under-represented
+    const overloadedIndices = counts
+      .map((count, idx) => ({ count, idx }))
+      .filter((item) => item.count > minCount + 1)
+      .sort((a, b) => b.count - a.count);
+
+    const underloadedIndices = counts
+      .map((count, idx) => ({ count, idx }))
+      .filter((item) => item.count === minCount);
+
+    if (overloadedIndices.length === 0 || underloadedIndices.length === 0) {
+      // Can't rebalance further
+      return;
+    }
+
+    let moved = false;
+
+    // Try to move exercises from overloaded to underloaded sessions
+    for (const overloaded of overloadedIndices) {
+      for (const underloaded of underloadedIndices) {
+        const overloadedList = sessionExerciseLists[overloaded.idx];
+        const underloadedList = sessionExerciseLists[underloaded.idx];
+        const underloadedTemplate = sessionTemplates[underloaded.idx];
+
+        // Find an exercise in overloaded session that's compatible with underloaded session
+        const movableExerciseIdx = overloadedList.findIndex((ex) =>
+          ex.muscle_groups.some((mg) => underloadedTemplate.muscles.includes(mg))
+        );
+
+        if (movableExerciseIdx !== -1) {
+          const exercise = overloadedList[movableExerciseIdx];
+
+          // Check if not already in underloaded session
+          const alreadyExists = underloadedList.some((ex) => ex.id === exercise.id);
+
+          if (!alreadyExists) {
+            // Move exercise
+            overloadedList.splice(movableExerciseIdx, 1);
+            underloadedList.push(exercise);
+            moved = true;
+            break; // Exit inner loop to recalculate in next iteration
+          }
+        }
+      }
+
+      if (moved) {
+        break; // Exit outer loop to recalculate in next iteration
+      }
+    }
+
+    // If nothing was moved, we can't balance further
+    if (!moved) {
+      return;
+    }
+  }
+}
+
+/**
  * Generate workout program from user-customized exercises
  * Uses flat array of exercises selected by the user
- * Intelligently distributes compound exercises across sessions
+ * Intelligently distributes exercises across sessions ensuring ALL exercises are included
+ * Enforces minimum 4 and maximum 6 exercises per session with intelligent repetition
  */
 export function generateWorkoutProgramFromCustomExercises(
   input: GenerationInput,
@@ -126,42 +332,173 @@ export function generateWorkoutProgramFromCustomExercises(
   // Validate muscle group coverage (soft validation - warning only)
   validateMuscleGroupCoverage(customExercises, frequency);
 
-  // Generate sessions
-  const sessions: ProgramSession[] = sessionTemplates.map((template) => {
-    // Get exercises that work ANY of the target muscles
-    const sessionExercises = customExercises.filter((exercise) =>
-      exercise.muscle_groups.some((mg) => template.muscles.includes(mg))
+  // Track which exercises have been assigned to ensure all are included
+  const assignedExercises = new Set<number>();
+  const MAX_EXERCISES_PER_SESSION = 6; // Maximum exercises per session
+  const MIN_EXERCISES_PER_SESSION = 4; // Minimum exercises per session
+
+  // First pass: assign exercises with primary muscle matches
+  const sessionExerciseLists: Exercise[][] = sessionTemplates.map((template) => {
+    // Get exercises where PRIMARY muscle matches session targets
+    const primaryMatches = customExercises.filter(
+      (exercise) =>
+        template.muscles.includes(exercise.muscle_groups[0]) &&
+        !assignedExercises.has(exercise.id)
     );
 
-    // Sort exercises: prioritize primary muscle matches, then compounds
-    const sorted = sessionExercises.sort((a, b) => {
-      // Check if primary muscle matches session targets
-      const aPrimaryMatch = template.muscles.includes(a.muscle_groups[0]);
-      const bPrimaryMatch = template.muscles.includes(b.muscle_groups[0]);
-
-      if (aPrimaryMatch && !bPrimaryMatch) return -1;
-      if (!aPrimaryMatch && bPrimaryMatch) return 1;
-
-      // Both primary or both secondary - sort by compound
+    // Sort: compound first
+    const sorted = primaryMatches.sort((a, b) => {
       if (a.is_compound && !b.is_compound) return -1;
       if (!a.is_compound && b.is_compound) return 1;
-
       return 0;
     });
 
-    // Limit exercises per session to avoid bloat (max 7)
-    const MAX_EXERCISES_PER_SESSION = 7;
-    const limitedExercises = sorted.slice(0, MAX_EXERCISES_PER_SESSION);
+    // Take up to max exercises per session
+    const selected = sorted.slice(0, MAX_EXERCISES_PER_SESSION);
+    selected.forEach((ex) => assignedExercises.add(ex.id));
+
+    return selected;
+  });
+
+  // Second pass: distribute remaining exercises (secondary muscle matches)
+  const unassignedExercises = customExercises.filter(
+    (ex) => !assignedExercises.has(ex.id)
+  );
+
+  if (unassignedExercises.length > 0) {
+    // Sort sessions by how many slots they have available
+    const sessionIndices = sessionTemplates.map((_, idx) => idx);
+    sessionIndices.sort(
+      (a, b) => sessionExerciseLists[a].length - sessionExerciseLists[b].length
+    );
+
+    // Distribute unassigned exercises to sessions with available slots
+    for (const exercise of unassignedExercises) {
+      // Find sessions that target any of this exercise's muscle groups
+      const compatibleSessions = sessionIndices.filter((idx) => {
+        const template = sessionTemplates[idx];
+        return (
+          exercise.muscle_groups.some((mg) => template.muscles.includes(mg)) &&
+          sessionExerciseLists[idx].length < MAX_EXERCISES_PER_SESSION
+        );
+      });
+
+      if (compatibleSessions.length > 0) {
+        // Assign to the session with fewest exercises
+        const targetSession = compatibleSessions[0];
+        sessionExerciseLists[targetSession].push(exercise);
+        assignedExercises.add(exercise.id);
+
+        // Re-sort after modification
+        sessionIndices.sort(
+          (a, b) =>
+            sessionExerciseLists[a].length - sessionExerciseLists[b].length
+        );
+      }
+      // If no compatible sessions with space, exercise cannot be assigned
+      // This is logged as a warning after the loop
+    }
+  }
+
+  // Rebalance exercises for even distribution (e.g., [4,4,5] instead of [3,3,6])
+  rebalanceExercisesAcrossSessions(sessionExerciseLists, sessionTemplates);
+
+  // Third pass: Ensure minimum exercises per session through repetition
+  // Simple, robust approach: Keep adding exercises until all sessions meet minimum
+  let ensureMinimumIterations = 0;
+  const maxEnsureIterations = 50;
+
+  while (ensureMinimumIterations < maxEnsureIterations) {
+    ensureMinimumIterations++;
+
+    // Find sessions below minimum
+    const sessionsNeedingMore = sessionTemplates
+      .map((_, idx) => idx)
+      .filter((idx) => sessionExerciseLists[idx].length < MIN_EXERCISES_PER_SESSION)
+      .sort((a, b) => sessionExerciseLists[a].length - sessionExerciseLists[b].length);
+
+    if (sessionsNeedingMore.length === 0) {
+      break; // All sessions meet minimum
+    }
+
+    // Build pool of exercises to add (unassigned first, then assigned for repetition)
+    const unassignedPool = customExercises.filter((ex) => !assignedExercises.has(ex.id));
+    const assignedPool = customExercises
+      .filter((ex) => assignedExercises.has(ex.id))
+      .sort((a, b) => {
+        // Compound exercises first
+        if (a.is_compound && !b.is_compound) return -1;
+        if (!a.is_compound && b.is_compound) return 1;
+        return 0;
+      });
+
+    const exercisePool = [...unassignedPool, ...assignedPool];
+
+    if (exercisePool.length === 0) {
+      break; // No exercises available
+    }
+
+    let addedInThisIteration = false;
+
+    // Try to add one exercise to each session needing more
+    for (const sessionIdx of sessionsNeedingMore) {
+      const sessionList = sessionExerciseLists[sessionIdx];
+      const template = sessionTemplates[sessionIdx];
+
+      if (sessionList.length >= MAX_EXERCISES_PER_SESSION) {
+        continue; // Session is at max
+      }
+
+      // Try to find a compatible exercise not already in this session
+      let added = false;
+      for (const exercise of exercisePool) {
+        const isCompatible = exercise.muscle_groups.some((mg) =>
+          template.muscles.includes(mg)
+        );
+        const alreadyInSession = sessionList.some((ex) => ex.id === exercise.id);
+
+        if (isCompatible && !alreadyInSession) {
+          sessionList.push(exercise);
+          assignedExercises.add(exercise.id);
+          addedInThisIteration = true;
+          added = true;
+          break;
+        }
+      }
+
+      // If no compatible exercise found, add any exercise not in this session
+      if (!added) {
+        for (const exercise of exercisePool) {
+          const alreadyInSession = sessionList.some((ex) => ex.id === exercise.id);
+          if (!alreadyInSession) {
+            sessionList.push(exercise);
+            assignedExercises.add(exercise.id);
+            addedInThisIteration = true;
+            break;
+          }
+        }
+      }
+    }
+
+    // If we couldn't add anything, stop trying
+    if (!addedInThisIteration) {
+      break;
+    }
+  }
+
+  // Generate final sessions with now ordered exercises
+  const sessions: ProgramSession[] = sessionTemplates.map((template, index) => {
+    const sessionExercises = sessionExerciseLists[index];
 
     // Order and create program exercises
-    const orderedExercises = orderExercises(limitedExercises);
+    const orderedExercises = orderExercises(sessionExercises);
     const programExercises: ProgramExercise[] = orderedExercises.map(
-      (exercise, index) => ({
+      (exercise, idx) => ({
         exercise,
         sets: scheme.sets,
         repsMin: scheme.repsMin,
         repsMax: scheme.repsMax,
-        order: index + 1,
+        order: idx + 1,
       })
     );
 
@@ -173,6 +510,17 @@ export function generateWorkoutProgramFromCustomExercises(
     };
   });
 
+  // Warn if not all exercises were assigned
+  if (assignedExercises.size < customExercises.length) {
+    const unassigned = customExercises.filter(
+      (ex) => !assignedExercises.has(ex.id)
+    );
+    console.warn(
+      `Warning: ${unassigned.length} exercises could not be assigned:`,
+      unassigned.map((ex) => ex.name)
+    );
+  }
+
   // Create program name
   const programName = `${focus} Program (${frequency}x/week)`;
 
@@ -183,6 +531,28 @@ export function generateWorkoutProgramFromCustomExercises(
     sessionsPerWeek: frequency,
     sessions,
   };
+}
+
+/**
+ * Extract all unique exercises from a workout program
+ * Returns flat array of exercises in program order
+ */
+export function extractExercisesFromProgram(program: WorkoutProgram): Exercise[] {
+  const exerciseIds = new Set<number>();
+  const exercises: Exercise[] = [];
+
+  // Iterate through sessions in order
+  program.sessions.forEach((session) => {
+    session.exercises.forEach((programEx) => {
+      // Only add if not already included (avoid duplicates)
+      if (!exerciseIds.has(programEx.exercise.id)) {
+        exerciseIds.add(programEx.exercise.id);
+        exercises.push(programEx.exercise);
+      }
+    });
+  });
+
+  return exercises;
 }
 
 /**

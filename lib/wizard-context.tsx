@@ -20,6 +20,10 @@ export interface WizardState {
     equipment: Equipment[];
     frequency: number;
   };
+  // Initial program generated in step 4 (before user modifications)
+  initialGeneratedProgram?: WorkoutProgram;
+  // Initial exercises from step 4 (before user modifications)
+  initialCustomExercises?: Exercise[];
 }
 
 // Context value interface
