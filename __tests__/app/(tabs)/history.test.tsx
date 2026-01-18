@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react-native";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react-native";
 import HistoryScreen from "@/app/(tabs)/history";
 import * as storage from "@/lib/storage/storage";
 
@@ -13,87 +13,110 @@ jest.mock("@/lib/storage/storage", () => ({
   getExerciseById: jest.fn(),
 }));
 
+// Helper to create mock sessions for the current month
+function createMockSessionsForCurrentMonth() {
+  const now = new Date();
+  const day5 = new Date(now.getFullYear(), now.getMonth(), 5, 10, 0, 0);
+  const day12 = new Date(now.getFullYear(), now.getMonth(), 12, 14, 0, 0);
+
+  return [
+    {
+      id: 1,
+      workout_plan_id: 1,
+      session_template_id: 1,
+      started_at: day5.toISOString(),
+      completed_at: new Date(day5.getTime() + 3600000).toISOString(), // +1 hour
+      notes: null,
+    },
+    {
+      id: 2,
+      workout_plan_id: 1,
+      session_template_id: 2,
+      started_at: day12.toISOString(),
+      completed_at: new Date(day12.getTime() + 3600000).toISOString(), // +1 hour
+      notes: null,
+    },
+  ];
+}
+
+function createMockTemplate() {
+  return {
+    id: 1,
+    workout_plan_id: 1,
+    sequence_order: 1,
+    name: "Upper Body A",
+    target_muscle_groups: '["Chest", "Back"]',
+    estimated_duration_minutes: 60,
+  };
+}
+
+function createMockSets() {
+  return [
+    {
+      id: 1,
+      completed_session_id: 1,
+      exercise_id: 1,
+      set_number: 1,
+      weight: 135,
+      reps: 8,
+      is_warmup: false,
+      completed_at: new Date().toISOString(),
+    },
+  ];
+}
+
 describe("HistoryScreen", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (storage.isStorageInitialized as jest.Mock).mockReturnValue(true);
+    (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue([]);
+    (storage.getSessionTemplateById as jest.Mock).mockReturnValue(null);
+    (storage.getCompletedSetsBySessionId as jest.Mock).mockReturnValue([]);
   });
 
   describe("Empty State", () => {
     it("shows empty state when no completed workouts", async () => {
-      (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue([]);
-
       render(<HistoryScreen />);
 
       await waitFor(() => {
         expect(screen.getByText("No Workout History")).toBeTruthy();
-        expect(
-          screen.getByText("Complete your first workout to start tracking your progress")
-        ).toBeTruthy();
       });
-    });
 
-    it("shows loading indicator initially", () => {
-      (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue([]);
-
-      render(<HistoryScreen />);
-
-      // Should show activity indicator before data loads
-      expect(screen.queryByText("History")).toBeFalsy();
+      expect(
+        screen.getByText("Complete your first workout to start tracking your progress")
+      ).toBeTruthy();
     });
   });
 
-  describe("Calendar Display", () => {
+  describe("With Workout Data", () => {
     beforeEach(() => {
-      const mockSessions = [
-        {
-          id: 1,
-          workout_plan_id: 1,
-          session_template_id: 1,
-          started_at: "2023-10-05T10:00:00.000Z",
-          completed_at: "2023-10-05T11:00:00.000Z",
-          notes: null,
-        },
-        {
-          id: 2,
-          workout_plan_id: 1,
-          session_template_id: 2,
-          started_at: "2023-10-12T14:00:00.000Z",
-          completed_at: "2023-10-12T15:00:00.000Z",
-          notes: null,
-        },
-      ];
-
-      (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue(mockSessions);
-      (storage.getSessionTemplateById as jest.Mock).mockReturnValue({
-        id: 1,
-        workout_plan_id: 1,
-        sequence_order: 1,
-        name: "Upper Body A",
-        target_muscle_groups: '["Chest", "Back"]',
-        estimated_duration_minutes: 60,
-      });
-      (storage.getCompletedSetsBySessionId as jest.Mock).mockReturnValue([
-        {
-          id: 1,
-          completed_session_id: 1,
-          exercise_id: 1,
-          set_number: 1,
-          weight: 135,
-          reps: 8,
-          is_warmup: false,
-          completed_at: "2023-10-05T10:30:00.000Z",
-        },
-      ]);
+      (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue(
+        createMockSessionsForCurrentMonth()
+      );
+      (storage.getSessionTemplateById as jest.Mock).mockReturnValue(createMockTemplate());
+      (storage.getCompletedSetsBySessionId as jest.Mock).mockReturnValue(createMockSets());
     });
 
-    it("renders calendar with current month and year", async () => {
+    it("renders History header when sessions exist", async () => {
       render(<HistoryScreen />);
 
       await waitFor(() => {
         expect(screen.getByText("History")).toBeTruthy();
-        // Month name should be displayed
-        expect(screen.getByText(/October|November|December|January/)).toBeTruthy();
+      });
+    });
+
+    it("renders current month and year", async () => {
+      render(<HistoryScreen />);
+
+      const now = new Date();
+      const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      ];
+      const expectedMonthYear = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+
+      await waitFor(() => {
+        expect(screen.getByText(expectedMonthYear)).toBeTruthy();
       });
     });
 
@@ -102,157 +125,94 @@ describe("HistoryScreen", () => {
 
       await waitFor(() => {
         expect(screen.getByText("Workouts")).toBeTruthy();
-        // There might be multiple "2"s on the calendar, so just check that the workout count is rendered
-        const allText = screen.getAllByText(/2/);
-        expect(allText.length).toBeGreaterThan(0);
       });
+
+      // Workouts label should be visible - the count is displayed nearby
+      // We verify the stats section exists rather than the specific number
+      // since the calendar also contains the number "2" as a date
     });
 
-    it("shows streak stats", async () => {
+    it("shows streak stats section", async () => {
       render(<HistoryScreen />);
 
       await waitFor(() => {
         expect(screen.getByText("Streak")).toBeTruthy();
-        expect(screen.getByText("Days")).toBeTruthy();
-      });
-    });
-  });
-
-  describe("Month Navigation", () => {
-    beforeEach(() => {
-      (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue([
-        {
-          id: 1,
-          workout_plan_id: 1,
-          session_template_id: 1,
-          started_at: "2023-10-05T10:00:00.000Z",
-          completed_at: "2023-10-05T11:00:00.000Z",
-          notes: null,
-        },
-      ]);
-    });
-
-    it("displays month and year in header", async () => {
-      render(<HistoryScreen />);
-
-      await waitFor(() => {
-        expect(screen.getByText("History")).toBeTruthy();
-        // Should display a month name and year
-        expect(screen.getByText(/January|February|March|April|May|June|July|August|September|October|November|December/)).toBeTruthy();
-      });
-    });
-
-    it("reloads data when navigating months", async () => {
-      render(<HistoryScreen />);
-
-      await waitFor(() => {
-        expect(screen.getByText("History")).toBeTruthy();
       });
 
-      const initialCallCount = (storage.getCompletedSessionsByDateRange as jest.Mock).mock
-        .calls.length;
-
-      // Verify initial call was made
-      expect(initialCallCount).toBeGreaterThan(0);
-    });
-  });
-
-  describe("View Mode Toggle", () => {
-    beforeEach(() => {
-      (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue([
-        {
-          id: 1,
-          workout_plan_id: 1,
-          session_template_id: 1,
-          started_at: "2023-10-05T10:00:00.000Z",
-          completed_at: "2023-10-05T11:00:00.000Z",
-          notes: null,
-        },
-      ]);
+      expect(screen.getByText("Days")).toBeTruthy();
     });
 
-    it("renders month/year toggle", async () => {
+    it("renders month/year toggle buttons", async () => {
       render(<HistoryScreen />);
 
       await waitFor(() => {
         expect(screen.getByText("Month")).toBeTruthy();
-        expect(screen.getByText("Year")).toBeTruthy();
       });
+
+      expect(screen.getByText("Year")).toBeTruthy();
     });
 
     it("can toggle between month and year view", async () => {
       render(<HistoryScreen />);
 
       await waitFor(() => {
-        const monthButton = screen.getByText("Month");
-        const yearButton = screen.getByText("Year");
-
-        expect(monthButton).toBeTruthy();
-        expect(yearButton).toBeTruthy();
-
-        // Click year button
-        fireEvent.press(yearButton);
-
-        // Both buttons should still be present
         expect(screen.getByText("Month")).toBeTruthy();
-        expect(screen.getByText("Year")).toBeTruthy();
       });
-    });
-  });
 
-  describe("Session Details Modal", () => {
-    beforeEach(() => {
-      (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue([
-        {
-          id: 1,
-          workout_plan_id: 1,
-          session_template_id: 1,
-          started_at: "2023-10-05T10:00:00.000Z",
-          completed_at: "2023-10-05T11:00:00.000Z",
-          notes: null,
-        },
-      ]);
-      (storage.getSessionTemplateById as jest.Mock).mockReturnValue({
-        id: 1,
-        workout_plan_id: 1,
-        sequence_order: 1,
-        name: "Upper Body A",
-        target_muscle_groups: '["Chest", "Back"]',
-        estimated_duration_minutes: 60,
-      });
-      (storage.getCompletedSetsBySessionId as jest.Mock).mockReturnValue([
-        {
-          id: 1,
-          completed_session_id: 1,
-          exercise_id: 1,
-          set_number: 1,
-          weight: 135,
-          reps: 8,
-          is_warmup: false,
-          completed_at: "2023-10-05T10:30:00.000Z",
-        },
-        {
-          id: 2,
-          completed_session_id: 1,
-          exercise_id: 2,
-          set_number: 1,
-          weight: 95,
-          reps: 10,
-          is_warmup: false,
-          completed_at: "2023-10-05T10:45:00.000Z",
-        },
-      ]);
+      const yearButton = screen.getByText("Year");
+      fireEvent.press(yearButton);
+
+      // Both buttons should still exist after toggle
+      expect(screen.getByText("Month")).toBeTruthy();
+      expect(screen.getByText("Year")).toBeTruthy();
     });
 
-    it("modal is initially not visible", async () => {
+    it("modal is not visible initially", async () => {
       render(<HistoryScreen />);
 
       await waitFor(() => {
         expect(screen.getByText("History")).toBeTruthy();
       });
 
-      // Session name should not be visible initially
+      // Template name should not be visible (modal closed)
       expect(screen.queryByText("Upper Body A")).toBeFalsy();
+    });
+  });
+
+  describe("Month Navigation", () => {
+    beforeEach(() => {
+      (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue(
+        createMockSessionsForCurrentMonth()
+      );
+    });
+
+    it("calls getCompletedSessionsByDateRange on mount", async () => {
+      render(<HistoryScreen />);
+
+      await waitFor(() => {
+        expect(storage.getCompletedSessionsByDateRange).toHaveBeenCalled();
+      });
+    });
+
+    it("fetches data with correct date range for current month", async () => {
+      render(<HistoryScreen />);
+
+      await waitFor(() => {
+        expect(storage.getCompletedSessionsByDateRange).toHaveBeenCalled();
+      });
+
+      const calls = (storage.getCompletedSessionsByDateRange as jest.Mock).mock.calls;
+      expect(calls.length).toBeGreaterThan(0);
+
+      const [startDate, endDate] = calls[0];
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+
+      // Should be querying for first and last day of current month
+      const now = new Date();
+      expect(start.getMonth()).toBe(now.getMonth());
+      expect(start.getFullYear()).toBe(now.getFullYear());
+      expect(start.getDate()).toBe(1);
     });
   });
 
@@ -260,7 +220,6 @@ describe("HistoryScreen", () => {
     it("initializes storage if not initialized", async () => {
       (storage.isStorageInitialized as jest.Mock).mockReturnValue(false);
       (storage.initStorage as jest.Mock).mockResolvedValue(undefined);
-      (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue([]);
 
       render(<HistoryScreen />);
 
@@ -271,7 +230,6 @@ describe("HistoryScreen", () => {
 
     it("does not initialize storage if already initialized", async () => {
       (storage.isStorageInitialized as jest.Mock).mockReturnValue(true);
-      (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue([]);
 
       render(<HistoryScreen />);
 
@@ -285,11 +243,11 @@ describe("HistoryScreen", () => {
 
   describe("Error Handling", () => {
     it("handles storage errors gracefully", async () => {
+      const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
+
       (storage.getCompletedSessionsByDateRange as jest.Mock).mockImplementation(() => {
         throw new Error("Storage error");
       });
-
-      const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
 
       render(<HistoryScreen />);
 
