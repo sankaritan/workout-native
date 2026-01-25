@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils/cn";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
+import { theme } from "@/constants/theme";
 
 export interface SetData {
   setNumber: number;
@@ -229,7 +230,7 @@ export function SetTracker({
                 <MaterialIcons
                   name="remove"
                   size={18}
-                  color={isActive ? "#9db9a8" : "#6b8779"}
+                  color={isActive ? theme.colors.text.secondary : theme.colors.text.muted}
                 />
               </Pressable>
               <Pressable
@@ -247,7 +248,7 @@ export function SetTracker({
                 <MaterialIcons
                   name="add"
                   size={18}
-                  color={isActive ? "#9db9a8" : "#6b8779"}
+                  color={isActive ? theme.colors.text.secondary : theme.colors.text.muted}
                 />
               </Pressable>
             </View>
@@ -304,7 +305,7 @@ export function SetTracker({
               className="flex items-center justify-center"
             >
               {isCompleted ? (
-                <MaterialIcons name="check-circle" size={20} color="#13ec6d" />
+                <MaterialIcons name="check-circle" size={20} color={theme.colors.primary.DEFAULT } />
               ) : (
                 <Pressable
                   onPress={() => completeSet(index)}
@@ -319,7 +320,7 @@ export function SetTracker({
                   )}
                 >
                   {set.weight !== null && set.reps !== null && (
-                    <MaterialIcons name="check" size={16} color="#13ec6d" />
+                    <MaterialIcons name="check" size={16} color={theme.colors.primary.DEFAULT } />
                   )}
                 </Pressable>
               )}
@@ -334,7 +335,7 @@ export function SetTracker({
         testID="add-set-button"
         className="flex-row items-center justify-center gap-2 py-3 mt-2 rounded-lg border border-dashed border-border-light text-text-muted active:text-white active:border-primary/50 active:bg-surface-dark"
       >
-        <MaterialIcons name="add" size={18} color="#9db9a8" />
+        <MaterialIcons name="add" size={18} color={theme.colors.text.secondary } />
         <Text className="text-sm font-medium text-text-muted">Add Set</Text>
       </Pressable>
     </View>

@@ -10,7 +10,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useWizard } from "@/lib/wizard-context";
 import { ExercisePickerItem } from "@/components/ExercisePickerItem";
-import { FilterPill } from "@/components/FilterPill";
+import { FilterPill } from "@/components/ui/FilterPill";
 import { getAllExercises } from "@/lib/storage/storage";
 import { filterExercisesByEquipment, filterExercisesByMuscleGroups } from "@/lib/workout-generator/exercise-selector";
 import type { Exercise, MuscleGroup } from "@/lib/storage/types";

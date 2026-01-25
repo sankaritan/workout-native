@@ -9,6 +9,7 @@ import { View, Text, Pressable } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { cn } from "@/lib/utils/cn";
 import type { Exercise } from "@/lib/storage/types";
+import { theme } from "@/constants/theme";
 
 export interface ExerciseCardWithActionsProps {
   /** The exercise to display */
@@ -104,7 +105,7 @@ export function ExerciseCardWithActions({
           accessibilityRole="button"
           className="p-2 rounded-lg active:bg-white/10"
         >
-          <MaterialIcons name="swap-horiz" size={22} color="#6b8779" />
+          <MaterialIcons name="swap-horiz" size={22} color={theme.colors.text.muted } />
         </Pressable>
 
         {/* Remove Button */}
@@ -123,7 +124,7 @@ export function ExerciseCardWithActions({
           <MaterialIcons
             name="close"
             size={22}
-            color={canRemove ? "#ef4444" : "#6b8779"}
+            color={canRemove ? theme.colors.danger.DEFAULT : theme.colors.text.muted}
           />
         </Pressable>
       </View>

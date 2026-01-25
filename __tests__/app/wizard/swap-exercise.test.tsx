@@ -1,9 +1,8 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { WizardProvider } from "@/lib/wizard-context";
+import { screen, fireEvent } from "@testing-library/react-native";
+import { renderWithWizard, mockMaterialIcons } from "@/__tests__/test-utils";
 
-// Mock expo-router
+// Mock expo-router with custom mockRouterBack
 const mockRouterBack = jest.fn();
 jest.mock("expo-router", () => ({
   router: {
@@ -23,9 +22,7 @@ jest.mock("expo-router", () => ({
 }));
 
 // Mock MaterialIcons
-jest.mock("@expo/vector-icons", () => ({
-  MaterialIcons: "MaterialIcons",
-}));
+mockMaterialIcons();
 
 // Mock storage to return test exercises
 jest.mock("@/lib/storage/storage", () => ({
@@ -37,22 +34,6 @@ jest.mock("@/lib/storage/storage", () => ({
     { id: 5, name: "Deadlift", muscle_group: "Back", muscle_groups: ["Back", "Legs", "Core"], equipment_required: "Barbell", is_compound: true, description: null },
   ]),
 }));
-
-// Safe area initial metrics for testing
-const initialMetrics = {
-  frame: { x: 0, y: 0, width: 390, height: 844 },
-  insets: { top: 47, left: 0, right: 0, bottom: 34 },
-};
-
-// Custom WizardProvider with preset state
-function WizardProviderWithState({ children, customExercises }: { children: React.ReactNode; customExercises?: any[] }) {
-  // We need to set up the wizard context with equipment and customExercises
-  return (
-    <WizardProvider>
-      {children}
-    </WizardProvider>
-  );
-}
 
 describe("Swap Exercise Screen", () => {
   beforeEach(() => {
@@ -66,49 +47,25 @@ describe("Swap Exercise Screen", () => {
 
   it("renders without crashing", () => {
     const SwapExerciseScreen = require("@/app/wizard/swap-exercise").default;
-    const result = render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
-        <WizardProvider>
-          <SwapExerciseScreen />
-        </WizardProvider>
-      </SafeAreaProvider>
-    );
+    const result = renderWithWizard(<SwapExerciseScreen />);
     expect(result).toBeTruthy();
   });
 
   it("renders title text", () => {
     const SwapExerciseScreen = require("@/app/wizard/swap-exercise").default;
-    render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
-        <WizardProvider>
-          <SwapExerciseScreen />
-        </WizardProvider>
-      </SafeAreaProvider>
-    );
+    renderWithWizard(<SwapExerciseScreen />);
     expect(screen.getByText("Swap Exercise")).toBeTruthy();
   });
 
   it("renders close button", () => {
     const SwapExerciseScreen = require("@/app/wizard/swap-exercise").default;
-    render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
-        <WizardProvider>
-          <SwapExerciseScreen />
-        </WizardProvider>
-      </SafeAreaProvider>
-    );
+    renderWithWizard(<SwapExerciseScreen />);
     expect(screen.getByTestId("close-button")).toBeTruthy();
   });
 
   it("displays filter pills for muscle groups", () => {
     const SwapExerciseScreen = require("@/app/wizard/swap-exercise").default;
-    render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
-        <WizardProvider>
-          <SwapExerciseScreen />
-        </WizardProvider>
-      </SafeAreaProvider>
-    );
+    renderWithWizard(<SwapExerciseScreen />);
     // Check that muscle group filter pills are present
     expect(screen.getAllByText("Chest").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Back").length).toBeGreaterThan(0);
@@ -118,13 +75,7 @@ describe("Swap Exercise Screen", () => {
 
   it("calls router.back when close button is pressed", () => {
     const SwapExerciseScreen = require("@/app/wizard/swap-exercise").default;
-    render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
-        <WizardProvider>
-          <SwapExerciseScreen />
-        </WizardProvider>
-      </SafeAreaProvider>
-    );
+    renderWithWizard(<SwapExerciseScreen />);
     const closeButton = screen.getByTestId("close-button");
     fireEvent.press(closeButton);
     expect(mockRouterBack).toHaveBeenCalled();

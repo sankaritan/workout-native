@@ -8,6 +8,7 @@ import { View, Text, Pressable } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ExerciseListItem } from "./ExerciseListItem";
 import type { ProgramSession } from "@/lib/workout-generator/types";
+import { theme } from "@/constants/theme";
 
 export interface SessionCardProps {
   session: ProgramSession;
@@ -43,7 +44,7 @@ export function SessionCard({ session }: SessionCardProps) {
           <MaterialIcons
             name={isExpanded ? "expand-less" : "expand-more"}
             size={24}
-            color="#9db9a8"
+            color={theme.colors.text.secondary}
           />
         </View>
 

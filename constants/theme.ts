@@ -31,6 +31,9 @@ export const theme = {
       DEFAULT: "#28392f",
       light: "#3b5445",
     },
+    danger: {
+      DEFAULT: "#ef4444",
+    },
   },
   fonts: {
     display: "Lexend",

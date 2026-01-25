@@ -6,6 +6,12 @@
 import React from "react";
 import { View, Text, Pressable } from "react-native";
 import { cn } from "@/lib/utils/cn";
+import {
+  getDaysInMonth,
+  getFirstDayOfMonth,
+  formatDateKey,
+  parseISOToDateKey,
+} from "@/lib/utils/date";
 
 export interface CalendarProps {
   /** Currently displayed year */
@@ -18,38 +24,6 @@ export interface CalendarProps {
   onDayPress?: (date: Date) => void;
   /** Optional className for container */
   className?: string;
-}
-
-/**
- * Gets the number of days in a month
- */
-function getDaysInMonth(year: number, month: number): number {
-  return new Date(year, month + 1, 0).getDate();
-}
-
-/**
- * Gets the day of week for the first day of the month (0 = Sunday, 6 = Saturday)
- */
-function getFirstDayOfMonth(year: number, month: number): number {
-  return new Date(year, month, 1).getDay();
-}
-
-/**
- * Format a date as YYYY-MM-DD for comparison
- */
-function formatDateKey(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-/**
- * Parse ISO date string to YYYY-MM-DD format
- */
-function parseISOToDateKey(isoString: string): string {
-  const date = new Date(isoString);
-  return formatDateKey(date);
 }
 
 /**
