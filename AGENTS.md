@@ -1,10 +1,10 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to OpenCode when working with code in this repository.
 
-**IMPORTANT**: This file is synchronized with AGENTS.md. When updating AI agent instructions, ALWAYS update both files to keep them in sync.
+**IMPORTANT**: This file is synchronized with CLAUDE.md. When updating AI agent instructions, ALWAYS update both files to keep them in sync.
 
-**Note**: README.md is for developers getting started with the project. When making significant changes, consider whether README.md needs updating too (setup instructions, commands, etc.). This file (CLAUDE.md) is for AI development context and coding patterns.
+**Note**: README.md is for developers getting started with the project. When making significant changes, consider whether README.md needs updating too (setup instructions, commands, etc.). This file (AGENTS.md) is for AI development context and coding patterns.
 
 ## Project Overview
 
