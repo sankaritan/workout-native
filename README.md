@@ -76,7 +76,6 @@ workout-app/
 │   └── _layout.tsx        # Root layout with fonts
 ├── components/
 │   ├── ui/                # Reusable UI components (Button, etc.)
-│   ├── layout/            # Layout components
 │   └── __tests__/         # Component tests
 ├── lib/
 │   ├── utils/             # Utility functions (cn.ts for classnames)

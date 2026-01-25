@@ -32,7 +32,7 @@ Workout App - A fitness/workout planning and tracking application built with Exp
 
 documented in package.json
 
-**Note**: Project requires Node.js >= 20 (current v18 works but may have issues).
+**Note**: Project requires Node.js >= 20.
 
 ## Project Structure
 
