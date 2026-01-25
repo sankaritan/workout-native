@@ -51,5 +51,3 @@ export const theme = {
     full: 9999,
   },
 } as const;
-
-export type Theme = typeof theme;

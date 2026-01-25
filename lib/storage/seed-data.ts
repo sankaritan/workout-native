@@ -1169,55 +1169,6 @@ export function seedExercises(): void {
 }
 
 /**
- * Get exercise count by muscle group for verification
- */
-export function getExerciseCountByMuscleGroup(): Record<string, number> {
-  const counts: Record<string, number> = {
-    Chest: 0,
-    Back: 0,
-    Legs: 0,
-    Shoulders: 0,
-    Arms: 0,
-    Core: 0,
-  };
-
-  for (const exercise of EXERCISES) {
-    counts[exercise.muscle_group]++;
-  }
-
-  return counts;
-}
-
-/**
- * Get exercise count by equipment type for verification
- */
-export function getExerciseCountByEquipment(): Record<string, number> {
-  const counts: Record<string, number> = {
-    Barbell: 0,
-    Dumbbell: 0,
-    Bodyweight: 0,
-    Cables: 0,
-    Machines: 0,
-    Bands: 0,
-  };
-
-  for (const exercise of EXERCISES) {
-    if (exercise.equipment_required) {
-      counts[exercise.equipment_required]++;
-    }
-  }
-
-  return counts;
-}
-
-/**
- * Get compound exercise count
- */
-export function getCompoundExerciseCount(): number {
-  return EXERCISES.filter((ex) => ex.is_compound).length;
-}
-
-/**
  * Seed a test workout plan for development/testing
  * Creates a simple 3-day plan with session ID 1 for testing
  */
