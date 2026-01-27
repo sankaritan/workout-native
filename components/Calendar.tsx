@@ -3,7 +3,7 @@
  * Shows month view with workout days highlighted
  */
 
-import React from "react";
+import React, { useMemo } from "react";
 import { View, Text, Pressable } from "react-native";
 import { cn } from "@/lib/utils/cn";
 import {
@@ -36,45 +36,55 @@ export function Calendar({
   onDayPress,
   className,
 }: CalendarProps) {
-  const daysInMonth = getDaysInMonth(year, month);
-  const firstDayOfMonth = getFirstDayOfMonth(year, month);
+  // Memoize workout date set - only rebuild when workoutDates changes
+  const workoutDateSet = useMemo(
+    () => new Set(workoutDates.map(parseISOToDateKey)),
+    [workoutDates]
+  );
 
-  // Create a Set of workout date keys for fast lookup
-  const workoutDateSet = new Set(workoutDates.map(parseISOToDateKey));
+  // Memoize today info - recalculate when year/month changes
+  const todayInfo = useMemo(() => {
+    const today = new Date();
+    return {
+      key: formatDateKey(today),
+      isCurrentMonth: today.getFullYear() === year && today.getMonth() === month,
+    };
+  }, [year, month]);
 
-  // Get today's date for highlighting
-  const today = new Date();
-  const todayKey = formatDateKey(today);
-  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+  // Memoize calendar grid - only rebuild when year/month changes
+  const calendarDays = useMemo(() => {
+    const daysInMonth = getDaysInMonth(year, month);
+    const firstDayOfMonth = getFirstDayOfMonth(year, month);
+    const days: Array<{ day: number; isCurrentMonth: boolean; date: Date }> = [];
+
+    // Add padding days from previous month
+    const prevMonth = month === 0 ? 11 : month - 1;
+    const prevYear = month === 0 ? year - 1 : year;
+    const daysInPrevMonth = getDaysInMonth(prevYear, prevMonth);
+
+    for (let i = firstDayOfMonth - 1; i >= 0; i--) {
+      const day = daysInPrevMonth - i;
+      days.push({
+        day,
+        isCurrentMonth: false,
+        date: new Date(prevYear, prevMonth, day),
+      });
+    }
+
+    // Add current month days
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push({
+        day,
+        isCurrentMonth: true,
+        date: new Date(year, month, day),
+      });
+    }
+
+    return days;
+  }, [year, month]);
 
   // Day names
   const dayNames = ["S", "M", "T", "W", "T", "F", "S"];
-
-  // Build calendar grid - previous month padding + current month days
-  const calendarDays: Array<{ day: number; isCurrentMonth: boolean; date: Date }> = [];
-
-  // Add padding days from previous month
-  const prevMonth = month === 0 ? 11 : month - 1;
-  const prevYear = month === 0 ? year - 1 : year;
-  const daysInPrevMonth = getDaysInMonth(prevYear, prevMonth);
-
-  for (let i = firstDayOfMonth - 1; i >= 0; i--) {
-    const day = daysInPrevMonth - i;
-    calendarDays.push({
-      day,
-      isCurrentMonth: false,
-      date: new Date(prevYear, prevMonth, day),
-    });
-  }
-
-  // Add current month days
-  for (let day = 1; day <= daysInMonth; day++) {
-    calendarDays.push({
-      day,
-      isCurrentMonth: true,
-      date: new Date(year, month, day),
-    });
-  }
 
   return (
     <View className={cn("px-4", className)}>
@@ -94,7 +104,7 @@ export function Calendar({
         {calendarDays.map((calendarDay, index) => {
           const dateKey = formatDateKey(calendarDay.date);
           const hasWorkout = workoutDateSet.has(dateKey);
-          const isToday = isCurrentMonth && dateKey === todayKey;
+          const isToday = todayInfo.isCurrentMonth && dateKey === todayInfo.key;
 
           return (
             <View key={index} className="w-[14.285%] items-center py-1">

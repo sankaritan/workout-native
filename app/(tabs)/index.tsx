@@ -3,7 +3,7 @@
  * Shows active workout plan or empty state
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -80,8 +80,8 @@ export default function HomeScreen() {
     router.push(`/session/${sessionId}`);
   };
 
-  // Calculate progress
-  const calculateProgress = () => {
+  // Memoize progress calculation - only recalculate when dependencies change
+  const progress = useMemo(() => {
     if (!activePlan || sessions.length === 0) return 0;
 
     // Calculate total expected sessions (sessions per week * duration weeks)
@@ -91,10 +91,10 @@ export default function HomeScreen() {
     const completedCount = completedSessions.filter(s => s.completed_at !== null).length;
 
     return Math.round((completedCount / totalExpectedSessions) * 100);
-  };
+  }, [activePlan, sessions.length, completedSessions]);
 
-  // Determine next session to do
-  const getNextSession = (): WorkoutSessionTemplate | null => {
+  // Memoize next session determination - only recalculate when dependencies change
+  const nextSession = useMemo((): WorkoutSessionTemplate | null => {
     if (sessions.length === 0) return null;
 
     // If there's an in-progress session, return that session template
@@ -111,13 +111,13 @@ export default function HomeScreen() {
     );
 
     // Find first session that hasn't been completed yet (in sequence order)
-    const nextSession = sessions
+    const nextSessionFound = sessions
       .sort((a, b) => a.sequence_order - b.sequence_order)
       .find(s => !completedTemplateIds.has(s.id));
 
     // If all sessions completed at least once, return first session (cycle through)
-    return nextSession || sessions[0];
-  };
+    return nextSessionFound || sessions[0];
+  }, [sessions, completedSessions, inProgressSession]);
 
   // Check if a session has been completed
   const isSessionCompleted = (sessionId: number): boolean => {
@@ -126,19 +126,19 @@ export default function HomeScreen() {
     );
   };
 
-  // Calculate current week
-  const getCurrentWeek = (): number => {
+  // Memoize current week calculation - only recalculate when dependencies change
+  const currentWeek = useMemo((): number => {
     if (!activePlan || completedSessions.length === 0) return 1;
 
     // Simple calculation: completed sessions / sessions per week
     const completedCount = completedSessions.filter(s => s.completed_at !== null).length;
-    const currentWeek = Math.floor(completedCount / activePlan.weekly_frequency) + 1;
+    const week = Math.floor(completedCount / activePlan.weekly_frequency) + 1;
 
-    return Math.min(currentWeek, activePlan.duration_weeks);
-  };
+    return Math.min(week, activePlan.duration_weeks);
+  }, [activePlan, completedSessions]);
 
-  // Get workout stats for this month
-  const getMonthlyStats = (): number => {
+  // Memoize monthly stats - only recalculate when completedSessions changes
+  const monthlyWorkouts = useMemo((): number => {
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -147,7 +147,7 @@ export default function HomeScreen() {
       const completedDate = new Date(s.completed_at);
       return completedDate >= firstDayOfMonth;
     }).length;
-  };
+  }, [completedSessions]);
 
   if (isLoading) {
     return (
@@ -207,11 +207,7 @@ export default function HomeScreen() {
     );
   }
 
-  // Active plan state
-  const nextSession = getNextSession();
-  const progress = calculateProgress();
-  const currentWeek = getCurrentWeek();
-  const monthlyWorkouts = getMonthlyStats();
+  // All calculations are now memoized above and available as values
 
   return (
     <ScrollView

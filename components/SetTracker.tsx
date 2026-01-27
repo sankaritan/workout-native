@@ -5,7 +5,7 @@
 
 import { cn } from "@/lib/utils/cn";
 import { MaterialIcons } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, memo } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { theme } from "@/constants/theme";
 
@@ -33,7 +33,11 @@ export interface SetTrackerProps {
   testID?: string;
 }
 
-export function SetTracker({
+/**
+ * SetTracker component - memoized to prevent unnecessary re-renders
+ * Only re-renders when target values or initial sets change
+ */
+export const SetTracker = memo(function SetTracker({
   targetSets,
   targetReps,
   previousWeight,
@@ -340,4 +344,16 @@ export function SetTracker({
       </Pressable>
     </View>
   );
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison function for memo
+  // Only re-render if these specific props change
+  // Intentionally exclude onSetsChange callback from comparison
+  return (
+    prevProps.targetSets === nextProps.targetSets &&
+    prevProps.targetReps === nextProps.targetReps &&
+    prevProps.previousWeight === nextProps.previousWeight &&
+    prevProps.previousReps === nextProps.previousReps &&
+    prevProps.initialSets === nextProps.initialSets &&
+    prevProps.testID === nextProps.testID
+  );
+});

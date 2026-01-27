@@ -4,7 +4,7 @@
  * Story 11 - History Calendar View
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -150,11 +150,14 @@ export default function HistoryScreen() {
   // Calculate workout stats for the month
   const workoutCount = completedSessions.length;
 
-  // Get workout dates as ISO strings for calendar highlighting
-  const workoutDates = completedSessions.map((s) => s.started_at);
+  // Memoize workout dates for calendar highlighting
+  const workoutDates = useMemo(
+    () => completedSessions.map((s) => s.started_at),
+    [completedSessions]
+  );
 
-  // Calculate streak (consecutive days with workouts)
-  function calculateStreak(): number {
+  // Memoize streak calculation - only recalculate when completedSessions changes
+  const streak = useMemo((): number => {
     if (completedSessions.length === 0) return 0;
 
     // Get unique dates with workouts (YYYY-MM-DD format)
@@ -165,13 +168,11 @@ export default function HistoryScreen() {
       workoutDatesSet.add(dateKey);
     });
 
-    const sortedDates = Array.from(workoutDatesSet).sort().reverse();
-
     // Start from today and count backwards
     const today = new Date();
     const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-    let streak = 0;
+    let currentStreak = 0;
     let currentDate = new Date(today);
 
     // Check if today or yesterday has a workout (to start the streak)
@@ -188,7 +189,7 @@ export default function HistoryScreen() {
       const dateKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
 
       if (workoutDatesSet.has(dateKey)) {
-        streak++;
+        currentStreak++;
       } else if (i > 0) {
         // Allow today to not have a workout if we're continuing a streak from yesterday
         break;
@@ -197,10 +198,8 @@ export default function HistoryScreen() {
       currentDate.setDate(currentDate.getDate() - 1);
     }
 
-    return streak;
-  }
-
-  const streak = calculateStreak();
+    return currentStreak;
+  }, [completedSessions]);
 
   if (loading) {
     return (
