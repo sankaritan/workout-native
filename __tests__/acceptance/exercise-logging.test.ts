@@ -30,6 +30,7 @@ import {
   getSessionWithExercises,
   hasAnyCompletedSets,
   deleteCompletedSetsBySessionId,
+  getAllExercises,
 } from "@/lib/storage/storage";
 import { seedExercises } from "@/lib/storage/seed-data";
 import type {
@@ -45,12 +46,19 @@ describe("Acceptance Test: Exercise Logging", () => {
   let sessionTemplateId: number;
   let benchPressId: number;
   let squatId: number;
+  let exerciseId1: number; // First exercise from seed data
+  let exerciseId2: number; // Second exercise from seed data
 
   beforeEach(async () => {
     // Setup storage with exercise database
     await initStorage();
     await resetStorage();
     await seedExercises();
+
+    // Get actual exercise IDs from seeded data
+    const allExercises = getAllExercises();
+    exerciseId1 = allExercises[0].id;
+    exerciseId2 = allExercises[1].id;
 
     // Create a test workout plan
     const plan: WorkoutPlanInsert = {
@@ -80,7 +88,7 @@ describe("Acceptance Test: Exercise Logging", () => {
     // Insert exercise templates manually
     const exerciseTemplate1: SessionExerciseTemplateInsert = {
       session_template_id: sessionTemplateId,
-      exercise_id: 1, // Will be set to actual exercise ID
+      exercise_id: exerciseId1, // Use actual exercise ID from seed data
       exercise_order: 1,
       sets: 3,
       reps: 10,
@@ -90,7 +98,7 @@ describe("Acceptance Test: Exercise Logging", () => {
 
     const exerciseTemplate2: SessionExerciseTemplateInsert = {
       session_template_id: sessionTemplateId,
-      exercise_id: 2,
+      exercise_id: exerciseId2, // Use actual exercise ID from seed data
       exercise_order: 2,
       sets: 3,
       reps: 10,
@@ -118,10 +126,10 @@ describe("Acceptance Test: Exercise Logging", () => {
     expect(inProgressSession?.id).toBe(completedSessionId);
     expect(inProgressSession?.completed_at).toBeNull();
 
-    // Step 2: User logs sets for first exercise (Bench Press - exercise_id 1)
+    // Step 2: User logs sets for first exercise (exercise_id from seed data)
     const benchPressSet1: ExerciseSetCompletedInsert = {
       completed_session_id: completedSessionId,
-      exercise_id: 1,
+      exercise_id: exerciseId1,
       set_number: 1,
       weight: 135,
       reps: 10,
@@ -133,7 +141,7 @@ describe("Acceptance Test: Exercise Logging", () => {
 
     const benchPressSet2: ExerciseSetCompletedInsert = {
       completed_session_id: completedSessionId,
-      exercise_id: 1,
+      exercise_id: exerciseId1,
       set_number: 2,
       weight: 135,
       reps: 9,
@@ -144,7 +152,7 @@ describe("Acceptance Test: Exercise Logging", () => {
 
     const benchPressSet3: ExerciseSetCompletedInsert = {
       completed_session_id: completedSessionId,
-      exercise_id: 1,
+      exercise_id: exerciseId1,
       set_number: 3,
       weight: 135,
       reps: 8,
@@ -158,10 +166,10 @@ describe("Acceptance Test: Exercise Logging", () => {
     expect(sessionSets).toHaveLength(3);
     expect(hasAnyCompletedSets(completedSessionId)).toBe(true);
 
-    // Step 3: User logs sets for second exercise (Squat - exercise_id 2)
+    // Step 3: User logs sets for second exercise (exercise_id from seed data)
     const squatSet1: ExerciseSetCompletedInsert = {
       completed_session_id: completedSessionId,
-      exercise_id: 2,
+      exercise_id: exerciseId2,
       set_number: 1,
       weight: 185,
       reps: 10,
@@ -172,7 +180,7 @@ describe("Acceptance Test: Exercise Logging", () => {
 
     const squatSet2: ExerciseSetCompletedInsert = {
       completed_session_id: completedSessionId,
-      exercise_id: 2,
+      exercise_id: exerciseId2,
       set_number: 2,
       weight: 185,
       reps: 10,
@@ -183,7 +191,7 @@ describe("Acceptance Test: Exercise Logging", () => {
 
     const squatSet3: ExerciseSetCompletedInsert = {
       completed_session_id: completedSessionId,
-      exercise_id: 2,
+      exercise_id: exerciseId2,
       set_number: 3,
       weight: 185,
       reps: 9,
@@ -212,11 +220,11 @@ describe("Acceptance Test: Exercise Logging", () => {
     expect(stillInProgress).toBeNull();
 
     // Step 6: Verify data is retrievable for history
-    const benchPressSets = getCompletedSetsByExerciseId(1);
+    const benchPressSets = getCompletedSetsByExerciseId(exerciseId1);
     expect(benchPressSets.length).toBeGreaterThanOrEqual(3);
     
     // Verify last set for exercise (for progress tracking)
-    const lastBenchPressSet = getLastCompletedSetForExercise(1);
+    const lastBenchPressSet = getLastCompletedSetForExercise(exerciseId1);
     expect(lastBenchPressSet).not.toBeNull();
     expect(lastBenchPressSet?.weight).toBe(135);
 
@@ -240,7 +248,7 @@ describe("Acceptance Test: Exercise Logging", () => {
     // Log some sets
     const set1: ExerciseSetCompletedInsert = {
       completed_session_id: sessionId,
-      exercise_id: 1,
+      exercise_id: exerciseId1,
       set_number: 1,
       weight: 135,
       reps: 10,
@@ -261,7 +269,7 @@ describe("Acceptance Test: Exercise Logging", () => {
     // User adds more sets
     const set2: ExerciseSetCompletedInsert = {
       completed_session_id: sessionId,
-      exercise_id: 1,
+      exercise_id: exerciseId1,
       set_number: 2,
       weight: 135,
       reps: 10,
@@ -295,7 +303,7 @@ describe("Acceptance Test: Exercise Logging", () => {
     // Log original sets
     insertCompletedSet({
       completed_session_id: sessionId,
-      exercise_id: 1,
+      exercise_id: exerciseId1,
       set_number: 1,
       weight: 135,
       reps: 10,
@@ -305,7 +313,7 @@ describe("Acceptance Test: Exercise Logging", () => {
 
     insertCompletedSet({
       completed_session_id: sessionId,
-      exercise_id: 1,
+      exercise_id: exerciseId1,
       set_number: 2,
       weight: 135,
       reps: 10,
@@ -324,7 +332,7 @@ describe("Acceptance Test: Exercise Logging", () => {
     // Save new sets
     insertCompletedSet({
       completed_session_id: sessionId,
-      exercise_id: 1,
+      exercise_id: exerciseId1,
       set_number: 1,
       weight: 140, // Increased weight
       reps: 10,
@@ -334,7 +342,7 @@ describe("Acceptance Test: Exercise Logging", () => {
 
     insertCompletedSet({
       completed_session_id: sessionId,
-      exercise_id: 1,
+      exercise_id: exerciseId1,
       set_number: 2,
       weight: 140,
       reps: 10,
@@ -344,7 +352,7 @@ describe("Acceptance Test: Exercise Logging", () => {
 
     insertCompletedSet({
       completed_session_id: sessionId,
-      exercise_id: 1,
+      exercise_id: exerciseId1,
       set_number: 3,
       weight: 140,
       reps: 8,
@@ -370,7 +378,7 @@ describe("Acceptance Test: Exercise Logging", () => {
     // Log warmup sets
     insertCompletedSet({
       completed_session_id: sessionId,
-      exercise_id: 1,
+      exercise_id: exerciseId1,
       set_number: 1,
       weight: 45, // Empty bar
       reps: 10,
@@ -380,7 +388,7 @@ describe("Acceptance Test: Exercise Logging", () => {
 
     insertCompletedSet({
       completed_session_id: sessionId,
-      exercise_id: 1,
+      exercise_id: exerciseId1,
       set_number: 2,
       weight: 95,
       reps: 5,
@@ -391,7 +399,7 @@ describe("Acceptance Test: Exercise Logging", () => {
     // Log working sets
     insertCompletedSet({
       completed_session_id: sessionId,
-      exercise_id: 1,
+      exercise_id: exerciseId1,
       set_number: 3,
       weight: 135,
       reps: 10,
@@ -404,7 +412,7 @@ describe("Acceptance Test: Exercise Logging", () => {
     expect(allSets).toHaveLength(3);
 
     // But last completed set excludes warmups
-    const lastWorkingSet = getLastCompletedSetForExercise(1);
+    const lastWorkingSet = getLastCompletedSetForExercise(exerciseId1);
     expect(lastWorkingSet?.is_warmup).toBe(false);
     expect(lastWorkingSet?.weight).toBe(135);
   });
@@ -421,7 +429,7 @@ describe("Acceptance Test: Exercise Logging", () => {
 
     insertCompletedSet({
       completed_session_id: session1Id,
-      exercise_id: 1,
+      exercise_id: exerciseId1,
       set_number: 1,
       weight: 135,
       reps: 10,
@@ -440,7 +448,7 @@ describe("Acceptance Test: Exercise Logging", () => {
 
     insertCompletedSet({
       completed_session_id: session2Id,
-      exercise_id: 1,
+      exercise_id: exerciseId1,
       set_number: 1,
       weight: 140,
       reps: 10,
@@ -453,11 +461,11 @@ describe("Acceptance Test: Exercise Logging", () => {
     expect(allSessions).toHaveLength(2);
 
     // Verify history shows progression
-    const benchPressSets = getCompletedSetsByExerciseId(1);
+    const benchPressSets = getCompletedSetsByExerciseId(exerciseId1);
     expect(benchPressSets.length).toBeGreaterThanOrEqual(2);
     
     // Most recent set should show progression
-    const lastSet = getLastCompletedSetForExercise(1);
+    const lastSet = getLastCompletedSetForExercise(exerciseId1);
     expect(lastSet?.weight).toBe(140); // Progressed from 135 to 140
   });
 });
