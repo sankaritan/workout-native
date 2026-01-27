@@ -1,5 +1,7 @@
 # Workout App
 
+> _"workout every day, keep doctor away"_
+
 A fitness/workout planning and tracking application built with Expo (React Native) for web and iOS platforms.
 
 ## Features
