@@ -8,6 +8,14 @@ Workout App helps you design, track, and analyze your fitness journey with three
 
 Review your fitness progress with a comprehensive history calendar that visualizes completed workouts. View detailed exercise-specific charts that track your strength gains over time. The app uses rule-based algorithms to distribute muscle groups across sessions and ensures proper recovery time between training the same muscles. All your data is persisted locally for seamless cross-platform use on web and iOS.
 
+### Main Features
+
+- **Personalized Workout Plans** - Generate custom programs via wizard based on frequency, equipment, and goals
+- **Real-Time Workout Tracking** - Log sets, reps, and weights with progressive overload support
+- **Progress Analytics** - View history calendar and exercise-specific strength progression charts
+- **Rule-Based Programming** - Smart muscle group distribution and recovery time management
+- **Cross-Platform** - Works seamlessly on web and iOS with local data persistence
+
 ## Tech Stack
 
 - **Framework**: Expo SDK 54 with React Native
