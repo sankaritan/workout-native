@@ -2,6 +2,12 @@
 
 A fitness/workout planning and tracking application built with Expo (React Native) for web and iOS platforms.
 
+## Features
+
+Workout App helps you design, track, and analyze your fitness journey with three core capabilities. Create personalized workout plans through an intuitive wizard that generates scientifically-backed programs based on your weekly frequency, available equipment, training focus (hypertrophy, strength, or endurance), and program duration. Track your workouts in real-time with an easy-to-use interface that logs sets, reps, and weights while showing your previous performance data to help you progressively overload.
+
+Review your fitness progress with a comprehensive history calendar that visualizes completed workouts and detailed exercise-specific charts that track your strength gains over time. The app uses rule-based algorithms to distribute muscle groups across sessions, ensures proper recovery time between training the same muscles, and prioritizes compound movements for maximum efficiency—all while persisting your data locally for seamless cross-platform use on web and iOS.
+
 ## Tech Stack
 
 - **Framework**: Expo SDK 54 with React Native
