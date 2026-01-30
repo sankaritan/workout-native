@@ -11,7 +11,7 @@ jest.mock("@expo/vector-icons", () => ({
 describe("WorkoutPlanCard", () => {
   const mockProgram: WorkoutProgram = {
     name: "Hypertrophy Program (3x/week)",
-    focus: "Hypertrophy",
+    focus: "Balanced",
     durationWeeks: 8,
     sessionsPerWeek: 3,
     sessions: [
@@ -41,7 +41,7 @@ describe("WorkoutPlanCard", () => {
 
   it("renders focus type", () => {
     render(<WorkoutPlanCard program={mockProgram} />);
-    expect(screen.getByText("Hypertrophy")).toBeTruthy();
+    expect(screen.getByText("Balanced")).toBeTruthy();
   });
 
   it("renders plural weeks correctly", () => {

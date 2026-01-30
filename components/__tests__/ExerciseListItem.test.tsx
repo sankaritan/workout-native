@@ -14,6 +14,7 @@ describe("ExerciseListItem", () => {
       id: 1,
       name: "Bench Press",
       muscle_group: "Chest",
+      muscle_groups: ["Chest", "Shoulders", "Arms"],
       equipment_required: "Barbell",
       is_compound: true,
       description: "Compound chest exercise",

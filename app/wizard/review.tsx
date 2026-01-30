@@ -56,7 +56,7 @@ export default function PlanReviewScreen() {
             );
           }
 
-          // Save to storage
+          // Save to storage and mark as active
           saveWorkoutProgram(program);
 
           // Update state with generated program
@@ -75,13 +75,12 @@ export default function PlanReviewScreen() {
 
   /**
    * Handle accept plan button press
-   * In future: save plan, mark as active, navigate to home
+   * Plan is already saved and marked as active during generation
    */
   const handleAcceptPlan = () => {
     console.log("Plan accepted!");
-    console.log("TODO: Save plan to database and mark as active");
 
-    // For now, reset wizard and go home
+    // Reset wizard and go home
     resetState();
     router.push("/");
   };

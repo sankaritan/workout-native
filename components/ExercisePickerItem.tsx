@@ -9,6 +9,7 @@ import { View, Text, Pressable } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { cn } from "@/lib/utils/cn";
 import type { Exercise } from "@/lib/storage/types";
+import { theme } from "@/constants/theme";
 
 export interface ExercisePickerItemProps {
   /** The exercise to display */
@@ -90,7 +91,7 @@ export function ExercisePickerItem({
       </View>
 
       {/* Chevron */}
-      <MaterialIcons name="chevron-right" size={24} color="#6b8779" />
+      <MaterialIcons name="chevron-right" size={24} color={theme.colors.text.muted } />
     </Pressable>
   );
 }

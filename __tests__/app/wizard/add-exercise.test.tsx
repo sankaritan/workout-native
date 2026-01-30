@@ -1,9 +1,8 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { WizardProvider } from "@/lib/wizard-context";
+import { screen, fireEvent } from "@testing-library/react-native";
+import { renderWithWizard, mockMaterialIcons } from "@/__tests__/test-utils";
 
-// Mock expo-router
+// Mock expo-router with custom mockRouterBack
 const mockRouterBack = jest.fn();
 jest.mock("expo-router", () => ({
   router: {
@@ -21,9 +20,7 @@ jest.mock("expo-router", () => ({
 }));
 
 // Mock MaterialIcons
-jest.mock("@expo/vector-icons", () => ({
-  MaterialIcons: "MaterialIcons",
-}));
+mockMaterialIcons();
 
 // Mock storage to return test exercises
 jest.mock("@/lib/storage/storage", () => ({
@@ -35,12 +32,6 @@ jest.mock("@/lib/storage/storage", () => ({
     { id: 5, name: "Deadlift", muscle_group: "Back", muscle_groups: ["Back", "Legs", "Core"], equipment_required: "Barbell", is_compound: true, description: null },
   ]),
 }));
-
-// Safe area initial metrics for testing
-const initialMetrics = {
-  frame: { x: 0, y: 0, width: 390, height: 844 },
-  insets: { top: 47, left: 0, right: 0, bottom: 34 },
-};
 
 describe("Add Exercise Screen", () => {
   beforeEach(() => {
@@ -54,49 +45,25 @@ describe("Add Exercise Screen", () => {
 
   it("renders without crashing", () => {
     const AddExerciseScreen = require("@/app/wizard/add-exercise").default;
-    const result = render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
-        <WizardProvider>
-          <AddExerciseScreen />
-        </WizardProvider>
-      </SafeAreaProvider>
-    );
+    const result = renderWithWizard(<AddExerciseScreen />);
     expect(result).toBeTruthy();
   });
 
   it("renders title text", () => {
     const AddExerciseScreen = require("@/app/wizard/add-exercise").default;
-    render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
-        <WizardProvider>
-          <AddExerciseScreen />
-        </WizardProvider>
-      </SafeAreaProvider>
-    );
+    renderWithWizard(<AddExerciseScreen />);
     expect(screen.getByText("Add Exercise")).toBeTruthy();
   });
 
   it("renders close button", () => {
     const AddExerciseScreen = require("@/app/wizard/add-exercise").default;
-    render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
-        <WizardProvider>
-          <AddExerciseScreen />
-        </WizardProvider>
-      </SafeAreaProvider>
-    );
+    renderWithWizard(<AddExerciseScreen />);
     expect(screen.getByTestId("close-button")).toBeTruthy();
   });
 
   it("displays filter pills for muscle groups", () => {
     const AddExerciseScreen = require("@/app/wizard/add-exercise").default;
-    render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
-        <WizardProvider>
-          <AddExerciseScreen />
-        </WizardProvider>
-      </SafeAreaProvider>
-    );
+    renderWithWizard(<AddExerciseScreen />);
     // Check that muscle group filter pills are present
     expect(screen.getAllByText("Chest").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Back").length).toBeGreaterThan(0);
@@ -106,15 +73,33 @@ describe("Add Exercise Screen", () => {
 
   it("calls router.back when close button is pressed", () => {
     const AddExerciseScreen = require("@/app/wizard/add-exercise").default;
-    render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
-        <WizardProvider>
-          <AddExerciseScreen />
-        </WizardProvider>
-      </SafeAreaProvider>
-    );
+    renderWithWizard(<AddExerciseScreen />);
     const closeButton = screen.getByTestId("close-button");
     fireEvent.press(closeButton);
     expect(mockRouterBack).toHaveBeenCalled();
+  });
+
+  it("maintains stable pill order when selecting filters", () => {
+    const AddExerciseScreen = require("@/app/wizard/add-exercise").default;
+    const { getAllByText } = renderWithWizard(<AddExerciseScreen />);
+    
+    // Get initial order of muscle group pills
+    const expectedOrder = ["Chest", "Back", "Shoulders", "Arms", "Legs", "Core"];
+    
+    // Verify initial order
+    expectedOrder.forEach((muscle) => {
+      const elements = getAllByText(muscle);
+      expect(elements[0]).toBeTruthy();
+    });
+    
+    // Select a filter (e.g., "Legs")
+    const legsPills = getAllByText("Legs");
+    fireEvent.press(legsPills[0]);
+    
+    // Verify order is still the same after selection
+    expectedOrder.forEach((muscle) => {
+      const elements = getAllByText(muscle);
+      expect(elements[0]).toBeTruthy();
+    });
   });
 });

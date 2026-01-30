@@ -1,6 +1,22 @@
 # Workout App
 
+> _"workout every day, keep doctor away"_
+
 A fitness/workout planning and tracking application built with Expo (React Native) for web and iOS platforms.
+
+## Features
+
+Workout App helps you design, track, and analyze your fitness journey with three core capabilities. Create personalized workout plans through an intuitive wizard that generates scientifically-backed programs based on your weekly frequency, available equipment, and training focus. Choose between hypertrophy, strength, or endurance goals, and select program durations from 4 to 12 weeks. Track your workouts in real-time with an easy-to-use interface that logs sets, reps, and weights while showing your previous performance data to help you progressively overload.
+
+Review your fitness progress with a comprehensive history calendar that visualizes completed workouts. View detailed exercise-specific charts that track your strength gains over time. The app uses rule-based algorithms to distribute muscle groups across sessions and ensures proper recovery time between training the same muscles. All your data is persisted locally for seamless cross-platform use on web and iOS.
+
+### Main Features
+
+- **Personalized Workout Plans** - Generate custom programs via wizard based on frequency, equipment, and goals
+- **Real-Time Workout Tracking** - Log sets, reps, and weights with progressive overload support
+- **Progress Analytics** - View history calendar and exercise-specific strength progression charts
+- **Rule-Based Programming** - Smart muscle group distribution and recovery time management
+- **Cross-Platform** - Works seamlessly on web and iOS with local data persistence
 
 ## Tech Stack
 
@@ -76,7 +92,6 @@ workout-app/
 │   └── _layout.tsx        # Root layout with fonts
 ├── components/
 │   ├── ui/                # Reusable UI components (Button, etc.)
-│   ├── layout/            # Layout components
 │   └── __tests__/         # Component tests
 ├── lib/
 │   ├── utils/             # Utility functions (cn.ts for classnames)

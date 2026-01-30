@@ -8,6 +8,7 @@ import React from "react";
 import { Pressable, View, Text, type PressableProps } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { cn } from "@/lib/utils/cn";
+import { theme } from "@/constants/theme";
 
 export interface EquipmentCardProps extends Omit<PressableProps, "children"> {
   /** Equipment name */
@@ -72,7 +73,7 @@ export function EquipmentCard({
       {/* Checkmark (top right) - only show when selected */}
       {selected && (
         <View className="absolute right-3 top-3 flex size-5 items-center justify-center rounded-full bg-primary">
-          <MaterialIcons name="check" size={16} color="#000000" />
+          <MaterialIcons name="check" size={16} color={theme.colors.surface.dark } />
         </View>
       )}
 
@@ -88,7 +89,7 @@ export function EquipmentCard({
         <MaterialIcons
           name={icon}
           size={28}
-          color={selected ? "#13ec6d" : "#ffffff"}
+          color={selected ? theme.colors.primary.DEFAULT : theme.colors.text.primary}
         />
       </View>
 

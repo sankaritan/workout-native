@@ -220,13 +220,6 @@ export function getExercisesByMuscleGroup(muscleGroup: MuscleGroup): Exercise[] 
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export function getExercisesByEquipment(equipment: Equipment): Exercise[] {
-  ensureInitialized();
-  return cache.exercises
-    .filter((e) => e.equipment_required === equipment)
-    .sort((a, b) => a.name.localeCompare(b.name));
-}
-
 export function getCompoundExercises(): Exercise[] {
   ensureInitialized();
   return cache.exercises

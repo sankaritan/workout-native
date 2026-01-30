@@ -6,7 +6,6 @@ import {
   selectExercisesForMuscles,
   orderExercises,
   selectInitialExercises,
-  selectInitialExercisesByMuscleGroup,
 } from "@/lib/workout-generator/exercise-selector";
 import type { Exercise, MuscleGroup } from "@/lib/storage/types";
 
@@ -285,131 +284,6 @@ describe("Exercise Selector", () => {
     it("handles empty array", () => {
       const result = orderExercises([]);
       expect(result).toHaveLength(0);
-    });
-  });
-
-  describe("selectInitialExercisesByMuscleGroup", () => {
-    it("returns entries only for muscle groups used in 2-day program (no Core)", () => {
-      const result = selectInitialExercisesByMuscleGroup(
-        comprehensiveMockExercises,
-        ["Barbell", "Dumbbell", "Bodyweight"],
-        2
-      );
-
-      expect(result).toHaveLength(5); // Chest, Back, Legs, Shoulders, Arms (no Core)
-      const muscleGroups = result.map(entry => entry.muscleGroup);
-      expect(muscleGroups).toContain("Chest");
-      expect(muscleGroups).toContain("Back");
-      expect(muscleGroups).toContain("Legs");
-      expect(muscleGroups).toContain("Shoulders");
-      expect(muscleGroups).toContain("Arms");
-      expect(muscleGroups).not.toContain("Core");
-    });
-
-    it("returns entries including Core for 5-day program", () => {
-      const result = selectInitialExercisesByMuscleGroup(
-        comprehensiveMockExercises,
-        ["Barbell", "Dumbbell", "Bodyweight"],
-        5
-      );
-
-      expect(result).toHaveLength(6); // All muscle groups including Core
-      const muscleGroups = result.map(entry => entry.muscleGroup);
-      expect(muscleGroups).toContain("Core");
-    });
-
-    it("returns 2-3 exercises per muscle group", () => {
-      const result = selectInitialExercisesByMuscleGroup(
-        comprehensiveMockExercises,
-        ["Barbell", "Dumbbell", "Bodyweight"],
-        3
-      );
-
-      result.forEach(entry => {
-        expect(entry.exercises.length).toBeGreaterThanOrEqual(1);
-        expect(entry.exercises.length).toBeLessThanOrEqual(3);
-      });
-    });
-
-    it("filters by equipment", () => {
-      const result = selectInitialExercisesByMuscleGroup(
-        comprehensiveMockExercises,
-        ["Bodyweight"], // Only bodyweight
-        3
-      );
-
-      result.forEach(entry => {
-        entry.exercises.forEach(exercise => {
-          expect(exercise.equipment_required).toBe("Bodyweight");
-        });
-      });
-    });
-
-    it("prioritizes compound exercises", () => {
-      const result = selectInitialExercisesByMuscleGroup(
-        comprehensiveMockExercises,
-        ["Barbell", "Dumbbell", "Bodyweight"],
-        3
-      );
-
-      // Check that when there are compounds available, they appear first
-      result.forEach(entry => {
-        if (entry.exercises.length > 1) {
-          const hasCompound = entry.exercises.some(e => e.is_compound);
-          if (hasCompound) {
-            // First exercise should be compound if any are available
-            const firstCompoundIndex = entry.exercises.findIndex(e => e.is_compound);
-            expect(firstCompoundIndex).toBe(0);
-          }
-        }
-      });
-    });
-
-    it("returns empty exercises array when no exercises match for a muscle group", () => {
-      // Only include exercises for Chest and Back
-      const limitedExercises: Exercise[] = [
-        { id: 1, name: "Bench Press", muscle_group: "Chest", muscle_groups: ["Chest", "Shoulders", "Arms"], equipment_required: "Barbell", is_compound: true, description: null },
-        { id: 2, name: "Pull-up", muscle_group: "Back", muscle_groups: ["Back", "Arms"], equipment_required: "Bodyweight", is_compound: true, description: null },
-      ];
-
-      const result = selectInitialExercisesByMuscleGroup(
-        limitedExercises,
-        ["Barbell", "Bodyweight"],
-        3
-      );
-
-      // For 3-day program, should have 5 muscle groups (no Core)
-      expect(result).toHaveLength(5);
-
-      const legsEntry = result.find(e => e.muscleGroup === "Legs");
-      expect(legsEntry?.exercises).toHaveLength(0);
-    });
-
-    it("includes bodyweight exercises regardless of equipment selection", () => {
-      const result = selectInitialExercisesByMuscleGroup(
-        comprehensiveMockExercises,
-        ["Barbell"], // Only barbell selected, but bodyweight should still be included
-        3
-      );
-
-      const hasBodyweight = result.some(entry =>
-        entry.exercises.some(e => e.equipment_required === "Bodyweight")
-      );
-      expect(hasBodyweight).toBe(true);
-    });
-
-    it("returns all exercises for same muscle group together", () => {
-      const result = selectInitialExercisesByMuscleGroup(
-        comprehensiveMockExercises,
-        ["Barbell", "Dumbbell", "Bodyweight"],
-        3
-      );
-
-      result.forEach(entry => {
-        entry.exercises.forEach(exercise => {
-          expect(exercise.muscle_group).toBe(entry.muscleGroup);
-        });
-      });
     });
   });
 

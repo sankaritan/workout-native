@@ -1,33 +1,9 @@
 import React from "react";
-import { render, screen } from "@testing-library/react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { WizardProvider } from "@/lib/wizard-context";
+import { screen } from "@testing-library/react-native";
+import { renderWithWizard, setupWizardMocks } from "@/__tests__/test-utils";
 
-// Mock expo-router
-jest.mock("expo-router", () => ({
-  router: {
-    push: jest.fn(),
-    back: jest.fn(),
-  },
-  useRouter: () => ({
-    push: jest.fn(),
-    back: jest.fn(),
-  }),
-  Stack: {
-    Screen: () => null,
-  },
-}));
-
-// Mock MaterialIcons
-jest.mock("@expo/vector-icons", () => ({
-  MaterialIcons: "MaterialIcons",
-}));
-
-// Safe area initial metrics for testing
-const initialMetrics = {
-  frame: { x: 0, y: 0, width: 390, height: 844 },
-  insets: { top: 47, left: 0, right: 0, bottom: 34 },
-};
+// Setup common mocks
+setupWizardMocks();
 
 describe("Focus Screen", () => {
   // Simple rendering test to verify module loads
@@ -38,37 +14,19 @@ describe("Focus Screen", () => {
 
   it("renders without crashing", () => {
     const FocusScreen = require("@/app/wizard/focus").default;
-    const result = render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
-        <WizardProvider>
-          <FocusScreen />
-        </WizardProvider>
-      </SafeAreaProvider>
-    );
+    const result = renderWithWizard(<FocusScreen />);
     expect(result).toBeTruthy();
   });
 
   it("renders title text", () => {
     const FocusScreen = require("@/app/wizard/focus").default;
-    render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
-        <WizardProvider>
-          <FocusScreen />
-        </WizardProvider>
-      </SafeAreaProvider>
-    );
+    renderWithWizard(<FocusScreen />);
     expect(screen.getByText("Define Your Goal")).toBeTruthy();
   });
 
   it("renders all focus options", () => {
     const FocusScreen = require("@/app/wizard/focus").default;
-    render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
-        <WizardProvider>
-          <FocusScreen />
-        </WizardProvider>
-      </SafeAreaProvider>
-    );
+    renderWithWizard(<FocusScreen />);
 
     expect(screen.getAllByText("Balanced").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Strength").length).toBeGreaterThan(0);
@@ -77,25 +35,13 @@ describe("Focus Screen", () => {
 
   it("renders step indicator", () => {
     const FocusScreen = require("@/app/wizard/focus").default;
-    render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
-        <WizardProvider>
-          <FocusScreen />
-        </WizardProvider>
-      </SafeAreaProvider>
-    );
+    renderWithWizard(<FocusScreen />);
     expect(screen.getByText("Step 3 of 5")).toBeTruthy();
   });
 
   it("renders continue button", () => {
     const FocusScreen = require("@/app/wizard/focus").default;
-    render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
-        <WizardProvider>
-          <FocusScreen />
-        </WizardProvider>
-      </SafeAreaProvider>
-    );
+    renderWithWizard(<FocusScreen />);
     expect(screen.getByText("Continue")).toBeTruthy();
   });
 });

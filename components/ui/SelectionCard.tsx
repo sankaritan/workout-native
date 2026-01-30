@@ -8,6 +8,7 @@ import React from "react";
 import { Pressable, View, Text, type PressableProps } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { cn } from "@/lib/utils/cn";
+import { theme } from "@/constants/theme";
 
 export interface SelectionCardProps extends Omit<PressableProps, "children"> {
   /** Label text (e.g., "Regular", "Casual") */
@@ -67,7 +68,7 @@ export function SelectionCard({
       style={{
         opacity: disabled ? 0.5 : 1,
         ...(selected && {
-          shadowColor: "#13ec6d",
+          shadowColor: theme.colors.primary.DEFAULT,
           shadowOffset: { width: 0, height: 0 },
           shadowOpacity: 0.15,
           shadowRadius: 20,
@@ -79,7 +80,7 @@ export function SelectionCard({
       {/* Check icon (top right) */}
       {selected && (
         <View className="absolute top-3 right-3">
-          <MaterialIcons name="check-circle" size={24} color="#13ec6d" />
+          <MaterialIcons name="check-circle" size={24} color={theme.colors.primary.DEFAULT } />
         </View>
       )}
 
@@ -95,7 +96,7 @@ export function SelectionCard({
           <MaterialIcons
             name={icon}
             size={28}
-            color={selected ? "#13ec6d" : "#6b8779"}
+            color={selected ? theme.colors.primary.DEFAULT : theme.colors.text.muted}
           />
         </View>
       )}

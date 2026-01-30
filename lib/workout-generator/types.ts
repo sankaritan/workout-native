@@ -66,13 +66,3 @@ export interface MuscleVolume {
  * Training split type
  */
 export type SplitType = "Full Body" | "Upper/Lower" | "Push/Pull/Legs" | "Body Part Split";
-
-/**
- * Exercises grouped by muscle group
- * @deprecated Use flat Exercise[] array instead. This type is kept for backward compatibility only.
- * The new multi-muscle group system uses Exercise.muscle_groups array for compound exercises.
- */
-export interface MuscleGroupExercises {
-  muscleGroup: MuscleGroup;
-  exercises: Exercise[];
-}

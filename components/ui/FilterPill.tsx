@@ -18,7 +18,7 @@ export function FilterPill({ label, selected, onToggle }: FilterPillProps) {
     <Pressable
       onPress={onToggle}
       className={cn(
-        "px-4 py-2 rounded-full mr-2",
+        "px-4 py-2 rounded-full",
         selected
           ? "bg-primary"
           : "bg-surface-dark border border-gray-600"

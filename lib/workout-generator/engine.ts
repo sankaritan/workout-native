@@ -21,7 +21,6 @@ import type {
   ProgramSession,
   ProgramExercise,
   SetsRepsScheme,
-  MuscleGroupExercises,
 } from "./types";
 import type { Exercise, MuscleGroup } from "@/lib/storage/types";
 
@@ -571,7 +570,7 @@ function validateMuscleGroupCoverage(
   });
 
   const missingGroups = requiredMuscleGroups.filter(
-    (mg) => !coveredMuscleGroups.has(mg)
+    (mg: MuscleGroup) => !coveredMuscleGroups.has(mg)
   );
 
   if (missingGroups.length > 0) {

@@ -134,28 +134,3 @@ export async function clearAllPreferences(): Promise<void> {
     throw error;
   }
 }
-
-/**
- * Initialize preferences with default values if not set
- * Useful to call on app startup
- */
-export async function initializePreferences(): Promise<void> {
-  try {
-    const keys = await AsyncStorage.getAllKeys();
-    const hasOnboarding = keys.includes(KEYS.ONBOARDING_COMPLETED);
-    const hasUnit = keys.includes(KEYS.UNIT_PREFERENCE);
-
-    if (!hasOnboarding) {
-      await setOnboardingCompleted(DEFAULTS.onboarding_completed);
-    }
-
-    if (!hasUnit) {
-      await setUnitPreference(DEFAULTS.unit_preference);
-    }
-
-    console.log("Preferences initialized");
-  } catch (error) {
-    console.error("Failed to initialize preferences:", error);
-    throw error;
-  }
-}

@@ -10,7 +10,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useWizard } from "@/lib/wizard-context";
 import { ExercisePickerItem } from "@/components/ExercisePickerItem";
-import { FilterPill } from "@/components/FilterPill";
+import { FilterPill } from "@/components/ui/FilterPill";
 import { getAllExercises } from "@/lib/storage/storage";
 import { filterExercisesByEquipment, filterExercisesByMuscleGroups } from "@/lib/workout-generator/exercise-selector";
 import type { Exercise, MuscleGroup } from "@/lib/storage/types";
@@ -141,11 +141,7 @@ export default function AddExerciseScreen() {
         </View>
 
         {/* Filter Pills */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingRight: 16 }}
-        >
+        <View className="flex-row flex-wrap gap-2">
           {MUSCLE_GROUPS.map((muscle) => (
             <FilterPill
               key={muscle}
@@ -159,7 +155,7 @@ export default function AddExerciseScreen() {
             selected={compoundOnly}
             onToggle={() => setCompoundOnly(!compoundOnly)}
           />
-        </ScrollView>
+        </View>
       </View>
 
       {/* Exercise List */}

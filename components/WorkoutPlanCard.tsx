@@ -7,6 +7,7 @@ import React from "react";
 import { View, Text } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import type { WorkoutProgram } from "@/lib/workout-generator/types";
+import { theme } from "@/constants/theme";
 
 export interface WorkoutPlanCardProps {
   program: WorkoutProgram;
@@ -27,7 +28,7 @@ export function WorkoutPlanCard({ program }: WorkoutPlanCardProps) {
         {/* Duration */}
         <View className="flex-row items-center">
           <View className="bg-primary/20 rounded-full size-10 items-center justify-center mr-3">
-            <MaterialIcons name="calendar-today" size={20} color="#13ec6d" />
+            <MaterialIcons name="calendar-today" size={20} color={theme.colors.primary.DEFAULT } />
           </View>
           <View>
             <Text className="text-xs text-gray-400">
@@ -42,7 +43,7 @@ export function WorkoutPlanCard({ program }: WorkoutPlanCardProps) {
         {/* Frequency */}
         <View className="flex-row items-center">
           <View className="bg-primary/20 rounded-full size-10 items-center justify-center mr-3">
-            <MaterialIcons name="fitness-center" size={20} color="#13ec6d" />
+            <MaterialIcons name="fitness-center" size={20} color={theme.colors.primary.DEFAULT } />
           </View>
           <View>
             <Text className="text-xs text-gray-400">
@@ -57,7 +58,7 @@ export function WorkoutPlanCard({ program }: WorkoutPlanCardProps) {
         {/* Focus */}
         <View className="flex-row items-center">
           <View className="bg-primary/20 rounded-full size-10 items-center justify-center mr-3">
-            <MaterialIcons name="trending-up" size={20} color="#13ec6d" />
+            <MaterialIcons name="trending-up" size={20} color={theme.colors.primary.DEFAULT } />
           </View>
           <View>
             <Text className="text-xs text-gray-400">

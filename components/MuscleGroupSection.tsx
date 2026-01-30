@@ -9,6 +9,7 @@ import { View, Text, Pressable } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ExerciseCardWithActions } from "./ExerciseCardWithActions";
 import type { Exercise, MuscleGroup } from "@/lib/storage/types";
+import { theme } from "@/constants/theme";
 
 export interface MuscleGroupSectionProps {
   /** The muscle group name */
@@ -74,7 +75,7 @@ export function MuscleGroupSection({
           onPress={onAdd}
           className="flex-row items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-gray-600 active:bg-white/5"
         >
-          <MaterialIcons name="add" size={20} color="#6b8779" />
+          <MaterialIcons name="add" size={20} color={theme.colors.text.muted } />
           <Text className="text-gray-400 font-medium">
             Add Exercise
           </Text>
