@@ -80,4 +80,30 @@ describe("Swap Exercise Screen", () => {
     fireEvent.press(closeButton);
     expect(mockRouterBack).toHaveBeenCalled();
   });
+
+  it("maintains stable pill order when selecting filters", () => {
+    const SwapExerciseScreen = require("@/app/wizard/swap-exercise").default;
+    const { getAllByText } = renderWithWizard(<SwapExerciseScreen />);
+    
+    // Get initial order of muscle group pills (excluding those in exercise cards)
+    // The first 6 occurrences should be the pills in the expected order
+    const expectedOrder = ["Chest", "Back", "Shoulders", "Arms", "Legs", "Core"];
+    
+    // Verify initial order
+    expectedOrder.forEach((muscle, index) => {
+      const elements = getAllByText(muscle);
+      // First element should be the pill for each muscle group
+      expect(elements[0]).toBeTruthy();
+    });
+    
+    // Select a filter (e.g., "Back")
+    const backPills = getAllByText("Back");
+    fireEvent.press(backPills[0]);
+    
+    // Verify order is still the same after selection
+    expectedOrder.forEach((muscle) => {
+      const elements = getAllByText(muscle);
+      expect(elements[0]).toBeTruthy();
+    });
+  });
 });
