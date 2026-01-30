@@ -141,11 +141,7 @@ export default function AddExerciseScreen() {
         </View>
 
         {/* Filter Pills */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingRight: 16 }}
-        >
+        <View className="flex-row flex-wrap gap-2">
           {MUSCLE_GROUPS.map((muscle) => (
             <FilterPill
               key={muscle}
@@ -159,7 +155,7 @@ export default function AddExerciseScreen() {
             selected={compoundOnly}
             onToggle={() => setCompoundOnly(!compoundOnly)}
           />
-        </ScrollView>
+        </View>
       </View>
 
       {/* Exercise List */}

@@ -42,18 +42,6 @@ export default function SwapExerciseScreen() {
     }
   }, [currentExercise]);
 
-  // Sort muscle groups to show selected filters first
-  const sortedMuscleGroups = useMemo(() => {
-    return [...MUSCLE_GROUPS].sort((a, b) => {
-      const aSelected = selectedMuscleFilters.includes(a);
-      const bSelected = selectedMuscleFilters.includes(b);
-
-      if (aSelected && !bSelected) return -1;
-      if (!aSelected && bSelected) return 1;
-      return 0; // Keep original order for same selection state
-    });
-  }, [selectedMuscleFilters]);
-
   // Get available exercises for swapping
   const availableExercises = useMemo(() => {
     const allExercises = getAllExercises();
@@ -163,12 +151,8 @@ export default function SwapExerciseScreen() {
         </View>
 
         {/* Filter Pills */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingRight: 16 }}
-        >
-          {sortedMuscleGroups.map((muscle) => (
+        <View className="flex-row flex-wrap gap-2">
+          {MUSCLE_GROUPS.map((muscle) => (
             <FilterPill
               key={muscle}
               label={muscle}
@@ -181,7 +165,7 @@ export default function SwapExerciseScreen() {
             selected={compoundOnly}
             onToggle={() => setCompoundOnly(!compoundOnly)}
           />
-        </ScrollView>
+        </View>
       </View>
 
       {/* Exercise List */}
