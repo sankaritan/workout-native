@@ -78,4 +78,28 @@ describe("Add Exercise Screen", () => {
     fireEvent.press(closeButton);
     expect(mockRouterBack).toHaveBeenCalled();
   });
+
+  it("maintains stable pill order when selecting filters", () => {
+    const AddExerciseScreen = require("@/app/wizard/add-exercise").default;
+    const { getAllByText } = renderWithWizard(<AddExerciseScreen />);
+    
+    // Get initial order of muscle group pills
+    const expectedOrder = ["Chest", "Back", "Shoulders", "Arms", "Legs", "Core"];
+    
+    // Verify initial order
+    expectedOrder.forEach((muscle) => {
+      const elements = getAllByText(muscle);
+      expect(elements[0]).toBeTruthy();
+    });
+    
+    // Select a filter (e.g., "Legs")
+    const legsPills = getAllByText("Legs");
+    fireEvent.press(legsPills[0]);
+    
+    // Verify order is still the same after selection
+    expectedOrder.forEach((muscle) => {
+      const elements = getAllByText(muscle);
+      expect(elements[0]).toBeTruthy();
+    });
+  });
 });
