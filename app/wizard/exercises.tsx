@@ -4,31 +4,31 @@
  * Allows users to customize selected exercises (flat list with muscle group badges)
  */
 
-import React, { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
-import { router } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useWizard } from "@/lib/wizard-context";
-import { cn } from "@/lib/utils/cn";
 import { ExerciseCardWithActions } from "@/components/ExerciseCardWithActions";
-import {
-  generateWorkoutProgramFromCustomExercises,
-  extractExercisesFromProgram,
-} from "@/lib/workout-generator/engine";
-import { selectInitialExercises } from "@/lib/workout-generator/exercise-selector";
 import { getAllExercises } from "@/lib/storage/storage";
 import type { Exercise } from "@/lib/storage/types";
+import { cn } from "@/lib/utils/cn";
+import { useWizard } from "@/lib/wizard-context";
+import {
+  extractExercisesFromProgram,
+  generateWorkoutProgramFromCustomExercises,
+} from "@/lib/workout-generator/engine";
+import { selectInitialExercises } from "@/lib/workout-generator/exercise-selector";
+import { MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Exercise count limits
-const MIN_EXERCISES = 6;
+const MIN_EXERCISES = 1;
 const MAX_EXERCISES = 20;
 
 export default function ExercisesScreen() {
   const insets = useSafeAreaInsets();
   const { state, updateState } = useWizard();
   const [customExercises, setCustomExercises] = useState<Exercise[]>(
-    state.customExercises || []
+    state.customExercises || [],
   );
 
   // Initialize or regenerate workout program when equipment or frequency changes
@@ -58,7 +58,7 @@ export default function ExercisesScreen() {
       const initialExercises = selectInitialExercises(
         allExercises,
         state.equipment,
-        state.frequency
+        state.frequency,
       );
 
       // Step 2: Generate full workout program from these exercises
@@ -68,7 +68,7 @@ export default function ExercisesScreen() {
           equipment: state.equipment,
           focus: state.focus,
         },
-        initialExercises
+        initialExercises,
       );
 
       // Step 3: Extract exercises from program (may differ from input due to distribution logic)
@@ -91,7 +91,7 @@ export default function ExercisesScreen() {
       setCustomExercises(state.customExercises);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.equipment, state.frequency, state.focus]);
+  }, [state.equipment, state.frequency, state.focus, state.customExercises]);
 
   /**
    * Handle swap exercise - navigate to swap screen
@@ -123,8 +123,12 @@ export default function ExercisesScreen() {
    * Handle continue button press
    */
   const handleContinue = () => {
-    // Make sure state is updated before navigating
-    updateState({ customExercises });
+    // Clear generated program and update exercises before navigating
+    // This forces regeneration in review screen with current exercises
+    updateState({
+      customExercises,
+      generatedProgram: undefined
+    });
     router.push("/wizard/review");
   };
 
@@ -143,7 +147,10 @@ export default function ExercisesScreen() {
   return (
     <View className="flex-1 bg-background-dark w-full">
       {/* Header */}
-      <View className="bg-background-dark/80 px-4 pb-2 w-full" style={{ paddingTop: insets.top + 16 }}>
+      <View
+        className="bg-background-dark/80 px-4 pb-2 w-full"
+        style={{ paddingTop: insets.top + 16 }}
+      >
         <View className="flex-row items-center justify-between mb-4">
           {/* Back button */}
           <Pressable
@@ -209,8 +216,8 @@ export default function ExercisesScreen() {
               customExercises.length < MIN_EXERCISES
                 ? "bg-red-500/20"
                 : customExercises.length > MAX_EXERCISES
-                ? "bg-red-500/20"
-                : "bg-primary/20"
+                  ? "bg-red-500/20"
+                  : "bg-primary/20",
             )}
           >
             <Text
@@ -219,15 +226,15 @@ export default function ExercisesScreen() {
                 customExercises.length < MIN_EXERCISES
                   ? "text-red-500"
                   : customExercises.length > MAX_EXERCISES
-                  ? "text-red-500"
-                  : "text-primary"
+                    ? "text-red-500"
+                    : "text-primary",
               )}
             >
               {customExercises.length < MIN_EXERCISES
                 ? `Need ${MIN_EXERCISES - customExercises.length} more`
                 : customExercises.length > MAX_EXERCISES
-                ? `Remove ${customExercises.length - MAX_EXERCISES}`
-                : "Ready"}
+                  ? `Remove ${customExercises.length - MAX_EXERCISES}`
+                  : "Ready"}
             </Text>
           </View>
         </View>
@@ -254,7 +261,11 @@ export default function ExercisesScreen() {
             accessibilityLabel="Add exercise"
             className="flex-row items-center justify-center bg-surface-dark rounded-xl p-4 mt-2 active:bg-surface-dark-highlight"
           >
-            <MaterialIcons name="add-circle-outline" size={24} color="#6b8779" />
+            <MaterialIcons
+              name="add-circle-outline"
+              size={24}
+              color="#6b8779"
+            />
             <Text className="text-primary font-semibold text-base ml-2">
               Add Exercise
             </Text>
@@ -278,15 +289,13 @@ export default function ExercisesScreen() {
             "flex-row w-full items-center justify-center gap-2 rounded-xl px-6 py-4 text-base font-bold shadow-lg transition-transform",
             isContinueDisabled
               ? "bg-surface-dark opacity-50"
-              : "bg-primary active:scale-[0.98] shadow-primary/20"
+              : "bg-primary active:scale-[0.98] shadow-primary/20",
           )}
         >
           <Text
             className={cn(
               "text-base font-bold",
-              isContinueDisabled
-                ? "text-gray-400"
-                : "text-background-dark"
+              isContinueDisabled ? "text-gray-400" : "text-background-dark",
             )}
           >
             Continue
