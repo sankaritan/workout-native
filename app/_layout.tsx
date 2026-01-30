@@ -1,29 +1,34 @@
-import { useEffect, useState } from "react";
-import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import * as SplashScreen from "expo-splash-screen";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 import {
-  useFonts,
+  seedExercises,
+  seedMockWorkoutHistory,
+  seedTestWorkoutPlan,
+} from "@/lib/storage/seed-data";
+import { initStorage } from "@/lib/storage/storage";
+import {
   Lexend_300Light,
   Lexend_400Regular,
   Lexend_500Medium,
   Lexend_600SemiBold,
   Lexend_700Bold,
+  useFonts,
 } from "@expo-google-fonts/lexend";
 import {
   NotoSans_400Regular,
   NotoSans_500Medium,
   NotoSans_700Bold,
 } from "@expo-google-fonts/noto-sans";
-import { initStorage } from "@/lib/storage/storage";
-import { seedExercises, seedTestWorkoutPlan, seedMockWorkoutHistory } from "@/lib/storage/seed-data";
+import { MaterialIcons } from "@expo/vector-icons";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import { useEffect, useState } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import "../global.css";
 
 export {
   // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
+  ErrorBoundary
 } from "expo-router";
 
 export const unstable_settings = {
@@ -45,6 +50,7 @@ export default function RootLayout() {
     NotoSans_400Regular,
     NotoSans_500Medium,
     NotoSans_700Bold,
+    ...MaterialIcons.font,
   });
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
@@ -96,7 +102,7 @@ export default function RootLayout() {
           name="wizard"
           options={{
             headerShown: false,
-            animation: "slide_from_right"
+            animation: "slide_from_right",
           }}
         />
         <Stack.Screen name="modal" options={{ presentation: "modal" }} />
