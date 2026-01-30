@@ -1,4 +1,6 @@
 import { ScrollViewStyleReset } from 'expo-router/html';
+// @ts-ignore - ttf files are handled by Metro bundler
+import MaterialIconsFont from '@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.ttf';
 
 // This file is web-only and used to configure the root HTML for every
 // web page during static rendering.
@@ -20,6 +22,10 @@ export default function Root({ children }: { children: React.ReactNode }) {
 
         {/* Using raw CSS styles as an escape-hatch to ensure the background color never flickers in dark-mode. */}
         <style dangerouslySetInnerHTML={{ __html: responsiveBackground }} />
+        
+        {/* Icon font declarations for @expo/vector-icons */}
+        <style dangerouslySetInnerHTML={{ __html: iconFontStyles }} />
+        
         {/* Add any additional <head> elements that you want globally available on web... */}
       </head>
       <body>{children}</body>
@@ -36,3 +42,13 @@ body {
     background-color: #000;
   }
 }`;
+
+const iconFontStyles = `
+@font-face {
+  font-family: 'material';
+  src: url(${MaterialIconsFont}) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+`;
