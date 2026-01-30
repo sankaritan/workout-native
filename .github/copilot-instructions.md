@@ -81,7 +81,6 @@ workout-native/
 ├── app/                    # Expo Router routes (file-based routing)
 │   ├── (tabs)/            # Route groups (parentheses don't affect URL structure)
 │   │   ├── index.tsx      # Home tab route (URL: /)
-│   │   ├── plans.tsx      # Plans tab route (URL: /plans)
 │   │   ├── history.tsx    # History tab route (URL: /history)
 │   │   └── _layout.tsx    # Tabs layout with navigation
 │   ├── +html.tsx          # Special route: Custom HTML template for web
@@ -98,8 +97,10 @@ workout-native/
 ├── __tests__/             # Integration/route tests (NOT in app/)
 ├── design-assets/         # Original HTML mockups for reference
 │   └── stitch_workout_frequency_selection/
-│       ├── code.html      # HTML mockup code
-│       └── screen.png     # Screenshot of mockup
+│       ├── workout_frequency_selection/  # Screen mockups
+│       ├── equipment_selection/          # Each subdirectory has:
+│       ├── generated_workout_plan/       #   - code.html (HTML mockup)
+│       └── ...                           #   - screen.png (screenshot)
 ├── global.css             # Global styles for NativeWind
 ├── tailwind.config.js     # Tailwind configuration with custom colors
 ├── jest.config.js         # Jest configuration
@@ -158,10 +159,12 @@ describe('Button', () => {
 ### Custom Colors (configured in tailwind.config.js)
 
 ```javascript
-primary:          #13ec6d    // Bright green for primary actions
+primary:          #13ec6d    // Bright green (DEFAULT), also has dark variant #0fa64d
 background-dark:  #102218    // Dark background
 surface-dark:     #1c2e24    // Dark surface for cards
+surface-dark-highlight: #25362e  // Highlighted dark surface
 text-muted:       #9db9a8    // Muted text color
+border:           #28392f    // Border color (DEFAULT)
 ```
 
 ### Styling Patterns
@@ -285,7 +288,7 @@ import { Button } from '@/components/ui/Button';
 
 ## Additional Notes
 
-1. **Design Assets**: Original mockups in `design-assets/stitch_workout_frequency_selection/` serve as reference for implementing screens. Each has `code.html` and `screen.png`.
+1. **Design Assets**: Original mockups in `design-assets/stitch_workout_frequency_selection/` serve as reference for implementing screens. This directory contains subdirectories for different screens (e.g., `workout_frequency_selection/`, `equipment_selection/`, `generated_workout_plan/`), and each subdirectory contains `code.html` and `screen.png` files.
 
 2. **No CI/CD Yet**: Currently no GitHub Actions workflows configured. Tests and type checking must be run manually.
 
