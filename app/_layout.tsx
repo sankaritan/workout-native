@@ -4,23 +4,10 @@ import {
   seedTestWorkoutPlan,
 } from "@/lib/storage/seed-data";
 import { initStorage } from "@/lib/storage/storage";
-import {
-  Lexend_300Light,
-  Lexend_400Regular,
-  Lexend_500Medium,
-  Lexend_600SemiBold,
-  Lexend_700Bold,
-  useFonts,
-} from "@expo-google-fonts/lexend";
-import {
-  NotoSans_400Regular,
-  NotoSans_500Medium,
-  NotoSans_700Bold,
-} from "@expo-google-fonts/noto-sans";
-import { MaterialIcons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import { useFonts } from "expo-font";
 import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -42,15 +29,15 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const [storageReady, setStorageReady] = useState(false);
   const [fontsLoaded, fontError] = useFonts({
-    Lexend_300Light,
-    Lexend_400Regular,
-    Lexend_500Medium,
-    Lexend_600SemiBold,
-    Lexend_700Bold,
-    NotoSans_400Regular,
-    NotoSans_500Medium,
-    NotoSans_700Bold,
-    ...MaterialIcons.font,
+    Lexend_300Light: require("../assets/fonts/Lexend_300Light.ttf"),
+    Lexend_400Regular: require("../assets/fonts/Lexend_400Regular.ttf"),
+    Lexend_500Medium: require("../assets/fonts/Lexend_500Medium.ttf"),
+    Lexend_600SemiBold: require("../assets/fonts/Lexend_600SemiBold.ttf"),
+    Lexend_700Bold: require("../assets/fonts/Lexend_700Bold.ttf"),
+    NotoSans_400Regular: require("../assets/fonts/NotoSans_400Regular.ttf"),
+    NotoSans_500Medium: require("../assets/fonts/NotoSans_500Medium.ttf"),
+    NotoSans_700Bold: require("../assets/fonts/NotoSans_700Bold.ttf"),
+    MaterialIcons: require("../assets/fonts/MaterialIcons.ttf"),
   });
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.

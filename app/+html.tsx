@@ -1,6 +1,6 @@
 import { ScrollViewStyleReset } from 'expo-router/html';
 // @ts-ignore - ttf files are handled by Metro bundler
-import MaterialIconsFont from '@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.ttf';
+import MaterialIconsFont from '../assets/fonts/MaterialIcons.ttf';
 
 // This file is web-only and used to configure the root HTML for every
 // web page during static rendering.
