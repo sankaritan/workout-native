@@ -44,7 +44,6 @@ const MONTH_NAMES = [
   "December",
 ];
 
-type ViewMode = "month" | "year";
 
 interface SessionDetails extends WorkoutSessionCompleted {
   template: WorkoutSessionTemplate | null;
@@ -54,7 +53,6 @@ interface SessionDetails extends WorkoutSessionCompleted {
 
 export default function HistoryScreen() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<ViewMode>("month");
   const [completedSessions, setCompletedSessions] = useState<
     WorkoutSessionCompleted[]
   >([]);
@@ -235,47 +233,7 @@ export default function HistoryScreen() {
           </Text>
         </View>
 
-        {/* View Mode Toggle (Month/Year) */}
-        <View className="px-4 py-3">
-          <View className="flex-row h-10 w-full items-center justify-center rounded-lg bg-surface-dark p-1">
-            <Pressable
-              onPress={() => setViewMode("month")}
-              className={cn(
-                "flex-1 h-full items-center justify-center rounded-[0.2rem] transition-all",
-                viewMode === "month" && "bg-[#2C4A3B] shadow-sm"
-              )}
-            >
-              <Text
-                className={cn(
-                  "text-sm font-semibold",
-                  viewMode === "month"
-                    ? "text-white"
-                    : "text-gray-300 dark:text-gray-400"
-                )}
-              >
-                Month
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setViewMode("year")}
-              className={cn(
-                "flex-1 h-full items-center justify-center rounded-[0.2rem] transition-all",
-                viewMode === "year" && "bg-[#2C4A3B] shadow-sm"
-              )}
-            >
-              <Text
-                className={cn(
-                  "text-sm font-semibold",
-                  viewMode === "year"
-                    ? "text-white"
-                    : "text-gray-300 dark:text-gray-400"
-                )}
-              >
-                Year
-              </Text>
-            </Pressable>
-          </View>
-        </View>
+        {/* Month/Year toggle removed — unused */}
 
         {/* Month Navigation */}
         <View className="flex-row items-center justify-between px-6 py-2">
