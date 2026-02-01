@@ -8,7 +8,7 @@ import { getMuscleGroupsForFrequency } from "./muscle-groups";
 
 /**
  * Filter exercises by available equipment
- * Always includes bodyweight exercises
+ * Only includes exercises that match the selected equipment
  */
 export function filterExercisesByEquipment(
   exercises: Exercise[],
@@ -16,7 +16,6 @@ export function filterExercisesByEquipment(
 ): Exercise[] {
   return exercises.filter(
     (exercise) =>
-      exercise.equipment_required === "Bodyweight" ||
       exercise.equipment_required === null ||
       availableEquipment.includes(exercise.equipment_required)
   );

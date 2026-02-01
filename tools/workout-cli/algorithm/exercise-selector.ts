@@ -32,7 +32,6 @@ export function filterExercisesByEquipment(
 ): Exercise[] {
   return exercises.filter(
     (exercise) =>
-      exercise.equipment_required === "Bodyweight" ||
       exercise.equipment_required === null ||
       availableEquipment.includes(exercise.equipment_required)
   );

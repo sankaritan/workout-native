@@ -97,18 +97,26 @@ describe("Exercise Selector", () => {
   describe("filterExercisesByEquipment", () => {
     it("returns exercises matching available equipment", () => {
       const result = filterExercisesByEquipment(mockExercises, ["Barbell"]);
-      // Should include Barbell exercises + bodyweight
-      expect(result.length).toBeGreaterThanOrEqual(2);
+      // Should include only Barbell exercises
+      expect(result.length).toBe(2);
       expect(result.map((e) => e.name)).toContain("Bench Press");
       expect(result.map((e) => e.name)).toContain("Squat");
     });
 
-    it("includes bodyweight exercises always", () => {
-      const result = filterExercisesByEquipment(mockExercises, ["Barbell"]);
+    it("includes bodyweight exercises only when bodyweight is selected", () => {
+      const result = filterExercisesByEquipment(mockExercises, ["Barbell", "Bodyweight"]);
       const bodyweightExercises = result.filter(
         (e) => e.equipment_required === "Bodyweight"
       );
       expect(bodyweightExercises.length).toBeGreaterThan(0);
+    });
+
+    it("excludes bodyweight exercises when bodyweight is not selected", () => {
+      const result = filterExercisesByEquipment(mockExercises, ["Barbell"]);
+      const bodyweightExercises = result.filter(
+        (e) => e.equipment_required === "Bodyweight"
+      );
+      expect(bodyweightExercises.length).toBe(0);
     });
 
     it("returns multiple equipment types", () => {
@@ -116,16 +124,14 @@ describe("Exercise Selector", () => {
         "Barbell",
         "Dumbbell",
       ]);
-      // Bench, Fly, Squat, + 2 bodyweight
-      expect(result).toHaveLength(5);
+      // Bench, Fly, Squat (no bodyweight)
+      expect(result).toHaveLength(3);
     });
 
     it("returns empty array when no matches", () => {
       const result = filterExercisesByEquipment(mockExercises, ["Cables"]);
-      // Should still include bodyweight
-      expect(result.every((e) => e.equipment_required === "Bodyweight")).toBe(
-        true
-      );
+      // Should not include bodyweight anymore
+      expect(result).toHaveLength(0);
     });
   });
 
@@ -406,15 +412,26 @@ describe("Exercise Selector", () => {
       expect(result.length).toBeLessThanOrEqual(2);
     });
 
-    it("includes bodyweight exercises regardless of equipment selection", () => {
+    it("excludes bodyweight exercises when not selected in equipment", () => {
       const result = selectInitialExercises(
         comprehensiveMockExercises,
-        ["Barbell"],
+        ["Barbell"], // Only Barbell, no Bodyweight
         3
       );
 
       const hasBodyweight = result.some((ex) => ex.equipment_required === "Bodyweight");
-      expect(hasBodyweight).toBe(true);
+      expect(hasBodyweight).toBe(false); // Should NOT include bodyweight
+    });
+
+    it("includes bodyweight exercises when selected in equipment", () => {
+      const result = selectInitialExercises(
+        comprehensiveMockExercises,
+        ["Barbell", "Bodyweight"], // Explicitly include Bodyweight
+        3
+      );
+
+      const hasBodyweight = result.some((ex) => ex.equipment_required === "Bodyweight");
+      expect(hasBodyweight).toBe(true); // Should include bodyweight
     });
   });
 });
