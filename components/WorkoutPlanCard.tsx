@@ -5,9 +5,7 @@
 
 import React from "react";
 import { View, Text } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
 import type { WorkoutProgram } from "@/lib/workout-generator/types";
-import { theme } from "@/constants/theme";
 
 export interface WorkoutPlanCardProps {
   program: WorkoutProgram;
@@ -17,57 +15,33 @@ export function WorkoutPlanCard({ program }: WorkoutPlanCardProps) {
   const weekText = program.durationWeeks === 1 ? "week" : "weeks";
 
   return (
-    <View className="bg-surface-dark rounded-2xl p-6 mb-6 border border-white/10">
-      {/* Program Name */}
-      <Text className="text-2xl font-bold text-white mb-4">
-        {program.name}
+    <View className="bg-surface-dark rounded-2xl p-4 mb-4 border border-white/10">
+      {/* Title (strip trailing ' (Nx/week)' if present) */}
+      <Text className="text-xl font-bold text-white mb-3">
+        {program.name.replace(/\s*\(\d+x\/week\)\s*$/i, "")}
       </Text>
 
-      {/* Plan Details */}
-      <View className="gap-3">
-        {/* Duration */}
-        <View className="flex-row items-center">
-          <View className="bg-primary/20 rounded-full size-10 items-center justify-center mr-3">
-            <MaterialIcons name="calendar-today" size={20} color={theme.colors.primary.DEFAULT } />
-          </View>
-          <View>
-            <Text className="text-xs text-gray-400">
-              Duration
-            </Text>
-            <Text className="text-base font-semibold text-white">
-              {program.durationWeeks} {weekText}
-            </Text>
-          </View>
+      {/* Compact Stats Row - All in one line */}
+      <View className="flex-row gap-2">
+        {/* Frequency */}
+        <View className="bg-primary/10 border border-primary/30 rounded-lg px-3 py-2">
+          <Text className="text-primary font-bold text-sm">
+            {program.sessionsPerWeek}x/week
+          </Text>
         </View>
 
-        {/* Frequency */}
-        <View className="flex-row items-center">
-          <View className="bg-primary/20 rounded-full size-10 items-center justify-center mr-3">
-            <MaterialIcons name="fitness-center" size={20} color={theme.colors.primary.DEFAULT } />
-          </View>
-          <View>
-            <Text className="text-xs text-gray-400">
-              Frequency
-            </Text>
-            <Text className="text-base font-semibold text-white">
-              {program.sessionsPerWeek} sessions/week
-            </Text>
-          </View>
+        {/* Duration */}
+        <View className="bg-background-dark/50 border border-white/5 rounded-lg px-3 py-2">
+          <Text className="text-white font-semibold text-sm">
+            {program.durationWeeks} {weekText}
+          </Text>
         </View>
 
         {/* Focus */}
-        <View className="flex-row items-center">
-          <View className="bg-primary/20 rounded-full size-10 items-center justify-center mr-3">
-            <MaterialIcons name="trending-up" size={20} color={theme.colors.primary.DEFAULT } />
-          </View>
-          <View>
-            <Text className="text-xs text-gray-400">
-              Training Focus
-            </Text>
-            <Text className="text-base font-semibold text-white">
-              {program.focus}
-            </Text>
-          </View>
+        <View className="bg-background-dark/50 border border-white/5 rounded-lg px-3 py-2">
+          <Text className="text-white font-semibold text-sm">
+            {program.focus}
+          </Text>
         </View>
       </View>
     </View>

@@ -10,6 +10,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useWizard } from "@/lib/wizard-context";
 import { WorkoutPlanCard } from "@/components/WorkoutPlanCard";
+import { WorkoutDesignInfo } from "@/components/WorkoutDesignInfo";
 import { SessionCard } from "@/components/SessionCard";
 import { generateWorkoutProgramFromCustomExercises, saveWorkoutProgram } from "@/lib/workout-generator/engine";
 
@@ -224,6 +225,9 @@ export default function PlanReviewScreen() {
       >
         {/* Plan Overview Card */}
         <WorkoutPlanCard program={generatedProgram} />
+
+        {/* Design Info Section */}
+        <WorkoutDesignInfo />
 
         {/* Sessions Header */}
         <View className="mb-4">

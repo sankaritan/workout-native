@@ -26,7 +26,7 @@ describe("WorkoutPlanCard", () => {
 
   it("renders program name", () => {
     render(<WorkoutPlanCard program={mockProgram} />);
-    expect(screen.getByText("Hypertrophy Program (3x/week)")).toBeTruthy();
+    expect(screen.getByText("Hypertrophy Program")).toBeTruthy();
   });
 
   it("renders duration", () => {
@@ -36,7 +36,7 @@ describe("WorkoutPlanCard", () => {
 
   it("renders frequency", () => {
     render(<WorkoutPlanCard program={mockProgram} />);
-    expect(screen.getByText("3 sessions/week")).toBeTruthy();
+    expect(screen.getByText("3x/week")).toBeTruthy();
   });
 
   it("renders focus type", () => {
