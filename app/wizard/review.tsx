@@ -20,6 +20,7 @@ export default function PlanReviewScreen() {
   const { state, updateState, resetState } = useWizard();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [savedPlanId, setSavedPlanId] = useState<number | null>(null);
 
   const { generatedProgram, customExercises, initialGeneratedProgram, initialCustomExercises, frequency, equipment, focus } = state;
 
@@ -59,7 +60,8 @@ export default function PlanReviewScreen() {
           }
 
           // Save to storage and mark as active
-          saveWorkoutProgram(program);
+          const planId = saveWorkoutProgram(program);
+          setSavedPlanId(planId);
 
           // Update state with generated program
           updateState({ generatedProgram: program });
@@ -82,9 +84,15 @@ export default function PlanReviewScreen() {
   const handleAcceptPlan = () => {
     console.log("Plan accepted!");
 
-    // Reset wizard and go home
+    // Reset wizard state
     resetState();
-    router.push("/");
+    
+    // Navigate to the newly created plan instead of home
+    if (savedPlanId) {
+      router.push(`/workout/${savedPlanId}`);
+    } else {
+      router.push("/");
+    }
   };
 
   /**
