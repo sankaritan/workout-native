@@ -1,0 +1,10 @@
+cloudflare_account_id     = ""
+pages_project_name        = ""
+access_application_id     = ""
+access_policy_name        = ""
+access_policy_precedence  = 1
+access_policy_include_emails  = []
+access_policy_include_domains = []
+
+# Optional: put API token here (not recommended). Prefer exporting CLOUDFLARE_API_TOKEN env var.
+# cloudflare_api_token = ""

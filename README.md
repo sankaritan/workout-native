@@ -238,6 +238,96 @@ npx expo start -c
 - [NativeWind Documentation](https://www.nativewind.dev/)
 - [React Native Documentation](https://reactnative.dev/)
 
+## Deployment
+
+The app is deployed to **Cloudflare Pages** with **Cloudflare Zero Trust Access** for authentication. Infrastructure is managed declaratively using **Terraform**.
+
+### Deploy via Cloudflare Pages (Automatic)
+
+The app automatically deploys to Cloudflare Pages on every push to `main`:
+
+1. **Push to GitHub**: `git push origin main`
+2. **Cloudflare Pages builds**: Runs `npm run build:web` automatically
+3. **Deploy**: Published to `workout-native.pages.dev`
+4. **Access Control**: Protected by Zero Trust Access (Google OAuth)
+
+### Infrastructure as Code (Terraform)
+
+All Cloudflare infrastructure (Pages project, Access application, Access policies) is managed via Terraform in the `terraform/` directory.
+
+#### Quick Start
+
+```bash
+cd terraform
+
+# 1. Copy example config and fill in your values
+cp terraform.tfvars.example terraform.tfvars
+
+# 2. Set your Cloudflare API token (or add it to terraform.tfvars)
+export CLOUDFLARE_API_TOKEN="your-token-here"
+
+# 3. Initialize Terraform
+terraform init
+
+# 4. Preview changes
+terraform plan
+
+# 5. Apply infrastructure changes
+terraform apply
+```
+
+#### Test Infrastructure as Code
+
+To verify Terraform correctly manages your infrastructure, try this safe test:
+
+```bash
+cd terraform
+
+# Make a small, useful change (reduce session duration for better security)
+# Edit main.tf: change session_duration from "12h" to "8h" in
+# cloudflare_zero_trust_access_application resource
+
+# Preview the change
+terraform plan
+# Should show: session_duration = "12h" -> "8h"
+
+# Apply the change
+terraform apply
+
+# Verify the change worked:
+terraform state show cloudflare_zero_trust_access_application.app | grep session_duration
+# Should show: session_duration = "8h"
+
+# Verify in Cloudflare dashboard:
+# Zero Trust > Access > Applications > Workout Native
+# Should show "Session Duration: 8 hours"
+
+# Optional: revert to 12h if desired
+# Edit main.tf back to session_duration = "12h"
+# Run: terraform apply
+```
+
+This test proves that:
+- ✅ Terraform can modify live infrastructure
+- ✅ Changes are applied safely (in-place update, non-destructive)
+- ✅ State is tracked correctly
+- ✅ Cloudflare API responds to Terraform commands
+
+#### API Token Setup
+
+To use Terraform, you need a Cloudflare API token with these permissions:
+
+- **Account: Cloudflare Pages: Edit**
+- **Account: Access: Apps and Policies: Edit**
+- **Account: Access: Apps and Policies: Read**
+- **Account: Account Settings: Read**
+
+Create your token at: Cloudflare Dashboard → My Profile → API Tokens
+
+Then either:
+1. Export as environment variable: `export CLOUDFLARE_API_TOKEN="your-token"`
+2. Add to `terraform/terraform.tfvars`: `cloudflare_api_token = "your-token"` (not recommended)
+
 ## Contributing
 
 1. Follow the TDD approach
