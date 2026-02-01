@@ -45,11 +45,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="reset"
+        name="test"
         options={{
-          title: 'Reset',
+          title: 'Test',
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="refresh" size={size} color={color} />
+            <MaterialIcons name="science" size={size} color={color} />
           ),
         }}
       />

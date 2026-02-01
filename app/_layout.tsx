@@ -51,9 +51,15 @@ export default function RootLayout() {
       try {
         console.log("Initializing storage...");
         await initStorage();
+        
+        // Always seed exercises (exercise library is required)
         seedExercises();
-        seedTestWorkoutPlan();
-        seedMockWorkoutHistory();
+        
+        // NOTE: We no longer auto-seed test data on startup.
+        // Use the Test tab in the app to manually seed or clear data.
+        // seedTestWorkoutPlan();
+        // seedMockWorkoutHistory();
+        
         setStorageReady(true);
         console.log("Storage initialized successfully");
       } catch (error) {
