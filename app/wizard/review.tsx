@@ -9,6 +9,7 @@ import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BackButton } from "@/components/BackButton";
+import { WizardContinueButton } from "@/components/ui/WizardContinueButton";
 import { useWizard } from "@/lib/wizard-context";
 import { WorkoutPlanCard } from "@/components/WorkoutPlanCard";
 import { WorkoutDesignInfo } from "@/components/WorkoutDesignInfo";
@@ -253,18 +254,13 @@ export default function PlanReviewScreen() {
       >
         <View className="gap-3">
           {/* Accept Plan Button */}
-          <Pressable
+          <WizardContinueButton
             onPress={handleAcceptPlan}
+            label="Accept Plan"
+            icon="check-circle"
             testID="accept-button"
-            accessibilityRole="button"
             accessibilityLabel="Accept workout plan"
-            className="flex-row items-center justify-center gap-2 bg-primary rounded-xl px-6 py-4 shadow-lg active:scale-[0.98]"
-          >
-            <MaterialIcons name="check-circle" size={20} color="#102218" />
-            <Text className="text-background-dark text-base font-bold">
-              Accept Plan
-            </Text>
-          </Pressable>
+          />
 
           {/* Edit Exercises Button */}
           <Pressable
