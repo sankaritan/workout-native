@@ -4,15 +4,42 @@
  * Based on design asset from design-assets/stitch_workout_frequency_selection/app_dashboard/code.html
  */
 
-import React from "react";
-import { View, Text, Pressable } from "react-native";
-import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import React, { useEffect, useRef } from "react";
+import { Animated, Easing, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Path, Circle } from "react-native-svg";
+import Svg, { Circle, Path } from "react-native-svg";
 
 export default function EmptyStateDashboard() {
   const insets = useSafeAreaInsets();
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Reset animation value before starting
+    rotateAnim.setValue(0);
+    
+    // Create continuous rotation animation
+    const animation = Animated.loop(
+      Animated.timing(rotateAnim, {
+        toValue: 1,
+        duration: 20000, // 20 seconds for one full rotation
+        easing: Easing.linear,
+        useNativeDriver: false, // Set to false for web compatibility
+      })
+    );
+    
+    animation.start();
+    
+    // Cleanup on unmount
+    return () => animation.stop();
+  }, []);
+
+  // Interpolate rotation value to degrees
+  const rotate = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
 
   const handleGeneratePlan = () => {
     router.push("/wizard/frequency");
@@ -33,8 +60,22 @@ export default function EmptyStateDashboard() {
           shadowRadius: 50,
         }} />
         
-        {/* SVG Illustration */}
-        <View className="relative z-10">
+        {/* SVG Illustration with rotating dots */}
+        <Animated.View 
+          className="relative z-10"
+          style={{ transform: [{ rotate }] }}
+        >
+          <Svg width={200} height={200} viewBox="0 0 200 200">
+            {/* Decorative dots - these will rotate */}
+            <Circle cx={160} cy={60} r={8} fill="#13ec6d" fillOpacity={0.6} />
+            <Circle cx={40} cy={140} r={6} fill="#13ec6d" fillOpacity={0.4} />
+            <Circle cx={150} cy={150} r={4} fill="#13ec6d" fillOpacity={0.8} />
+            <Circle cx={50} cy={50} r={5} fill="#13ec6d" fillOpacity={0.5} />
+          </Svg>
+        </Animated.View>
+        
+        {/* Static SVG elements (don't rotate) */}
+        <View className="absolute z-10" style={{ pointerEvents: 'none' }}>
           <Svg width={200} height={200} viewBox="0 0 200 200">
             {/* Outer circle background */}
             <Path
@@ -69,12 +110,6 @@ export default function EmptyStateDashboard() {
               strokeWidth={4}
               strokeLinecap="round"
             />
-            
-            {/* Decorative dots */}
-            <Circle cx={160} cy={60} r={8} fill="#13ec6d" fillOpacity={0.6} />
-            <Circle cx={40} cy={140} r={6} fill="#13ec6d" fillOpacity={0.4} />
-            <Circle cx={150} cy={150} r={4} fill="#13ec6d" fillOpacity={0.8} />
-            <Circle cx={50} cy={50} r={5} fill="#13ec6d" fillOpacity={0.5} />
           </Svg>
         </View>
       </View>
@@ -87,7 +122,7 @@ export default function EmptyStateDashboard() {
             <MaterialIcons name="science" size={40} color="#13ec6d" />
           </View>
           <Text className="text-2xl font-bold tracking-tight text-white text-center">
-            Design workouts based on science
+            Let's create <Text className="text-primary">your</Text> workout plan
           </Text>
         </View>
 
@@ -106,34 +141,39 @@ export default function EmptyStateDashboard() {
           
           <View className="relative z-10 gap-5">
             {/* Step 1 */}
-            <View className="flex-row gap-4 items-start">
-              <View className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
-                <Text className="text-sm font-bold text-primary">1</Text>
+              <View className="flex-row gap-4 items-start">
+                <View className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
+                  <Text className="text-sm font-bold text-primary">1</Text>
+                </View>
+                <Text className="text-base text-gray-300 flex-1 pt-0.5">
+                  Tell us about your fitness goals
+                </Text>
               </View>
-              <Text className="text-base text-gray-300 flex-1 pt-0.5">
-                Share your workout needs
-              </Text>
-            </View>
 
             {/* Step 2 */}
-            <View className="flex-row gap-4 items-start">
-              <View className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
-                <Text className="text-sm font-bold text-primary">2</Text>
+              <View className="flex-row gap-4 items-start">
+                <View className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
+                  <Text className="text-sm font-bold text-primary">2</Text>
+                </View>
+                <View className="flex-1">
+                  <Text className="text-base text-gray-300 pt-0.5 leading-snug">
+                    We'll do the heavy lifting
+                  </Text>
+                  <Text className="text-sm text-gray-400 italic mt-1">
+                    ..see what we did there? :)
+                  </Text>
+                </View>
               </View>
-              <Text className="text-base text-gray-300 flex-1 pt-0.5 leading-snug">
-                We do the math - make sure your workout is balanced, optimize recovery and works for your schedule
-              </Text>
-            </View>
 
             {/* Step 3 */}
-            <View className="flex-row gap-4 items-start">
-              <View className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
-                <Text className="text-sm font-bold text-primary">3</Text>
+              <View className="flex-row gap-4 items-start">
+                <View className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
+                  <Text className="text-sm font-bold text-primary">3</Text>
+                </View>
+                <Text className="text-base text-gray-300 flex-1 pt-0.5">
+                  Enjoy workouts designed around your life!
+                </Text>
               </View>
-              <Text className="text-base text-gray-300 flex-1 pt-0.5">
-                Start your new workout, uniquely designed just for you!
-              </Text>
-            </View>
           </View>
         </View>
 
@@ -162,7 +202,7 @@ export default function EmptyStateDashboard() {
 
         {/* Subtext */}
         <Text className="mt-4 text-xs text-gray-500 text-center">
-          Takes about 2 minutes to set up
+          Takes less than 1 minute to set up
         </Text>
       </View>
     </View>
