@@ -12,13 +12,17 @@ import { theme } from "@/constants/theme";
 
 export interface SessionCardProps {
   session: ProgramSession;
+  dayNumber?: number; // Optional ascending day number (1, 2, 3, etc.)
 }
 
-export function SessionCard({ session }: SessionCardProps) {
+export function SessionCard({ session, dayNumber }: SessionCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const exerciseCount = session.exercises.length;
   const exerciseText = exerciseCount === 1 ? "exercise" : "exercises";
+  
+  // Use dayNumber if provided, otherwise fall back to dayOfWeek
+  const displayDay = dayNumber ?? session.dayOfWeek;
 
   return (
     <View className="mb-4">
@@ -32,7 +36,7 @@ export function SessionCard({ session }: SessionCardProps) {
           <View className="flex-row items-center flex-1">
             <View className="bg-primary/20 rounded-full px-3 py-1 mr-3">
               <Text className="text-primary font-bold text-xs">
-                Day {session.dayOfWeek}
+                Day {displayDay}
               </Text>
             </View>
             <Text className="text-lg font-bold text-white flex-1">

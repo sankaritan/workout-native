@@ -14,7 +14,6 @@ import { FilterPill } from "@/components/ui/FilterPill";
 import { getAllExercises } from "@/lib/storage/storage";
 import { filterExercisesByEquipment, filterExercisesByMuscleGroups } from "@/lib/workout-generator/exercise-selector";
 import type { Exercise, MuscleGroup } from "@/lib/storage/types";
-import { isCompoundPriority } from "@/lib/storage/types";
 
 // All muscle groups for filtering
 const MUSCLE_GROUPS: MuscleGroup[] = ["Chest", "Back", "Shoulders", "Arms", "Legs", "Core"];
@@ -34,7 +33,6 @@ export default function SwapExerciseScreen() {
 
   // Filter state - pre-select primary muscle group of current exercise
   const [selectedMuscleFilters, setSelectedMuscleFilters] = useState<MuscleGroup[]>([]);
-  const [compoundOnly, setCompoundOnly] = useState(false);
 
   // Pre-select filter based on current exercise's primary muscle group (first in muscle_groups array)
   useEffect(() => {
@@ -56,11 +54,6 @@ export default function SwapExerciseScreen() {
     let filtered = equipmentFiltered;
     if (selectedMuscleFilters.length > 0) {
       filtered = filterExercisesByMuscleGroups(filtered, selectedMuscleFilters);
-    }
-
-    // Filter compound only
-    if (compoundOnly) {
-      filtered = filtered.filter((ex) => isCompoundPriority(ex.priority));
     }
 
     // Exclude the current exercise
@@ -87,7 +80,7 @@ export default function SwapExerciseScreen() {
       // Finally sort alphabetically
       return a.name.localeCompare(b.name);
     });
-  }, [state.equipment, customExercises, selectedMuscleFilters, compoundOnly, currentExerciseId]);
+  }, [state.equipment, customExercises, selectedMuscleFilters, currentExerciseId]);
 
   /**
    * Toggle muscle group filter
@@ -160,11 +153,6 @@ export default function SwapExerciseScreen() {
               onToggle={() => toggleMuscleFilter(muscle)}
             />
           ))}
-          <FilterPill
-            label="Compound Only"
-            selected={compoundOnly}
-            onToggle={() => setCompoundOnly(!compoundOnly)}
-          />
         </View>
       </View>
 

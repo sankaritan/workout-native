@@ -57,7 +57,7 @@ describe("ExerciseCardWithActions", () => {
         canRemove={true}
       />
     );
-    expect(screen.getByText("Primary")).toBeTruthy();
+    expect(screen.getByText("Big Lifts")).toBeTruthy();
   });
 
   it("renders isolation badge for isolation exercises", () => {
@@ -69,7 +69,7 @@ describe("ExerciseCardWithActions", () => {
         canRemove={true}
       />
     );
-    expect(screen.getByText("Isolation")).toBeTruthy();
+    expect(screen.getByText("Single-Muscle")).toBeTruthy();
   });
 
   it("renders equipment type", () => {

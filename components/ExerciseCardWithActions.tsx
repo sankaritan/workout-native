@@ -45,24 +45,25 @@ export function ExerciseCardWithActions({
   return (
     <View
       testID={testID}
-      className="flex-row items-center bg-surface-dark rounded-xl p-3 mb-2"
+      className="flex-row items-start bg-surface-dark rounded-xl p-3 mb-2"
     >
       {/* Exercise Info */}
       <View className="flex-1 mr-2">
-        <View className="flex-row items-center gap-2 mb-1">
-          <Text className="text-white font-semibold">
+        <View className="flex-row items-start justify-between mb-1">
+          <Text className="text-white font-semibold flex-1 mr-2">
             {exercise.name}
           </Text>
-          {/* Priority Tier Badge */}
+          {/* Priority Tier Badge - Top Right */}
           <View
             className={cn(
-              "px-2 py-0.5 rounded",
+              "px-2.5 py-1 rounded-full border",
+              EXERCISE_PRIORITY_BADGES[exercise.priority].border,
               EXERCISE_PRIORITY_BADGES[exercise.priority].background
             )}
           >
             <Text
               className={cn(
-                "text-xs font-medium",
+                "text-xs font-medium uppercase",
                 EXERCISE_PRIORITY_BADGES[exercise.priority].text
               )}
             >

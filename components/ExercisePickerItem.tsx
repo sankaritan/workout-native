@@ -36,24 +36,25 @@ export function ExercisePickerItem({
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`Select ${exercise.name}`}
-      className="flex-row items-center bg-surface-dark rounded-xl p-4 mb-2 active:bg-surface-dark-highlight"
+      className="flex-row items-start bg-surface-dark rounded-xl p-4 mb-2 active:bg-surface-dark-highlight"
     >
       {/* Exercise Info */}
       <View className="flex-1">
-        <View className="flex-row items-center gap-2 mb-1">
-          <Text className="text-white font-semibold text-base">
+        <View className="flex-row items-start justify-between mb-1">
+          <Text className="text-white font-semibold text-base flex-1 mr-2">
             {exercise.name}
           </Text>
-          {/* Priority Tier Badge */}
+          {/* Priority Tier Badge - Top Right */}
           <View
             className={cn(
-              "px-2 py-0.5 rounded",
+              "px-2.5 py-1 rounded-full border",
+              EXERCISE_PRIORITY_BADGES[exercise.priority].border,
               EXERCISE_PRIORITY_BADGES[exercise.priority].background
             )}
           >
             <Text
               className={cn(
-                "text-xs font-medium",
+                "text-xs font-medium uppercase",
                 EXERCISE_PRIORITY_BADGES[exercise.priority].text
               )}
             >

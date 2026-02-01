@@ -70,7 +70,6 @@ describe("Swap Exercise Screen", () => {
     expect(screen.getAllByText("Chest").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Back").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Shoulders").length).toBeGreaterThan(0);
-    expect(screen.getByText("Compound Only")).toBeTruthy();
   });
 
   it("calls router.back when close button is pressed", () => {

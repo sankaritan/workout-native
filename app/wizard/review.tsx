@@ -237,7 +237,7 @@ export default function PlanReviewScreen() {
 
         {/* Session Cards */}
         {generatedProgram.sessions.map((session, idx) => (
-          <SessionCard key={idx} session={session} />
+          <SessionCard key={idx} session={session} dayNumber={idx + 1} />
         ))}
       </ScrollView>
 

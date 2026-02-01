@@ -6,22 +6,22 @@
 export type ExercisePriority = 1 | 2 | 3 | 4 | 5;
 
 export const EXERCISE_PRIORITY_LABELS: Record<ExercisePriority, string> = {
-  1: "Primary",
-  2: "Secondary",
-  3: "Accessory",
-  4: "Isolation",
+  1: "Big Lifts",
+  2: "Major Lifts",
+  3: "Support Lifts",
+  4: "Single-Muscle",
   5: "Core",
 };
 
 export const EXERCISE_PRIORITY_BADGES: Record<
   ExercisePriority,
-  { background: string; text: string }
+  { border: string; text: string; background?: string }
 > = {
-  1: { background: "bg-primary/20", text: "text-primary" },
-  2: { background: "bg-blue-500/20", text: "text-blue-400" },
-  3: { background: "bg-amber-500/20", text: "text-amber-400" },
-  4: { background: "bg-gray-500/20", text: "text-gray-400" },
-  5: { background: "bg-gray-500/20", text: "text-gray-400" },
+  1: { border: "border-primary", text: "text-primary", background: "bg-primary/20" }, // Filled background for prominence
+  2: { border: "border-primary", text: "text-primary" }, // Outlined only
+  3: { border: "border-gray-500", text: "text-gray-400" },
+  4: { border: "border-gray-500", text: "text-gray-400" },
+  5: { border: "border-gray-500", text: "text-gray-400" },
 };
 
 export function isCompoundPriority(priority: ExercisePriority): boolean {

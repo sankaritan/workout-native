@@ -14,7 +14,6 @@ import { FilterPill } from "@/components/ui/FilterPill";
 import { getAllExercises } from "@/lib/storage/storage";
 import { filterExercisesByEquipment, filterExercisesByMuscleGroups } from "@/lib/workout-generator/exercise-selector";
 import type { Exercise, MuscleGroup } from "@/lib/storage/types";
-import { isCompoundPriority } from "@/lib/storage/types";
 
 // All muscle groups for filtering
 const MUSCLE_GROUPS: MuscleGroup[] = ["Chest", "Back", "Shoulders", "Arms", "Legs", "Core"];
@@ -28,7 +27,6 @@ export default function AddExerciseScreen() {
 
   // Filter state
   const [selectedMuscleFilters, setSelectedMuscleFilters] = useState<MuscleGroup[]>([]);
-  const [compoundOnly, setCompoundOnly] = useState(false);
 
   const customExercises = state.customExercises || [];
 
@@ -52,11 +50,6 @@ export default function AddExerciseScreen() {
       filtered = filterExercisesByMuscleGroups(filtered, selectedMuscleFilters);
     }
 
-    // Filter compound only
-    if (compoundOnly) {
-      filtered = filtered.filter((ex) => isCompoundPriority(ex.priority));
-    }
-
     // Exclude already-selected exercises
     const selectedIds = customExercises.map((e) => e.id);
     filtered = filtered.filter((exercise) => !selectedIds.includes(exercise.id));
@@ -78,7 +71,7 @@ export default function AddExerciseScreen() {
       // Finally sort alphabetically
       return a.name.localeCompare(b.name);
     });
-  }, [state.equipment, customExercises, selectedMuscleFilters, compoundOnly, isAtMaxLimit]);
+  }, [state.equipment, customExercises, selectedMuscleFilters, isAtMaxLimit]);
 
   /**
    * Toggle muscle group filter
@@ -150,11 +143,6 @@ export default function AddExerciseScreen() {
               onToggle={() => toggleMuscleFilter(muscle)}
             />
           ))}
-          <FilterPill
-            label="Compound Only"
-            selected={compoundOnly}
-            onToggle={() => setCompoundOnly(!compoundOnly)}
-          />
         </View>
       </View>
 
