@@ -1,4 +1,6 @@
 import { Platform } from "react-native";
+import { File } from "expo-file-system";
+import * as DocumentPicker from "expo-document-picker";
 import { BackupFile, ValidationError } from "./types";
 import { replaceAllStorageData } from "@/lib/storage/storage";
 
@@ -54,16 +56,14 @@ export async function importBackup(): Promise<BackupFile> {
     if (Platform.OS === "web") {
       content = await pickFileOnWeb();
     } else {
-      // Native - use document picker
-      try {
-        const DocumentPicker = require("expo-document-picker");
-        const res = await DocumentPicker.getDocumentAsync({ type: "application/json" });
-        if (res.type !== "success") throw new Error("No file selected");
-        const FileSystem = require("expo-file-system");
-        content = await FileSystem.readAsStringAsync(res.uri, { encoding: FileSystem.EncodingType.UTF8 });
-      } catch (err) {
-        throw err;
+      // Native - use document picker and new File API
+      const res = await DocumentPicker.getDocumentAsync({ type: "application/json" });
+      if (res.canceled || !res.assets || res.assets.length === 0) {
+        throw new Error("No file selected");
       }
+      const fileUri = res.assets[0].uri;
+      const file = new File(fileUri);
+      content = await file.text();
     }
 
     const parsed = JSON.parse(content);

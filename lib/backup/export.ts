@@ -1,4 +1,6 @@
 import { Platform } from "react-native";
+import { Paths, File } from "expo-file-system";
+import * as Sharing from "expo-sharing";
 import { getAllStorageData } from "@/lib/storage/storage";
 import { BackupFile } from "./types";
 
@@ -33,13 +35,11 @@ export async function exportBackup(): Promise<void> {
     return;
   }
 
-  // For native platforms, fallback to writing to cache and sharing
+  // For native platforms (iOS/Android) using new expo-file-system API
   try {
-    const FileSystem = require("expo-file-system");
-    const Sharing = require("expo-sharing");
-    const path = `${FileSystem.cacheDirectory}workout-backup-${Date.now()}.json`;
-    await FileSystem.writeAsStringAsync(path, content, { encoding: FileSystem.EncodingType.UTF8 });
-    await Sharing.shareAsync(path, { mimeType: "application/json" });
+    const file = new File(Paths.cache, `workout-backup-${Date.now()}.json`);
+    await file.write(content);
+    await Sharing.shareAsync(file.uri, { mimeType: "application/json" });
   } catch (error) {
     console.error("Native export failed:", error);
     throw error;
