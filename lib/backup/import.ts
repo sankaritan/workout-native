@@ -1,0 +1,83 @@
+import { Platform } from "react-native";
+import { BackupFile, ValidationError } from "./types";
+import { replaceAllStorageData } from "@/lib/storage/storage";
+
+function validateBackup(obj: any): ValidationError[] {
+  const errors: ValidationError[] = [];
+  if (!obj || typeof obj !== "object") {
+    errors.push({ field: "root", message: "Backup is not a valid object" });
+    return errors;
+  }
+  if (typeof obj.version !== "number") errors.push({ field: "version", message: "Missing version" });
+  if (typeof obj.exportedAt !== "string") errors.push({ field: "exportedAt", message: "Missing exportedAt" });
+  if (!obj.data || typeof obj.data !== "object") errors.push({ field: "data", message: "Missing data" });
+  else {
+    const d = obj.data;
+    const expected = [
+      "exercises",
+      "workoutPlans",
+      "sessionTemplates",
+      "exerciseTemplates",
+      "completedSessions",
+      "completedSets",
+      "idCounters",
+    ];
+    expected.forEach((k) => {
+      if (!(k in d)) errors.push({ field: `data.${k}`, message: `Missing ${k}` });
+    });
+  }
+  return errors;
+}
+
+async function pickFileOnWeb(): Promise<string> {
+  return await new Promise((resolve, reject) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json,application/json";
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return reject(new Error("No file selected"));
+      try {
+        const text = await file.text();
+        resolve(text);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    input.click();
+  });
+}
+
+export async function importBackup(): Promise<BackupFile> {
+  try {
+    let content: string;
+    if (Platform.OS === "web") {
+      content = await pickFileOnWeb();
+    } else {
+      // Native - use document picker
+      try {
+        const DocumentPicker = require("expo-document-picker");
+        const res = await DocumentPicker.getDocumentAsync({ type: "application/json" });
+        if (res.type !== "success") throw new Error("No file selected");
+        const FileSystem = require("expo-file-system");
+        content = await FileSystem.readAsStringAsync(res.uri, { encoding: FileSystem.EncodingType.UTF8 });
+      } catch (err) {
+        throw err;
+      }
+    }
+
+    const parsed = JSON.parse(content);
+    const errors = validateBackup(parsed);
+    if (errors.length > 0) {
+      throw new Error(`Backup validation failed: ${errors.map((e) => `${e.field}: ${e.message}`).join(", ")}`);
+    }
+
+    // Replace storage
+    await replaceAllStorageData(parsed.data);
+
+    return parsed as BackupFile;
+  } catch (error) {
+    console.error("Import failed:", error);
+    throw error;
+  }
+}

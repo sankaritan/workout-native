@@ -516,3 +516,53 @@ export function getCompletedSessionWithDetails(
     session_template: template,
   };
 }
+
+// ============================================================================
+// Backup & Restore
+// ============================================================================
+
+/**
+ * Get all storage data for backup purposes
+ * Returns a copy of the entire cache
+ */
+export function getAllStorageData() {
+  ensureInitialized();
+  return {
+    exercises: [...cache.exercises],
+    workoutPlans: [...cache.workoutPlans],
+    sessionTemplates: [...cache.sessionTemplates],
+    exerciseTemplates: [...cache.exerciseTemplates],
+    completedSessions: [...cache.completedSessions],
+    completedSets: [...cache.completedSets],
+    idCounters: { ...cache.idCounters },
+  };
+}
+
+/**
+ * Replace all storage data (used for restore from backup)
+ * This will overwrite all existing data
+ */
+export async function replaceAllStorageData(data: {
+  exercises: Exercise[];
+  workoutPlans: WorkoutPlan[];
+  sessionTemplates: WorkoutSessionTemplate[];
+  exerciseTemplates: SessionExerciseTemplate[];
+  completedSessions: WorkoutSessionCompleted[];
+  completedSets: ExerciseSetCompleted[];
+  idCounters: IdCounters;
+}): Promise<void> {
+  ensureInitialized();
+  
+  // Update cache
+  cache.exercises = data.exercises;
+  cache.workoutPlans = data.workoutPlans;
+  cache.sessionTemplates = data.sessionTemplates;
+  cache.exerciseTemplates = data.exerciseTemplates;
+  cache.completedSessions = data.completedSessions;
+  cache.completedSets = data.completedSets;
+  cache.idCounters = data.idCounters;
+  
+  // Persist to AsyncStorage
+  await persistCache();
+  console.log("Storage data replaced successfully");
+}

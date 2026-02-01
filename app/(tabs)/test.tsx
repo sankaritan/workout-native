@@ -10,6 +10,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useFocusEffect } from "expo-router";
 import { resetStorage, getAllWorkoutPlans } from "@/lib/storage/storage";
 import { seedExercises, seedTestWorkoutPlan, seedMockWorkoutHistory } from "@/lib/storage/seed-data";
+import { exportBackup } from "@/lib/backup/export";
+import { importBackup } from "@/lib/backup/import";
+import { showAlert } from "@/lib/utils/alert";
 
 export default function TestScreen() {
   const insets = useSafeAreaInsets();
@@ -113,6 +116,70 @@ export default function TestScreen() {
       setIsProcessing(false);
       console.log("Clear data process finished");
     }
+  };
+
+  const handleExportBackup = async () => {
+    console.log("Export Backup button pressed");
+    setSuccessMessage(null);
+    
+    try {
+      setIsProcessing(true);
+      console.log("Starting export process...");
+      
+      await exportBackup();
+      console.log("Export complete");
+      
+      setSuccessMessage("✓ Backup exported successfully!");
+    } catch (error) {
+      console.error("Failed to export backup:", error);
+      Alert.alert("Error", `Failed to export backup: ${error}`);
+    } finally {
+      setIsProcessing(false);
+      console.log("Export process finished");
+    }
+  };
+
+  const handleImportBackup = async () => {
+    console.log("Import Backup button pressed");
+    setSuccessMessage(null);
+    
+    showAlert(
+      "Import Backup",
+      "This will replace all your current workout data with the data from the backup file. This action cannot be undone. Continue?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Import",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setIsProcessing(true);
+              console.log("Starting import process...");
+              
+              const backup = await importBackup();
+              console.log("Import complete", backup);
+              
+              // Reload stats
+              loadDataStats();
+              console.log("Stats reloaded");
+              
+              const date = new Date(backup.exportedAt).toLocaleString();
+              setSuccessMessage(`✓ Backup imported successfully! Data from ${date} has been restored.`);
+            } catch (error) {
+              console.error("Failed to import backup:", error);
+              const errorMessage = error instanceof Error ? error.message : String(error);
+              Alert.alert("Import Failed", errorMessage);
+            } finally {
+              setIsProcessing(false);
+              console.log("Import process finished");
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -270,14 +337,88 @@ export default function TestScreen() {
           </View>
         </View>
 
+        {/* Backup & Restore Section */}
+        <View className="mb-6">
+          <Text className="text-xl font-bold text-white mb-4">
+            Backup & Restore
+          </Text>
+
+          {/* Export Data Card */}
+          <View className="bg-surface-dark rounded-2xl p-6 mb-4 border border-white/5">
+            <View className="flex-row items-start gap-4 mb-4">
+              <View className="bg-blue-500/10 p-3 rounded-xl">
+                <MaterialIcons name="cloud-upload" size={28} color="#3b82f6" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-white font-bold text-lg mb-1">
+                  Export Data
+                </Text>
+                <Text className="text-gray-400 text-sm leading-relaxed">
+                  Download all your workout data as a JSON file. Save this file somewhere safe 
+                  to restore your data later if needed.
+                </Text>
+              </View>
+            </View>
+
+            <Pressable
+              onPress={handleExportBackup}
+              disabled={isProcessing}
+              className="bg-blue-500/20 border border-blue-500/30 rounded-xl py-3 px-6 active:scale-[0.98]"
+              accessibilityRole="button"
+              accessibilityLabel="Export workout data"
+            >
+              <View className="flex-row items-center justify-center gap-2">
+                <MaterialIcons name="save-alt" size={20} color="#3b82f6" />
+                <Text className="text-blue-400 font-bold">
+                  {isProcessing ? "Exporting..." : "Export Data"}
+                </Text>
+              </View>
+            </Pressable>
+          </View>
+
+          {/* Import Data Card */}
+          <View className="bg-surface-dark rounded-2xl p-6 border border-white/5">
+            <View className="flex-row items-start gap-4 mb-4">
+              <View className="bg-purple-500/10 p-3 rounded-xl">
+                <MaterialIcons name="cloud-download" size={28} color="#a855f7" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-white font-bold text-lg mb-1">
+                  Import Data
+                </Text>
+                <Text className="text-gray-400 text-sm leading-relaxed">
+                  Restore workout data from a previously exported backup file. 
+                  This will replace all your current data.
+                </Text>
+              </View>
+            </View>
+
+            <Pressable
+              onPress={handleImportBackup}
+              disabled={isProcessing}
+              className="bg-purple-500/20 border border-purple-500/30 rounded-xl py-3 px-6 active:scale-[0.98]"
+              accessibilityRole="button"
+              accessibilityLabel="Import workout data"
+            >
+              <View className="flex-row items-center justify-center gap-2">
+                <MaterialIcons name="restore" size={20} color="#a855f7" />
+                <Text className="text-purple-400 font-bold">
+                  {isProcessing ? "Importing..." : "Import Data"}
+                </Text>
+              </View>
+            </Pressable>
+          </View>
+        </View>
+
         {/* Info Section */}
         <View className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
           <View className="flex-row items-start gap-3">
             <MaterialIcons name="info-outline" size={20} color="#3b82f6" />
             <View className="flex-1">
               <Text className="text-blue-400 text-sm leading-relaxed">
-                <Text className="font-bold">Tip:</Text> After seeding or clearing data, 
-                the app will automatically navigate to the Home tab to reflect the changes.
+                <Text className="font-bold">Tip:</Text> Use "Export Data" to create backups 
+                before testing destructive operations. You can restore your data anytime 
+                using "Import Data".
               </Text>
             </View>
           </View>
