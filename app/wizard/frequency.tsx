@@ -9,6 +9,7 @@ import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SelectionCard } from "@/components/ui/SelectionCard";
+import { BackButton } from "@/components/BackButton";
 import { useWizard } from "@/lib/wizard-context";
 import { cn } from "@/lib/utils/cn";
 
@@ -61,19 +62,7 @@ export default function FrequencyScreen() {
         style={{ paddingTop: insets.top + 16 }}
       >
         {/* Back button */}
-        <Pressable
-          onPress={handleBack}
-          className="flex items-center justify-center size-10 rounded-full active:bg-white/10"
-          testID="back-button"
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
-          <MaterialIcons
-            name="arrow-back-ios-new"
-            size={24}
-            color="#ffffff"
-          />
-        </Pressable>
+        <BackButton onPress={handleBack} />
 
         {/* Step indicator */}
         <View className="flex-1 items-center">

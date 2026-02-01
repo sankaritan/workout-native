@@ -8,6 +8,7 @@ import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-nati
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BackButton } from "@/components/BackButton";
 import { useWizard } from "@/lib/wizard-context";
 import { WorkoutPlanCard } from "@/components/WorkoutPlanCard";
 import { WorkoutDesignInfo } from "@/components/WorkoutDesignInfo";
@@ -172,15 +173,7 @@ export default function PlanReviewScreen() {
       <View className="bg-background-dark/80 px-4 pb-2 w-full" style={{ paddingTop: insets.top + 16 }}>
         <View className="flex-row items-center justify-between mb-4">
           {/* Back button */}
-          <Pressable
-            onPress={handleBack}
-            className="flex size-10 items-center justify-center rounded-full active:bg-white/10"
-            testID="back-button"
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-          >
-            <MaterialIcons name="arrow-back" size={24} color="#ffffff" />
-          </Pressable>
+          <BackButton onPress={handleBack} />
 
           {/* Step indicator */}
           <Text className="text-sm font-semibold uppercase tracking-widest text-gray-400">

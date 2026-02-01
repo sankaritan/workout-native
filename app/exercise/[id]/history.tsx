@@ -15,6 +15,7 @@ import {
 import { useLocalSearchParams, router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BackButton } from "@/components/BackButton";
 import { ProgressChart, type ChartDataPoint } from "@/components/ProgressChart";
 import {
   initStorage,
@@ -189,16 +190,7 @@ export default function ExerciseHistoryScreen() {
         style={{ paddingTop: insets.top + 12 }}
       >
         <View className="flex-row items-center justify-between w-full">
-          <Pressable
-            onPress={() => router.back()}
-            testID="back-button"
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-            className="flex-row items-center gap-1 active:opacity-70"
-          >
-            <MaterialIcons name="arrow-back" size={24} color="#9db9a8" />
-            <Text className="text-text-muted text-sm font-medium">Back</Text>
-          </Pressable>
+          <BackButton onPress={() => router.back()} />
 
           <View className="flex-1 items-center">
             <Text className="text-lg font-bold text-white">{exercise.name}</Text>

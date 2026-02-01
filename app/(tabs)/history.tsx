@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { CancelButton } from "@/components/CancelButton";
 import { Calendar } from "@/components/Calendar";
 import {
   initStorage,
@@ -331,12 +332,10 @@ export default function HistoryScreen() {
                   </>
                 )}
               </View>
-              <Pressable
+              <CancelButton 
                 onPress={() => setShowSessionModal(false)}
-                className="p-2 rounded-full active:bg-white/10"
-              >
-                <MaterialIcons name="close" size={24} color="#9db9a8" />
-              </Pressable>
+                label="Close"
+              />
             </View>
 
             <ScrollView className="flex-1">

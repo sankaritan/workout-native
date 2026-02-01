@@ -8,6 +8,7 @@ import { View, Text, Pressable, ScrollView } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BackButton } from "@/components/BackButton";
 import { SetTracker, type SetData } from "@/components/SetTracker";
 import { showAlert } from "@/lib/utils/alert";
 import {
@@ -279,16 +280,10 @@ export default function WorkoutSessionScreen() {
         style={{ paddingTop: insets.top + 12 }}
       >
         <View className="flex-row items-center justify-between w-full">
-          <Pressable
+          <BackButton 
             onPress={handleBack}
-            testID="back-button"
-            accessibilityRole="button"
             accessibilityLabel="Go back and pause workout"
-            className="flex-row items-center gap-1 active:opacity-70"
-          >
-            <MaterialIcons name="arrow-back" size={24} color="#9db9a8" />
-            <Text className="text-text-muted text-sm font-medium">Back</Text>
-          </Pressable>
+          />
 
           <View className="flex-col">
             <Text className="text-sm font-medium text-text-muted uppercase tracking-wider">

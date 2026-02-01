@@ -9,6 +9,7 @@ import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { EquipmentCard } from "@/components/ui/EquipmentCard";
+import { BackButton } from "@/components/BackButton";
 import { useWizard } from "@/lib/wizard-context";
 import { cn } from "@/lib/utils/cn";
 import type { Equipment } from "@/lib/storage/types";
@@ -101,15 +102,7 @@ export default function EquipmentScreen() {
       <View className="bg-background-dark/80 px-4 pb-2 w-full" style={{ paddingTop: insets.top + 16 }}>
         <View className="flex-row items-center justify-between mb-4">
           {/* Back button */}
-          <Pressable
-            onPress={handleBack}
-            className="flex size-10 items-center justify-center rounded-full active:bg-white/10"
-            testID="back-button"
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-          >
-            <MaterialIcons name="arrow-back" size={24} color="#ffffff" />
-          </Pressable>
+          <BackButton onPress={handleBack} />
 
           {/* Step indicator */}
           <Text className="text-sm font-semibold uppercase tracking-widest text-gray-400">

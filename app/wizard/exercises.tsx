@@ -5,6 +5,7 @@
  */
 
 import { ExerciseCardWithActions } from "@/components/ExerciseCardWithActions";
+import { BackButton } from "@/components/BackButton";
 import { getAllExercises } from "@/lib/storage/storage";
 import type { Exercise } from "@/lib/storage/types";
 import { cn } from "@/lib/utils/cn";
@@ -153,15 +154,7 @@ export default function ExercisesScreen() {
       >
         <View className="flex-row items-center justify-between mb-4">
           {/* Back button */}
-          <Pressable
-            onPress={handleBack}
-            className="flex size-10 items-center justify-center rounded-full active:bg-white/10"
-            testID="back-button"
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-          >
-            <MaterialIcons name="arrow-back" size={24} color="#ffffff" />
-          </Pressable>
+          <BackButton onPress={handleBack} />
 
           {/* Step indicator */}
           <Text className="text-sm font-semibold uppercase tracking-widest text-gray-400">

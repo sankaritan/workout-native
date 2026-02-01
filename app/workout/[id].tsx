@@ -8,6 +8,7 @@ import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-nati
 import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BackButton } from "@/components/BackButton";
 import {
   getWorkoutPlanById,
   getSessionTemplatesByPlanId,
@@ -83,8 +84,8 @@ export default function WorkoutDetailScreen() {
     router.push(`/session/${sessionId}`);
   };
 
-  const handleGenerateNewPlan = () => {
-    router.push("/wizard/frequency");
+  const handleBack = () => {
+    router.back();
   };
 
   // Calculate progress
@@ -204,14 +205,19 @@ export default function WorkoutDetailScreen() {
       }}
     >
       <View>
-        {/* Header */}
-        <View className="mb-6">
-          <Text className="text-3xl font-bold text-white mb-2">
-            Your Workout Plan
-          </Text>
-          <Text className="text-gray-400">
-            {monthlyWorkouts} {monthlyWorkouts === 1 ? 'workout' : 'workouts'} this month
-          </Text>
+        {/* Header with Back Button */}
+        <View className="flex-row items-center justify-between mb-6">
+          {/* Back button */}
+          <BackButton onPress={handleBack} />
+          
+          <View className="flex-1 ml-4">
+            <Text className="text-3xl font-bold text-white mb-2">
+              Your Workout Plan
+            </Text>
+            <Text className="text-gray-400">
+              {monthlyWorkouts} {monthlyWorkouts === 1 ? 'workout' : 'workouts'} this month
+            </Text>
+          </View>
         </View>
 
         {/* Active Plan Card */}
@@ -338,20 +344,7 @@ export default function WorkoutDetailScreen() {
           </View>
         </View>
 
-        {/* Generate New Plan Button */}
-        <Pressable
-          onPress={handleGenerateNewPlan}
-          className="bg-white/5 border border-white/10 rounded-xl py-4 px-6 active:scale-[0.98]"
-          accessibilityRole="button"
-          accessibilityLabel="Generate a new workout plan"
-        >
-          <View className="flex-row items-center justify-center gap-2">
-            <MaterialIcons name="add-circle-outline" size={20} color="#9db9a8" />
-            <Text className="text-white font-bold">
-              Generate New Plan
-            </Text>
-          </View>
-        </Pressable>
+
       </View>
     </ScrollView>
   );

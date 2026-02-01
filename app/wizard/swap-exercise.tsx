@@ -8,6 +8,7 @@ import { View, Text, Pressable, ScrollView } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { CancelButton } from "@/components/CancelButton";
 import { useWizard } from "@/lib/wizard-context";
 import { ExercisePickerItem } from "@/components/ExercisePickerItem";
 import { FilterPill } from "@/components/ui/FilterPill";
@@ -132,15 +133,12 @@ export default function SwapExerciseScreen() {
           </View>
 
           {/* Close button */}
-          <Pressable
-            onPress={handleClose}
-            className="flex size-10 items-center justify-center rounded-full active:bg-white/10"
+          <CancelButton 
+            onPress={handleClose} 
             testID="close-button"
-            accessibilityRole="button"
             accessibilityLabel="Close"
-          >
-            <MaterialIcons name="close" size={24} color="#ffffff" />
-          </Pressable>
+            label="Close"
+          />
         </View>
 
         {/* Filter Pills */}
