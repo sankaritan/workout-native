@@ -1,13 +1,18 @@
 /**
  * SetTracker Component
  * Tracks sets, reps, and weight for an exercise during workout
+ * 
+ * Note: Uses inline styles from setTrackerStyles instead of dynamic className
+ * to avoid NativeWind/Reanimated timing issues on iOS. When state changes
+ * trigger dynamic className updates, NativeWind's Reanimated integration
+ * can cause navigation context errors. See lib/styles/setTracker.ts for details.
  */
 
-import { cn } from "@/lib/utils/cn";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { theme } from "@/constants/theme";
+import { setTrackerStyles as styles } from "@/lib/styles/setTracker";
 
 export interface SetData {
   setNumber: number;
@@ -201,13 +206,13 @@ export function SetTracker({
         return (
           <View
             key={set.setNumber}
-            className={cn(
-              "flex-row items-center gap-2 rounded-lg p-3",
-              isCompleted && "bg-surface-dark/40 opacity-60",
-              isActive && "bg-surface-dark border border-primary/40 shadow-lg",
-              isFuture && "bg-surface-dark/20",
-              !isActive && !isCompleted && !isFuture && "bg-surface-dark/20",
-            )}
+            className="flex-row items-center gap-2 rounded-lg p-3"
+            style={[
+              styles.setRowDefault,
+              isCompleted && styles.setRowCompleted,
+              isActive && styles.setRowActive,
+              isFuture && styles.setRowFuture,
+            ]}
             testID={`set-row-${set.setNumber}`}
           >
             {/* +/- Weight Adjustment Buttons */}
@@ -219,13 +224,12 @@ export function SetTracker({
                 onPress={() => adjustWeight(index, -5)}
                 disabled={isCompleted}
                 testID={`weight-minus-${set.setNumber}`}
-                className={cn(
-                  "h-8 w-8 rounded items-center justify-center",
-                  isCompleted && "opacity-30",
-                  isActive
-                    ? "bg-surface-dark border border-border-light active:bg-primary/20"
-                    : "bg-surface-dark/60 border border-border active:bg-surface-dark",
-                )}
+                className="h-8 w-8 rounded items-center justify-center"
+                style={[
+                  styles.button,
+                  isCompleted && styles.buttonDisabled,
+                  isActive ? styles.buttonActive : styles.buttonInactive,
+                ]}
               >
                 <MaterialIcons
                   name="remove"
@@ -237,13 +241,12 @@ export function SetTracker({
                 onPress={() => adjustWeight(index, 5)}
                 disabled={isCompleted}
                 testID={`weight-plus-${set.setNumber}`}
-                className={cn(
-                  "h-8 w-8 rounded items-center justify-center",
-                  isCompleted && "opacity-30",
-                  isActive
-                    ? "bg-surface-dark border border-border-light active:bg-primary/20"
-                    : "bg-surface-dark/60 border border-border active:bg-surface-dark",
-                )}
+                className="h-8 w-8 rounded items-center justify-center"
+                style={[
+                  styles.button,
+                  isCompleted && styles.buttonDisabled,
+                  isActive ? styles.buttonActive : styles.buttonInactive,
+                ]}
               >
                 <MaterialIcons
                   name="add"
@@ -266,13 +269,13 @@ export function SetTracker({
                 keyboardType="numeric"
                 editable={!isCompleted}
                 testID={`weight-input-${set.setNumber}`}
-                className={cn(
-                  "h-10 rounded border text-center font-medium text-base p-0",
-                  isCompleted && "bg-[#111814] border-border text-white/50",
-                  isActive &&
-                    "h-12 bg-[#111814] border-border-light text-white font-bold text-lg",
-                  isFuture && "bg-transparent border-border text-white/70",
-                )}
+                className="rounded border text-center font-medium p-0"
+                style={[
+                  styles.input,
+                  isCompleted && styles.inputCompleted,
+                  isActive && styles.inputActive,
+                  isFuture && styles.inputFuture,
+                ]}
               />
             </View>
 
@@ -289,13 +292,13 @@ export function SetTracker({
                 keyboardType="number-pad"
                 editable={!isCompleted}
                 testID={`reps-input-${set.setNumber}`}
-                className={cn(
-                  "h-10 rounded border text-center font-medium text-base p-0",
-                  isCompleted && "bg-[#111814] border-border text-white/50",
-                  isActive &&
-                    "h-12 bg-[#111814] border-border-light text-white font-bold text-lg",
-                  isFuture && "bg-transparent border-border text-white/70",
-                )}
+                className="rounded border text-center font-medium p-0"
+                style={[
+                  styles.input,
+                  isCompleted && styles.inputCompleted,
+                  isActive && styles.inputActive,
+                  isFuture && styles.inputFuture,
+                ]}
               />
             </View>
 
@@ -305,22 +308,20 @@ export function SetTracker({
               className="flex items-center justify-center"
             >
               {isCompleted ? (
-                <MaterialIcons name="check-circle" size={20} color={theme.colors.primary.DEFAULT } />
+                <MaterialIcons name="check-circle" size={20} color={theme.colors.primary.DEFAULT} />
               ) : (
                 <Pressable
                   onPress={() => completeSet(index)}
                   disabled={set.weight === null || set.reps === null}
                   testID={`complete-checkbox-${set.setNumber}`}
-                  className={cn(
-                    "h-6 w-6 rounded border items-center justify-center",
-                    isActive ? "border-border-light" : "border-border",
-                    set.weight === null || set.reps === null
-                      ? "opacity-30"
-                      : "opacity-100",
-                  )}
+                  className="h-6 w-6 rounded border items-center justify-center"
+                  style={[
+                    isActive ? styles.checkboxActive : styles.checkboxInactive,
+                    (set.weight === null || set.reps === null) && styles.checkboxDisabled,
+                  ]}
                 >
                   {set.weight !== null && set.reps !== null && (
-                    <MaterialIcons name="check" size={16} color={theme.colors.primary.DEFAULT } />
+                    <MaterialIcons name="check" size={16} color={theme.colors.primary.DEFAULT} />
                   )}
                 </Pressable>
               )}
@@ -333,10 +334,11 @@ export function SetTracker({
       <Pressable
         onPress={addSet}
         testID="add-set-button"
-        className="flex-row items-center justify-center gap-2 py-3 mt-2 rounded-lg border border-dashed border-border-light text-text-muted active:text-white active:border-primary/50 active:bg-surface-dark"
+        className="flex-row items-center justify-center gap-2 py-3 mt-2 rounded-lg border border-dashed"
+        style={styles.addButton}
       >
-        <MaterialIcons name="add" size={18} color={theme.colors.text.secondary } />
-        <Text className="text-sm font-medium text-text-muted">Add Set</Text>
+        <MaterialIcons name="add" size={18} color={theme.colors.text.secondary} />
+        <Text style={styles.addButtonText}>Add Set</Text>
       </Pressable>
     </View>
   );

@@ -224,7 +224,12 @@ describe("SetTracker", () => {
 
     // First set should be active initially
     const firstRow = screen.getByTestId("set-row-1");
-    expect(firstRow.props.className).toContain("border-primary");
+    // Check that active row has border styling (using inline styles now)
+    expect(firstRow.props.style).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ borderWidth: 1 })
+      ])
+    );
 
     // Complete first set
     const weightInput = screen.getByTestId("weight-input-1");
@@ -236,7 +241,12 @@ describe("SetTracker", () => {
 
     // Second set should now be active
     const secondRow = screen.getByTestId("set-row-2");
-    expect(secondRow.props.className).toContain("border-primary");
+    // Check that second row is now active with border styling
+    expect(secondRow.props.style).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ borderWidth: 1 })
+      ])
+    );
   });
 
   describe("weight adjustment buttons", () => {
@@ -342,11 +352,20 @@ describe("SetTracker", () => {
       const checkbox = screen.getByTestId("complete-checkbox-1");
       fireEvent.press(checkbox);
 
-      // Buttons should be disabled (have opacity-30 class)
+      // Buttons should be disabled (have opacity in style)
       const plusButton = screen.getByTestId("weight-plus-1");
       const minusButton = screen.getByTestId("weight-minus-1");
-      expect(plusButton.props.className).toContain("opacity-30");
-      expect(minusButton.props.className).toContain("opacity-30");
+      // Check that disabled buttons have opacity styling
+      expect(plusButton.props.style).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ opacity: 0.3 })
+        ])
+      );
+      expect(minusButton.props.style).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ opacity: 0.3 })
+        ])
+      );
     });
   });
 });
