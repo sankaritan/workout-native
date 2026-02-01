@@ -4,14 +4,14 @@
  */
 
 import React, { useState } from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { EquipmentCard } from "@/components/ui/EquipmentCard";
 import { BackButton } from "@/components/BackButton";
+import { WizardContinueButton } from "@/components/ui/WizardContinueButton";
 import { useWizard } from "@/lib/wizard-context";
-import { cn } from "@/lib/utils/cn";
 import type { Equipment } from "@/lib/storage/types";
 
 // Equipment options based on mockup and database types
@@ -168,36 +168,10 @@ export default function EquipmentScreen() {
         className="absolute bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 p-4 w-full"
         style={{ paddingBottom: insets.bottom + 24 }}
       >
-        <Pressable
+        <WizardContinueButton
           onPress={handleContinue}
           disabled={isContinueDisabled}
-          accessibilityRole="button"
-          accessibilityLabel="Continue to next step"
-          accessibilityState={{ disabled: isContinueDisabled }}
-          testID="continue-button"
-          className={cn(
-            "flex w-full items-center justify-center gap-2 rounded-xl px-6 py-4 text-base font-bold shadow-lg transition-transform",
-            isContinueDisabled
-              ? "bg-surface-dark opacity-50"
-              : "bg-primary active:scale-[0.98] shadow-primary/20"
-          )}
-        >
-          <Text
-            className={cn(
-              "text-base font-bold",
-              isContinueDisabled
-                ? "text-gray-400"
-                : "text-background-dark"
-            )}
-          >
-            Continue
-          </Text>
-          <MaterialIcons
-            name="arrow-forward"
-            size={20}
-            color={isContinueDisabled ? "#6b8779" : "#102218"}
-          />
-        </Pressable>
+        />
       </View>
     </View>
   );

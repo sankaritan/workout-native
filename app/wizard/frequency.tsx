@@ -4,14 +4,13 @@
  */
 
 import React, { useState } from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { router } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SelectionCard } from "@/components/ui/SelectionCard";
 import { BackButton } from "@/components/BackButton";
+import { WizardContinueButton } from "@/components/ui/WizardContinueButton";
 import { useWizard } from "@/lib/wizard-context";
-import { cn } from "@/lib/utils/cn";
 
 // Frequency options based on mockup
 const FREQUENCY_OPTIONS = [
@@ -141,37 +140,10 @@ export default function FrequencyScreen() {
         className="absolute bottom-0 left-0 right-0 px-4 bg-background-dark/95 pt-12 w-full"
         style={{ paddingBottom: insets.bottom + 24 }}
       >
-        <Pressable
+        <WizardContinueButton
           onPress={handleContinue}
           disabled={isContinueDisabled}
-          accessibilityRole="button"
-          accessibilityLabel="Continue to next step"
-          accessibilityState={{ disabled: isContinueDisabled }}
-          testID="continue-button"
-          className={cn(
-            "w-full rounded-xl py-4 px-6 text-lg font-bold shadow-lg flex-row items-center justify-center gap-2",
-            "transition-all",
-            isContinueDisabled
-              ? "bg-surface-dark opacity-50"
-              : "bg-primary active:scale-[0.98] active:bg-[#10d460]"
-          )}
-        >
-          <Text
-            className={cn(
-              "text-lg font-bold",
-              isContinueDisabled
-                ? "text-gray-400"
-                : "text-background-dark"
-            )}
-          >
-            Continue
-          </Text>
-          <MaterialIcons
-            name="arrow-forward"
-            size={20}
-            color={isContinueDisabled ? "#6b8779" : "#102218"}
-          />
-        </Pressable>
+        />
       </View>
     </View>
   );

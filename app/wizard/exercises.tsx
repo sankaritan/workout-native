@@ -6,6 +6,7 @@
 
 import { ExerciseCardWithActions } from "@/components/ExerciseCardWithActions";
 import { BackButton } from "@/components/BackButton";
+import { WizardContinueButton } from "@/components/ui/WizardContinueButton";
 import { getAllExercises } from "@/lib/storage/storage";
 import type { Exercise } from "@/lib/storage/types";
 import { cn } from "@/lib/utils/cn";
@@ -271,34 +272,11 @@ export default function ExercisesScreen() {
         className="absolute bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 p-4 w-full"
         style={{ paddingBottom: insets.bottom + 24 }}
       >
-        <Pressable
+        <WizardContinueButton
           onPress={handleContinue}
           disabled={isContinueDisabled}
-          accessibilityRole="button"
           accessibilityLabel="Continue to review"
-          accessibilityState={{ disabled: isContinueDisabled }}
-          testID="continue-button"
-          className={cn(
-            "flex-row w-full items-center justify-center gap-2 rounded-xl px-6 py-4 text-base font-bold shadow-lg transition-transform",
-            isContinueDisabled
-              ? "bg-surface-dark opacity-50"
-              : "bg-primary active:scale-[0.98] shadow-primary/20",
-          )}
-        >
-          <Text
-            className={cn(
-              "text-base font-bold",
-              isContinueDisabled ? "text-gray-400" : "text-background-dark",
-            )}
-          >
-            Continue
-          </Text>
-          <MaterialIcons
-            name="arrow-forward"
-            size={20}
-            color={isContinueDisabled ? "#6b8779" : "#102218"}
-          />
-        </Pressable>
+        />
       </View>
     </View>
   );
