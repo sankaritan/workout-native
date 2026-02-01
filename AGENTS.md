@@ -17,6 +17,7 @@ Workout App - A fitness/workout planning and tracking application built with Exp
 - **All features must work on both web and iOS.** Even if iOS is the primary end-user platform, developers test features on web during development. If a feature doesn't work on web, it's useless for development workflow. Never make features "mobile-only".
 - Update README.md whenever setup changes
 - Whenever we add a feature or tweak to requirements that modify existing implementation plan (in IMPLEMENTATION_PLAN.md), update this plan accordingly to ensure future, not yet implemented, stories account for these modifications
+- never do "git commit" or "git push" - leave user to do this manually!
 
 ## Tech Stack
 

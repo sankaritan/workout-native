@@ -3,16 +3,16 @@
  * Provides utilities for testing and development
  */
 
-import React, { useState, useEffect } from "react";
-import { View, Text, Pressable, ScrollView, Alert } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router, useFocusEffect } from "expo-router";
-import { resetStorage, getAllWorkoutPlans } from "@/lib/storage/storage";
-import { seedExercises, seedTestWorkoutPlan, seedMockWorkoutHistory } from "@/lib/storage/seed-data";
 import { exportBackup } from "@/lib/backup/export";
 import { importBackup } from "@/lib/backup/import";
+import { seedExercises, seedMockWorkoutHistory, seedTestWorkoutPlan } from "@/lib/storage/seed-data";
+import { getAllWorkoutPlans, resetStorage } from "@/lib/storage/storage";
 import { showAlert } from "@/lib/utils/alert";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useFocusEffect } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TestScreen() {
   const insets = useSafeAreaInsets();
@@ -68,12 +68,7 @@ export default function TestScreen() {
       console.log("Stats reloaded");
       
       setSuccessMessage("✓ Sample data seeded successfully! Go to Home to see it.");
-      
-      // Auto-navigate after a short delay
-      setTimeout(() => {
-        console.log("Navigating to home...");
-        router.push("/(tabs)");
-      }, 2000);
+
     } catch (error) {
       console.error("Failed to seed data:", error);
       Alert.alert("Error", `Failed to seed data: ${error}`);
@@ -102,13 +97,7 @@ export default function TestScreen() {
       loadDataStats();
       console.log("Stats reloaded");
       
-      setSuccessMessage("✓ All workout data cleared! Go to Home to see the empty state.");
-      
-      // Auto-navigate after a short delay
-      setTimeout(() => {
-        console.log("Navigating to home...");
-        router.push("/(tabs)");
-      }, 2000);
+      setSuccessMessage("✓ All workout data cleared!");
     } catch (error) {
       console.error("Failed to clear data:", error);
       Alert.alert("Error", `Failed to clear data: ${error}`);
