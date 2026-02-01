@@ -8,6 +8,7 @@ import {
   selectInitialExercises,
 } from "@/lib/workout-generator/exercise-selector";
 import type { Exercise, MuscleGroup } from "@/lib/storage/types";
+import { isCompoundPriority } from "@/lib/storage/types";
 
 describe("Exercise Selector", () => {
   // Basic mock exercises for existing tests
@@ -18,7 +19,7 @@ describe("Exercise Selector", () => {
       muscle_group: "Chest",
       muscle_groups: ["Chest", "Shoulders", "Arms"],
       equipment_required: "Barbell",
-      is_compound: true,
+      priority: 1,
       description: "Compound chest exercise",
     },
     {
@@ -27,7 +28,7 @@ describe("Exercise Selector", () => {
       muscle_group: "Chest",
       muscle_groups: ["Chest"],
       equipment_required: "Dumbbell",
-      is_compound: false,
+      priority: 4,
       description: "Isolation chest exercise",
     },
     {
@@ -36,7 +37,7 @@ describe("Exercise Selector", () => {
       muscle_group: "Legs",
       muscle_groups: ["Legs", "Core"],
       equipment_required: "Barbell",
-      is_compound: true,
+      priority: 1,
       description: "Compound leg exercise",
     },
     {
@@ -45,7 +46,7 @@ describe("Exercise Selector", () => {
       muscle_group: "Chest",
       muscle_groups: ["Chest", "Shoulders", "Arms"],
       equipment_required: "Bodyweight",
-      is_compound: true,
+      priority: 3,
       description: "Bodyweight chest exercise",
     },
     {
@@ -54,7 +55,7 @@ describe("Exercise Selector", () => {
       muscle_group: "Back",
       muscle_groups: ["Back", "Arms"],
       equipment_required: "Bodyweight",
-      is_compound: true,
+      priority: 2,
       description: "Bodyweight back exercise",
     },
   ];
@@ -62,35 +63,35 @@ describe("Exercise Selector", () => {
   // Comprehensive mock exercises covering all 6 muscle groups
   const comprehensiveMockExercises: Exercise[] = [
     // Chest (4 exercises)
-    { id: 1, name: "Bench Press", muscle_group: "Chest", muscle_groups: ["Chest", "Shoulders", "Arms"], equipment_required: "Barbell", is_compound: true, description: null },
-    { id: 2, name: "Dumbbell Fly", muscle_group: "Chest", muscle_groups: ["Chest"], equipment_required: "Dumbbell", is_compound: false, description: null },
-    { id: 3, name: "Push-up", muscle_group: "Chest", muscle_groups: ["Chest", "Shoulders", "Arms"], equipment_required: "Bodyweight", is_compound: true, description: null },
-    { id: 4, name: "Cable Crossover", muscle_group: "Chest", muscle_groups: ["Chest"], equipment_required: "Cables", is_compound: false, description: null },
+    { id: 1, name: "Bench Press", muscle_group: "Chest", muscle_groups: ["Chest", "Shoulders", "Arms"], equipment_required: "Barbell", priority: 1, description: null },
+    { id: 2, name: "Dumbbell Fly", muscle_group: "Chest", muscle_groups: ["Chest"], equipment_required: "Dumbbell", priority: 4, description: null },
+    { id: 3, name: "Push-up", muscle_group: "Chest", muscle_groups: ["Chest", "Shoulders", "Arms"], equipment_required: "Bodyweight", priority: 3, description: null },
+    { id: 4, name: "Cable Crossover", muscle_group: "Chest", muscle_groups: ["Chest"], equipment_required: "Cables", priority: 4, description: null },
     // Back (4 exercises)
-    { id: 5, name: "Deadlift", muscle_group: "Back", muscle_groups: ["Back", "Legs", "Core"], equipment_required: "Barbell", is_compound: true, description: null },
-    { id: 6, name: "Pull-up", muscle_group: "Back", muscle_groups: ["Back", "Arms"], equipment_required: "Bodyweight", is_compound: true, description: null },
-    { id: 7, name: "Lat Pulldown", muscle_group: "Back", muscle_groups: ["Back", "Arms"], equipment_required: "Cables", is_compound: true, description: null },
-    { id: 8, name: "Dumbbell Row", muscle_group: "Back", muscle_groups: ["Back", "Arms"], equipment_required: "Dumbbell", is_compound: true, description: null },
+    { id: 5, name: "Deadlift", muscle_group: "Back", muscle_groups: ["Back", "Legs", "Core"], equipment_required: "Barbell", priority: 1, description: null },
+    { id: 6, name: "Pull-up", muscle_group: "Back", muscle_groups: ["Back", "Arms"], equipment_required: "Bodyweight", priority: 2, description: null },
+    { id: 7, name: "Lat Pulldown", muscle_group: "Back", muscle_groups: ["Back", "Arms"], equipment_required: "Cables", priority: 3, description: null },
+    { id: 8, name: "Dumbbell Row", muscle_group: "Back", muscle_groups: ["Back", "Arms"], equipment_required: "Dumbbell", priority: 2, description: null },
     // Legs (4 exercises)
-    { id: 9, name: "Squat", muscle_group: "Legs", muscle_groups: ["Legs", "Core"], equipment_required: "Barbell", is_compound: true, description: null },
-    { id: 10, name: "Leg Press", muscle_group: "Legs", muscle_groups: ["Legs"], equipment_required: "Machines", is_compound: true, description: null },
-    { id: 11, name: "Lunges", muscle_group: "Legs", muscle_groups: ["Legs", "Core"], equipment_required: "Bodyweight", is_compound: true, description: null },
-    { id: 12, name: "Leg Curl", muscle_group: "Legs", muscle_groups: ["Legs"], equipment_required: "Machines", is_compound: false, description: null },
+    { id: 9, name: "Squat", muscle_group: "Legs", muscle_groups: ["Legs", "Core"], equipment_required: "Barbell", priority: 1, description: null },
+    { id: 10, name: "Leg Press", muscle_group: "Legs", muscle_groups: ["Legs"], equipment_required: "Machines", priority: 3, description: null },
+    { id: 11, name: "Lunges", muscle_group: "Legs", muscle_groups: ["Legs", "Core"], equipment_required: "Bodyweight", priority: 3, description: null },
+    { id: 12, name: "Leg Curl", muscle_group: "Legs", muscle_groups: ["Legs"], equipment_required: "Machines", priority: 4, description: null },
     // Shoulders (4 exercises)
-    { id: 13, name: "Overhead Press", muscle_group: "Shoulders", muscle_groups: ["Shoulders", "Arms", "Core"], equipment_required: "Barbell", is_compound: true, description: null },
-    { id: 14, name: "Lateral Raise", muscle_group: "Shoulders", muscle_groups: ["Shoulders"], equipment_required: "Dumbbell", is_compound: false, description: null },
-    { id: 15, name: "Pike Push-up", muscle_group: "Shoulders", muscle_groups: ["Shoulders", "Arms"], equipment_required: "Bodyweight", is_compound: true, description: null },
-    { id: 16, name: "Face Pull", muscle_group: "Shoulders", muscle_groups: ["Shoulders", "Back"], equipment_required: "Cables", is_compound: false, description: null },
+    { id: 13, name: "Overhead Press", muscle_group: "Shoulders", muscle_groups: ["Shoulders", "Arms", "Core"], equipment_required: "Barbell", priority: 2, description: null },
+    { id: 14, name: "Lateral Raise", muscle_group: "Shoulders", muscle_groups: ["Shoulders"], equipment_required: "Dumbbell", priority: 4, description: null },
+    { id: 15, name: "Pike Push-up", muscle_group: "Shoulders", muscle_groups: ["Shoulders", "Arms"], equipment_required: "Bodyweight", priority: 3, description: null },
+    { id: 16, name: "Face Pull", muscle_group: "Shoulders", muscle_groups: ["Shoulders", "Back"], equipment_required: "Cables", priority: 4, description: null },
     // Arms (4 exercises)
-    { id: 17, name: "Barbell Curl", muscle_group: "Arms", muscle_groups: ["Arms"], equipment_required: "Barbell", is_compound: false, description: null },
-    { id: 18, name: "Tricep Dips", muscle_group: "Arms", muscle_groups: ["Arms", "Chest"], equipment_required: "Bodyweight", is_compound: true, description: null },
-    { id: 19, name: "Hammer Curl", muscle_group: "Arms", muscle_groups: ["Arms"], equipment_required: "Dumbbell", is_compound: false, description: null },
-    { id: 20, name: "Cable Tricep Extension", muscle_group: "Arms", muscle_groups: ["Arms"], equipment_required: "Cables", is_compound: false, description: null },
+    { id: 17, name: "Barbell Curl", muscle_group: "Arms", muscle_groups: ["Arms"], equipment_required: "Barbell", priority: 4, description: null },
+    { id: 18, name: "Tricep Dips", muscle_group: "Arms", muscle_groups: ["Arms", "Chest"], equipment_required: "Bodyweight", priority: 3, description: null },
+    { id: 19, name: "Hammer Curl", muscle_group: "Arms", muscle_groups: ["Arms"], equipment_required: "Dumbbell", priority: 4, description: null },
+    { id: 20, name: "Cable Tricep Extension", muscle_group: "Arms", muscle_groups: ["Arms"], equipment_required: "Cables", priority: 4, description: null },
     // Core (4 exercises)
-    { id: 21, name: "Plank", muscle_group: "Core", muscle_groups: ["Core", "Shoulders"], equipment_required: "Bodyweight", is_compound: false, description: null },
-    { id: 22, name: "Cable Crunch", muscle_group: "Core", muscle_groups: ["Core"], equipment_required: "Cables", is_compound: false, description: null },
-    { id: 23, name: "Hanging Leg Raise", muscle_group: "Core", muscle_groups: ["Core", "Back"], equipment_required: "Bodyweight", is_compound: false, description: null },
-    { id: 24, name: "Ab Wheel Rollout", muscle_group: "Core", muscle_groups: ["Core", "Shoulders"], equipment_required: "Bodyweight", is_compound: true, description: null },
+    { id: 21, name: "Plank", muscle_group: "Core", muscle_groups: ["Core", "Shoulders"], equipment_required: "Bodyweight", priority: 5, description: null },
+    { id: 22, name: "Cable Crunch", muscle_group: "Core", muscle_groups: ["Core"], equipment_required: "Cables", priority: 5, description: null },
+    { id: 23, name: "Hanging Leg Raise", muscle_group: "Core", muscle_groups: ["Core", "Back"], equipment_required: "Bodyweight", priority: 5, description: null },
+    { id: 24, name: "Ab Wheel Rollout", muscle_group: "Core", muscle_groups: ["Core", "Shoulders"], equipment_required: "Bodyweight", priority: 5, description: null },
   ];
 
   describe("filterExercisesByEquipment", () => {
@@ -188,7 +189,7 @@ describe("Exercise Selector", () => {
           muscle_group: "Chest",
           muscle_groups: ["Chest"],
           equipment_required: "Barbell",
-          is_compound: false,
+          priority: 4,
           description: null,
         },
       ];
@@ -226,7 +227,7 @@ describe("Exercise Selector", () => {
           muscle_group: "Chest",
           muscle_groups: ["Chest", "Shoulders"],
           equipment_required: "Barbell",
-          is_compound: true,
+          priority: 2,
           description: null,
         },
       ];
@@ -249,8 +250,7 @@ describe("Exercise Selector", () => {
 
     it("prioritizes compound exercises", () => {
       const result = selectExercisesForMuscles(mockExercises, ["Chest"], 2);
-      // Should include at least one compound
-      expect(result.some((e) => e.is_compound)).toBe(true);
+      expect(result.some((e) => isCompoundPriority(e.priority))).toBe(true);
     });
 
     it("respects exercise count limit", () => {
@@ -266,7 +266,7 @@ describe("Exercise Selector", () => {
   });
 
   describe("orderExercises", () => {
-    it("places compound exercises first", () => {
+    it("orders exercises by priority", () => {
       const result = orderExercises([
         mockExercises[1], // Dumbbell Fly (isolation)
         mockExercises[0], // Bench Press (compound)
@@ -275,10 +275,13 @@ describe("Exercise Selector", () => {
       expect(result[1].name).toBe("Dumbbell Fly");
     });
 
-    it("maintains order within same compound status", () => {
-      const compounds = mockExercises.filter((e) => e.is_compound);
-      const result = orderExercises(compounds);
-      expect(result.every((e) => e.is_compound)).toBe(true);
+    it("maintains order within same priority", () => {
+      const samePriority = [
+        { ...mockExercises[0], id: 10, name: "Bench Press A" },
+        { ...mockExercises[0], id: 11, name: "Bench Press B" },
+      ];
+      const result = orderExercises(samePriority);
+      expect(result.map((e) => e.name)).toEqual(["Bench Press A", "Bench Press B"]);
     });
 
     it("handles empty array", () => {
@@ -361,7 +364,7 @@ describe("Exercise Selector", () => {
       );
 
       // Count compound exercises
-      const compoundCount = result.filter((ex) => ex.is_compound).length;
+      const compoundCount = result.filter((ex) => isCompoundPriority(ex.priority)).length;
 
       // Most should be compound since they're prioritized
       expect(compoundCount).toBeGreaterThan(result.length * 0.5);
@@ -389,8 +392,8 @@ describe("Exercise Selector", () => {
 
     it("handles limited exercise availability", () => {
       const limitedExercises: Exercise[] = [
-        { id: 1, name: "Bench Press", muscle_group: "Chest", muscle_groups: ["Chest", "Shoulders", "Arms"], equipment_required: "Barbell", is_compound: true, description: null },
-        { id: 2, name: "Pull-up", muscle_group: "Back", muscle_groups: ["Back", "Arms"], equipment_required: "Bodyweight", is_compound: true, description: null },
+        { id: 1, name: "Bench Press", muscle_group: "Chest", muscle_groups: ["Chest", "Shoulders", "Arms"], equipment_required: "Barbell", priority: 1, description: null },
+        { id: 2, name: "Pull-up", muscle_group: "Back", muscle_groups: ["Back", "Arms"], equipment_required: "Bodyweight", priority: 2, description: null },
       ];
 
       const result = selectInitialExercises(

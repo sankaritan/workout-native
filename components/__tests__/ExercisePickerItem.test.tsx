@@ -15,7 +15,7 @@ describe("ExercisePickerItem", () => {
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Shoulders", "Arms"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 1,
     description: "Compound chest exercise",
   };
 
@@ -25,7 +25,7 @@ describe("ExercisePickerItem", () => {
     muscle_group: "Chest",
     muscle_groups: ["Chest"],
     equipment_required: "Dumbbell",
-    is_compound: false,
+    priority: 4,
     description: "Isolation chest exercise",
   };
 
@@ -45,24 +45,24 @@ describe("ExercisePickerItem", () => {
     expect(screen.getByText("Bench Press")).toBeTruthy();
   });
 
-  it("renders compound badge for compound exercises", () => {
+  it("renders primary badge for high priority exercises", () => {
     render(
       <ExercisePickerItem
         exercise={mockCompoundExercise}
         onPress={mockOnPress}
       />
     );
-    expect(screen.getByText("Compound")).toBeTruthy();
+    expect(screen.getByText("Primary")).toBeTruthy();
   });
 
-  it("renders isolated badge for isolation exercises", () => {
+  it("renders isolation badge for isolation exercises", () => {
     render(
       <ExercisePickerItem
         exercise={mockIsolatedExercise}
         onPress={mockOnPress}
       />
     );
-    expect(screen.getByText("Isolated")).toBeTruthy();
+    expect(screen.getByText("Isolation")).toBeTruthy();
   });
 
   it("renders equipment type", () => {

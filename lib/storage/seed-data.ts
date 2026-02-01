@@ -18,7 +18,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Shoulders", "Arms"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 1,
     description: "Classic compound chest exercise performed lying on a flat bench",
   },
   {
@@ -26,7 +26,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Shoulders", "Arms"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 2,
     description: "Bench press variation targeting upper chest",
   },
   {
@@ -34,7 +34,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Shoulders", "Arms"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 2,
     description: "Bench press variation targeting lower chest",
   },
 
@@ -44,7 +44,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Shoulders", "Arms"],
     equipment_required: "Dumbbell",
-    is_compound: true,
+    priority: 3,
     description: "Chest press with dumbbells for greater range of motion",
   },
   {
@@ -52,7 +52,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Shoulders", "Arms"],
     equipment_required: "Dumbbell",
-    is_compound: true,
+    priority: 3,
     description: "Dumbbell press on incline bench for upper chest emphasis",
   },
   {
@@ -60,7 +60,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest"],
     equipment_required: "Dumbbell",
-    is_compound: false,
+    priority: 4,
     description: "Isolation exercise for chest stretch and contraction",
   },
   {
@@ -68,7 +68,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Back"],
     equipment_required: "Dumbbell",
-    is_compound: true,
+    priority: 3,
     description: "Pullover movement targeting chest and lats",
   },
 
@@ -78,7 +78,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Shoulders", "Arms"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 3,
     description: "Bodyweight chest exercise that can be done anywhere",
   },
   {
@@ -86,7 +86,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Arms"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 3,
     description: "Bodyweight exercise emphasizing lower chest with forward lean",
   },
   {
@@ -94,7 +94,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Arms"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 3,
     description: "Push-up variation with hands close together for inner chest",
   },
 
@@ -104,7 +104,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest"],
     equipment_required: "Cables",
-    is_compound: false,
+    priority: 4,
     description: "Cable variation of flyes for constant tension",
   },
   {
@@ -112,7 +112,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest"],
     equipment_required: "Cables",
-    is_compound: false,
+    priority: 4,
     description: "High-to-low cable movement for lower chest definition",
   },
   {
@@ -120,7 +120,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Shoulders"],
     equipment_required: "Cables",
-    is_compound: false,
+    priority: 4,
     description: "Low-to-high cable movement targeting upper chest",
   },
 
@@ -130,7 +130,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Shoulders", "Arms"],
     equipment_required: "Machines",
-    is_compound: true,
+    priority: 3,
     description: "Machine-based chest press for controlled movement",
   },
   {
@@ -138,7 +138,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest"],
     equipment_required: "Machines",
-    is_compound: false,
+    priority: 4,
     description: "Machine fly for chest isolation and squeeze",
   },
   {
@@ -146,7 +146,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Shoulders", "Arms"],
     equipment_required: "Machines",
-    is_compound: true,
+    priority: 3,
     description: "Guided barbell press for stable chest work",
   },
 
@@ -156,7 +156,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Shoulders", "Arms"],
     equipment_required: "Bands",
-    is_compound: true,
+    priority: 3,
     description: "Push-ups with band resistance across back",
   },
   {
@@ -164,7 +164,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest", "Shoulders", "Arms"],
     equipment_required: "Bands",
-    is_compound: true,
+    priority: 3,
     description: "Standing chest press using resistance band",
   },
   {
@@ -172,7 +172,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Chest",
     muscle_groups: ["Chest"],
     equipment_required: "Bands",
-    is_compound: false,
+    priority: 4,
     description: "Fly movement with bands anchored behind",
   },
 
@@ -186,7 +186,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Legs", "Core"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 1,
     description: "King of back exercises, works entire posterior chain",
   },
   {
@@ -194,7 +194,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 1,
     description: "Bent-over row for mid-back thickness",
   },
   {
@@ -202,7 +202,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 2,
     description: "Compound row variation for back thickness",
   },
   {
@@ -210,7 +210,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 2,
     description: "Explosive row from dead stop for power and thickness",
   },
 
@@ -220,7 +220,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Dumbbell",
-    is_compound: true,
+    priority: 3,
     description: "Single-arm row for unilateral back development",
   },
   {
@@ -228,7 +228,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Chest"],
     equipment_required: "Dumbbell",
-    is_compound: true,
+    priority: 3,
     description: "Pullover emphasizing lat stretch and contraction",
   },
   {
@@ -236,7 +236,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Dumbbell",
-    is_compound: true,
+    priority: 3,
     description: "Row with chest on incline bench to isolate back",
   },
 
@@ -246,7 +246,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 2,
     description: "Bodyweight vertical pull for back width",
   },
   {
@@ -254,7 +254,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 2,
     description: "Underhand grip pull-up variation with bicep emphasis",
   },
   {
@@ -262,7 +262,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 3,
     description: "Horizontal pull using body weight on low bar",
   },
 
@@ -272,7 +272,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Cables",
-    is_compound: true,
+    priority: 3,
     description: "Cable machine exercise for back width",
   },
   {
@@ -280,7 +280,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Cables",
-    is_compound: true,
+    priority: 3,
     description: "Horizontal cable pull for mid-back thickness",
   },
   {
@@ -288,7 +288,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Shoulders"],
     equipment_required: "Cables",
-    is_compound: false,
+    priority: 4,
     description: "Cable exercise for rear delts and upper back health",
   },
   {
@@ -296,7 +296,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back"],
     equipment_required: "Cables",
-    is_compound: false,
+    priority: 4,
     description: "Isolation exercise for lat engagement",
   },
 
@@ -306,7 +306,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Machines",
-    is_compound: true,
+    priority: 3,
     description: "Machine-based pulldown for consistent lat work",
   },
   {
@@ -314,7 +314,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Machines",
-    is_compound: true,
+    priority: 3,
     description: "Machine row for controlled back development",
   },
   {
@@ -322,7 +322,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Machines",
-    is_compound: true,
+    priority: 3,
     description: "Counterweight machine for pull-up progression",
   },
 
@@ -332,7 +332,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Bands",
-    is_compound: true,
+    priority: 3,
     description: "Pulldown movement with band anchored overhead",
   },
   {
@@ -340,7 +340,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Arms"],
     equipment_required: "Bands",
-    is_compound: true,
+    priority: 3,
     description: "Seated or standing row with resistance band",
   },
   {
@@ -348,7 +348,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Back",
     muscle_groups: ["Back", "Shoulders"],
     equipment_required: "Bands",
-    is_compound: false,
+    priority: 4,
     description: "Face pull using band for rear delt and upper back",
   },
 
@@ -362,7 +362,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs", "Core"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 1,
     description: "King of leg exercises, works entire lower body",
   },
   {
@@ -370,7 +370,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs", "Core"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 2,
     description: "Squat variation with bar in front, emphasizes quads",
   },
   {
@@ -378,7 +378,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs", "Back"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 2,
     description: "Hamstring-focused deadlift variation",
   },
   {
@@ -386,7 +386,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs", "Core"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 3,
     description: "Glute-focused hip extension with barbell",
   },
 
@@ -396,7 +396,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs", "Core"],
     equipment_required: "Dumbbell",
-    is_compound: true,
+    priority: 3,
     description: "Unilateral leg exercise for balance and strength",
   },
   {
@@ -404,7 +404,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs", "Core"],
     equipment_required: "Dumbbell",
-    is_compound: true,
+    priority: 3,
     description: "Single-leg squat variation with rear foot elevated",
   },
   {
@@ -412,7 +412,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs", "Back"],
     equipment_required: "Dumbbell",
-    is_compound: true,
+    priority: 3,
     description: "Dumbbell RDL for hamstring development",
   },
 
@@ -422,7 +422,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs", "Core"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 3,
     description: "Foundational squat pattern without weights",
   },
   {
@@ -430,7 +430,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs", "Core"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 3,
     description: "Dynamic lunge variation for leg strength and balance",
   },
   {
@@ -438,7 +438,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs", "Core"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 3,
     description: "Hip extension exercise for glutes",
   },
 
@@ -448,7 +448,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs", "Core"],
     equipment_required: "Cables",
-    is_compound: true,
+    priority: 3,
     description: "Hip hinge movement for glutes and hamstrings",
   },
   {
@@ -456,7 +456,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs"],
     equipment_required: "Cables",
-    is_compound: false,
+    priority: 4,
     description: "Isolated glute exercise with ankle strap",
   },
   {
@@ -464,7 +464,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs", "Back"],
     equipment_required: "Cables",
-    is_compound: true,
+    priority: 3,
     description: "RDL variation with cable for constant tension",
   },
 
@@ -474,7 +474,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs"],
     equipment_required: "Machines",
-    is_compound: true,
+    priority: 3,
     description: "Machine-based compound leg exercise",
   },
   {
@@ -482,7 +482,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs"],
     equipment_required: "Machines",
-    is_compound: false,
+    priority: 4,
     description: "Isolation exercise for quadriceps",
   },
   {
@@ -490,7 +490,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs"],
     equipment_required: "Machines",
-    is_compound: false,
+    priority: 4,
     description: "Isolation exercise for hamstrings",
   },
   {
@@ -498,7 +498,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs"],
     equipment_required: "Machines",
-    is_compound: false,
+    priority: 4,
     description: "Isolation exercise for calf development",
   },
   {
@@ -506,7 +506,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs"],
     equipment_required: "Machines",
-    is_compound: true,
+    priority: 3,
     description: "Machine squat for quad-focused leg development",
   },
 
@@ -516,7 +516,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs", "Core"],
     equipment_required: "Bands",
-    is_compound: true,
+    priority: 3,
     description: "Squat with band around thighs for glute activation",
   },
   {
@@ -524,7 +524,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs", "Core"],
     equipment_required: "Bands",
-    is_compound: true,
+    priority: 3,
     description: "Hip bridge with band above knees for glute work",
   },
   {
@@ -532,7 +532,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Legs",
     muscle_groups: ["Legs"],
     equipment_required: "Bands",
-    is_compound: true,
+    priority: 3,
     description: "Side steps with band for hip abductor strength",
   },
 
@@ -546,7 +546,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders", "Arms", "Core"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 2,
     description: "Standing barbell press for overall shoulder development",
   },
   {
@@ -554,7 +554,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders", "Arms", "Legs"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 2,
     description: "Explosive overhead press with leg drive",
   },
   {
@@ -562,7 +562,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders", "Back"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 3,
     description: "Compound exercise for shoulders and traps",
   },
 
@@ -572,7 +572,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders", "Arms"],
     equipment_required: "Dumbbell",
-    is_compound: true,
+    priority: 3,
     description: "Seated or standing dumbbell press for shoulders",
   },
   {
@@ -580,7 +580,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders", "Arms"],
     equipment_required: "Dumbbell",
-    is_compound: true,
+    priority: 3,
     description: "Rotating dumbbell press hitting all three deltoid heads",
   },
   {
@@ -588,7 +588,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders"],
     equipment_required: "Dumbbell",
-    is_compound: false,
+    priority: 4,
     description: "Isolation exercise for side deltoids",
   },
   {
@@ -596,7 +596,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders"],
     equipment_required: "Dumbbell",
-    is_compound: false,
+    priority: 4,
     description: "Isolation exercise for front deltoids",
   },
   {
@@ -604,7 +604,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders"],
     equipment_required: "Dumbbell",
-    is_compound: false,
+    priority: 4,
     description: "Isolation exercise for rear deltoids",
   },
 
@@ -614,7 +614,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders", "Arms"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 3,
     description: "Bodyweight exercise targeting shoulders",
   },
   {
@@ -622,7 +622,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders", "Arms", "Core"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 3,
     description: "Advanced bodyweight shoulder press against wall",
   },
   {
@@ -630,7 +630,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders", "Core"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 3,
     description: "Walking hands up wall for shoulder strength",
   },
 
@@ -640,7 +640,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders"],
     equipment_required: "Cables",
-    is_compound: false,
+    priority: 4,
     description: "Lateral raise with cable for constant tension",
   },
   {
@@ -648,7 +648,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders"],
     equipment_required: "Cables",
-    is_compound: false,
+    priority: 4,
     description: "Front deltoid raise using cable",
   },
   {
@@ -656,7 +656,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders", "Back"],
     equipment_required: "Cables",
-    is_compound: true,
+    priority: 3,
     description: "Upright row with cable for smooth resistance",
   },
 
@@ -666,7 +666,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders", "Arms"],
     equipment_required: "Machines",
-    is_compound: true,
+    priority: 3,
     description: "Machine-based overhead press for shoulders",
   },
   {
@@ -674,7 +674,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders"],
     equipment_required: "Machines",
-    is_compound: false,
+    priority: 4,
     description: "Machine for isolated lateral deltoid work",
   },
   {
@@ -682,7 +682,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders", "Back"],
     equipment_required: "Machines",
-    is_compound: false,
+    priority: 4,
     description: "Reverse fly machine for rear deltoids",
   },
 
@@ -692,7 +692,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders", "Arms"],
     equipment_required: "Bands",
-    is_compound: true,
+    priority: 3,
     description: "Overhead press with resistance band",
   },
   {
@@ -700,7 +700,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders"],
     equipment_required: "Bands",
-    is_compound: false,
+    priority: 4,
     description: "Lateral raise using band stepped under feet",
   },
   {
@@ -708,7 +708,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Shoulders",
     muscle_groups: ["Shoulders", "Back"],
     equipment_required: "Bands",
-    is_compound: false,
+    priority: 4,
     description: "Band pulled apart at chest level for rear delts",
   },
 
@@ -722,7 +722,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Barbell",
-    is_compound: false,
+    priority: 4,
     description: "Classic bicep exercise with barbell",
   },
   {
@@ -730,7 +730,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms", "Chest"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 3,
     description: "Bench press variation emphasizing triceps",
   },
   {
@@ -738,7 +738,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Barbell",
-    is_compound: false,
+    priority: 4,
     description: "Lying tricep extension exercise",
   },
   {
@@ -746,7 +746,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Barbell",
-    is_compound: false,
+    priority: 4,
     description: "Bicep curl on preacher bench for isolation",
   },
 
@@ -756,7 +756,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Dumbbell",
-    is_compound: false,
+    priority: 4,
     description: "Bicep curl with dumbbells for unilateral work",
   },
   {
@@ -764,7 +764,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Dumbbell",
-    is_compound: false,
+    priority: 4,
     description: "Neutral grip curl for biceps and brachialis",
   },
   {
@@ -772,7 +772,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Dumbbell",
-    is_compound: false,
+    priority: 4,
     description: "Overhead extension for long head of triceps",
   },
   {
@@ -780,7 +780,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Dumbbell",
-    is_compound: false,
+    priority: 4,
     description: "Tricep isolation with arm extended behind",
   },
 
@@ -790,7 +790,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms", "Chest"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 3,
     description: "Bodyweight exercise for triceps on parallel bars",
   },
   {
@@ -798,7 +798,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 3,
     description: "Tricep dips using a bench for support",
   },
   {
@@ -806,7 +806,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms", "Chest"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 3,
     description: "Push-ups with narrow hand placement for triceps",
   },
 
@@ -816,7 +816,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Cables",
-    is_compound: false,
+    priority: 4,
     description: "Cable isolation exercise for triceps",
   },
   {
@@ -824,7 +824,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Cables",
-    is_compound: false,
+    priority: 4,
     description: "Bicep curl with cable for constant tension",
   },
   {
@@ -832,7 +832,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Cables",
-    is_compound: false,
+    priority: 4,
     description: "Tricep extension with cable behind head",
   },
   {
@@ -840,7 +840,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Cables",
-    is_compound: false,
+    priority: 4,
     description: "Cable curl with rope for neutral grip",
   },
 
@@ -850,7 +850,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Machines",
-    is_compound: false,
+    priority: 4,
     description: "Machine-based bicep curl for isolation",
   },
   {
@@ -858,7 +858,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Machines",
-    is_compound: false,
+    priority: 4,
     description: "Machine for isolated tricep work",
   },
   {
@@ -866,7 +866,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms", "Chest"],
     equipment_required: "Machines",
-    is_compound: true,
+    priority: 3,
     description: "Counterweight machine for dip progression",
   },
 
@@ -876,7 +876,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Bands",
-    is_compound: false,
+    priority: 4,
     description: "Bicep curl with resistance band",
   },
   {
@@ -884,7 +884,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Bands",
-    is_compound: false,
+    priority: 4,
     description: "Tricep pushdown with band anchored above",
   },
   {
@@ -892,7 +892,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Arms",
     muscle_groups: ["Arms"],
     equipment_required: "Bands",
-    is_compound: false,
+    priority: 4,
     description: "Overhead tricep extension with band",
   },
 
@@ -906,7 +906,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core", "Shoulders"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 5,
     description: "Ab rollout using barbell for core stability",
   },
   {
@@ -914,7 +914,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core", "Shoulders"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 5,
     description: "Rotational exercise with barbell in landmine",
   },
   {
@@ -922,7 +922,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core", "Back", "Legs"],
     equipment_required: "Barbell",
-    is_compound: true,
+    priority: 5,
     description: "Hip hinge with barbell for posterior chain and core",
   },
 
@@ -932,7 +932,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core"],
     equipment_required: "Dumbbell",
-    is_compound: false,
+    priority: 5,
     description: "Lateral flexion for oblique development",
   },
   {
@@ -940,7 +940,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core", "Shoulders"],
     equipment_required: "Dumbbell",
-    is_compound: true,
+    priority: 5,
     description: "Rotational movement pattern for core strength",
   },
   {
@@ -948,7 +948,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core"],
     equipment_required: "Dumbbell",
-    is_compound: false,
+    priority: 5,
     description: "Crunch holding dumbbell for added resistance",
   },
 
@@ -958,7 +958,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core", "Shoulders"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 5,
     description: "Isometric core exercise for stability",
   },
   {
@@ -966,7 +966,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core"],
     equipment_required: "Bodyweight",
-    is_compound: false,
+    priority: 5,
     description: "Basic abdominal exercise",
   },
   {
@@ -974,7 +974,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core", "Back"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 5,
     description: "Advanced core exercise hanging from bar",
   },
   {
@@ -982,7 +982,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core"],
     equipment_required: "Bodyweight",
-    is_compound: false,
+    priority: 5,
     description: "Rotational core exercise for obliques",
   },
   {
@@ -990,7 +990,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core", "Shoulders"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 5,
     description: "Advanced core exercise with ab wheel",
   },
   {
@@ -998,7 +998,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core", "Shoulders"],
     equipment_required: "Bodyweight",
-    is_compound: true,
+    priority: 5,
     description: "Dynamic core exercise with cardio element",
   },
   {
@@ -1006,7 +1006,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core"],
     equipment_required: "Bodyweight",
-    is_compound: false,
+    priority: 5,
     description: "Core stability exercise performed on back",
   },
 
@@ -1016,7 +1016,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core"],
     equipment_required: "Cables",
-    is_compound: false,
+    priority: 5,
     description: "Cable machine crunch for progressive overload",
   },
   {
@@ -1024,7 +1024,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core", "Shoulders"],
     equipment_required: "Cables",
-    is_compound: true,
+    priority: 5,
     description: "Rotational cable movement for obliques",
   },
   {
@@ -1032,7 +1032,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core"],
     equipment_required: "Cables",
-    is_compound: false,
+    priority: 5,
     description: "Anti-rotation exercise for core stability",
   },
 
@@ -1042,7 +1042,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core"],
     equipment_required: "Machines",
-    is_compound: false,
+    priority: 5,
     description: "Machine for weighted ab crunches",
   },
   {
@@ -1050,7 +1050,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core"],
     equipment_required: "Machines",
-    is_compound: false,
+    priority: 5,
     description: "Machine for rotational oblique work",
   },
   {
@@ -1058,7 +1058,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core"],
     equipment_required: "Machines",
-    is_compound: false,
+    priority: 5,
     description: "Leg raise supported by arm rests",
   },
 
@@ -1068,7 +1068,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core"],
     equipment_required: "Bands",
-    is_compound: false,
+    priority: 5,
     description: "Anti-rotation press with resistance band",
   },
   {
@@ -1076,7 +1076,7 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core", "Shoulders"],
     equipment_required: "Bands",
-    is_compound: true,
+    priority: 5,
     description: "Rotational chop pattern with band",
   },
   {
@@ -1084,10 +1084,11 @@ export const EXERCISES: ExerciseInsert[] = [
     muscle_group: "Core",
     muscle_groups: ["Core"],
     equipment_required: "Bands",
-    is_compound: false,
+    priority: 5,
     description: "Dead bug with band resistance for added challenge",
   },
 ];
+
 
 /**
  * Migrate existing exercises to add muscle_groups field
@@ -1135,6 +1136,38 @@ export function migrateExerciseMuscleGroups(): void {
   }
 }
 
+export function migrateExercisePriority(): void {
+  try {
+    const { updateExercise } = require("./storage");
+    const existingExercises = getAllExercises() || [];
+
+    let updatedCount = 0;
+
+    for (const existingEx of existingExercises) {
+      if (existingEx.priority !== undefined && existingEx.priority !== null) {
+        continue;
+      }
+
+      const seedEx = EXERCISES.find((ex) => ex.name === existingEx.name);
+
+      const priority =
+        seedEx?.priority ?? (existingEx.muscle_group === "Core" ? 5 : 4);
+
+      updateExercise(existingEx.id, {
+        ...existingEx,
+        priority,
+      });
+      updatedCount++;
+    }
+
+    if (updatedCount > 0) {
+      console.log(`Migrated ${updatedCount} exercises to priority system`);
+    }
+  } catch (error) {
+    console.error("Failed to migrate exercises priority:", error);
+  }
+}
+
 /**
  * Seed the exercises table with initial data
  * Only inserts exercises that don't already exist (based on name)
@@ -1160,8 +1193,8 @@ export function seedExercises(): void {
       console.log("All exercises already exist in database");
     }
 
-    // Run migration to add muscle_groups to existing exercises
     migrateExerciseMuscleGroups();
+    migrateExercisePriority();
   } catch (error) {
     console.error("Failed to seed exercises:", error);
     throw error;

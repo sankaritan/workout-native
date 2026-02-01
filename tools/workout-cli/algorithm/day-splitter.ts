@@ -2,6 +2,15 @@ import type { Exercise, MuscleGroup } from "../../../lib/storage/types";
 import { distributeMuscleGroups } from "./muscle-groups";
 import { orderExercises } from "./exercise-selector";
 import type { GenerationInput, WorkoutProgram, ProgramSession, ProgramExercise } from "./types";
+import type { SessionTemplate } from "./muscle-groups";
+
+/**
+ * Determines if an exercise requires significant recovery time
+ * Currently: Priority 1 + Barbell equipment (the "big 4" lifts: Bench, Squat, Deadlift, Barbell Row)
+ */
+function isHighRecoveryExercise(exercise: Exercise): boolean {
+  return exercise.priority === 1 && exercise.equipment_required === "Barbell";
+}
 
 export interface AssignmentReason {
   exerciseId: number;
@@ -120,6 +129,105 @@ function rebalanceExercisesAcrossSessions(
   }
 }
 
+/**
+ * Find a session that is not consecutive to the source session
+ * and is compatible with the given exercise
+ */
+function findNonConsecutiveSession(
+  sourceSessionIdx: number,
+  exercise: Exercise,
+  sessionTemplates: SessionTemplate[],
+  sessionExerciseLists: Exercise[][],
+  maxExercises: number
+): number | null {
+  const sourceDayOfWeek = sessionTemplates[sourceSessionIdx].dayOfWeek;
+
+  // First pass: Find non-consecutive sessions without high-recovery exercises
+  for (let i = 0; i < sessionTemplates.length; i++) {
+    if (i === sourceSessionIdx) continue;
+
+    const targetDayOfWeek = sessionTemplates[i].dayOfWeek;
+    const isConsecutive = Math.abs(targetDayOfWeek - sourceDayOfWeek) === 1;
+
+    if (isConsecutive) continue;
+
+    const isCompatible = exercise.muscle_groups.some((mg) =>
+      sessionTemplates[i].muscles.includes(mg)
+    );
+    if (!isCompatible) continue;
+
+    if (sessionExerciseLists[i].length >= maxExercises) continue;
+
+    const alreadyExists = sessionExerciseLists[i].some((ex) => ex.id === exercise.id);
+    if (alreadyExists) continue;
+
+    const hasHighRecovery = sessionExerciseLists[i].some(isHighRecoveryExercise);
+    if (!hasHighRecovery) {
+      return i;
+    }
+  }
+
+  // Second pass: Any non-consecutive compatible session with room
+  for (let i = 0; i < sessionTemplates.length; i++) {
+    if (i === sourceSessionIdx) continue;
+
+    const targetDayOfWeek = sessionTemplates[i].dayOfWeek;
+    const isConsecutive = Math.abs(targetDayOfWeek - sourceDayOfWeek) === 1;
+
+    if (isConsecutive) continue;
+
+    const isCompatible = exercise.muscle_groups.some((mg) =>
+      sessionTemplates[i].muscles.includes(mg)
+    );
+    if (!isCompatible) continue;
+
+    if (sessionExerciseLists[i].length >= maxExercises) continue;
+
+    const alreadyExists = sessionExerciseLists[i].some((ex) => ex.id === exercise.id);
+    if (alreadyExists) continue;
+
+    return i;
+  }
+
+  return null;
+}
+
+/**
+ * Check if adding an exercise to a session would violate high-recovery spacing rules
+ */
+function wouldViolateHighRecoverySpacing(
+  sessionIdx: number,
+  exercise: Exercise,
+  sessionTemplates: SessionTemplate[],
+  sessionExerciseLists: Exercise[][],
+  frequency: number
+): boolean {
+  if (frequency < 4 || !isHighRecoveryExercise(exercise)) {
+    return false;
+  }
+
+  const currentDayOfWeek = sessionTemplates[sessionIdx].dayOfWeek;
+
+  for (let i = 0; i < sessionTemplates.length; i++) {
+    if (i === sessionIdx) continue;
+
+    const otherDayOfWeek = sessionTemplates[i].dayOfWeek;
+    const isConsecutive = Math.abs(otherDayOfWeek - currentDayOfWeek) === 1;
+
+    if (isConsecutive) {
+      const exerciseExistsInConsecutive = sessionExerciseLists[i].some(
+        (ex) => ex.id === exercise.id
+      );
+
+      if (exerciseExistsInConsecutive) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 export function generateWorkoutProgramFromCustomExercises(
   input: GenerationInput,
   customExercises: Exercise[]
@@ -145,11 +253,7 @@ export function generateWorkoutProgramFromCustomExercises(
         !assignedExercises.has(exercise.id)
     );
 
-    const sorted = primaryMatches.sort((a, b) => {
-      if (a.is_compound && !b.is_compound) return -1;
-      if (!a.is_compound && b.is_compound) return 1;
-      return 0;
-    });
+    const sorted = primaryMatches.sort((a, b) => a.priority - b.priority);
 
     const selected = sorted.slice(0, MAX_EXERCISES_PER_SESSION);
     selected.forEach((ex) => assignedExercises.add(ex.id));
@@ -232,11 +336,7 @@ export function generateWorkoutProgramFromCustomExercises(
     const unassignedPool = customExercises.filter((ex) => !assignedExercises.has(ex.id));
     const assignedPool = customExercises
       .filter((ex) => assignedExercises.has(ex.id))
-      .sort((a, b) => {
-        if (a.is_compound && !b.is_compound) return -1;
-        if (!a.is_compound && b.is_compound) return 1;
-        return 0;
-      });
+      .sort((a, b) => a.priority - b.priority);
 
     const exercisePool = [...unassignedPool, ...assignedPool];
 
@@ -260,8 +360,17 @@ export function generateWorkoutProgramFromCustomExercises(
           template.muscles.includes(mg)
         );
         const alreadyInSession = sessionList.some((ex) => ex.id === exercise.id);
+        
+        // Check if adding would violate high-recovery spacing
+        const wouldViolateSpacing = wouldViolateHighRecoverySpacing(
+          sessionIdx,
+          exercise,
+          sessionTemplates,
+          sessionExerciseLists,
+          frequency
+        );
 
-        if (isCompatible && !alreadyInSession) {
+        if (isCompatible && !alreadyInSession && !wouldViolateSpacing) {
           sessionList.push(exercise);
           assignedExercises.add(exercise.id);
           diagnostics.assignments.push({
@@ -283,7 +392,17 @@ export function generateWorkoutProgramFromCustomExercises(
       if (!added) {
         for (const exercise of exercisePool) {
           const alreadyInSession = sessionList.some((ex) => ex.id === exercise.id);
-          if (!alreadyInSession) {
+          
+          // Check spacing even for non-compatible exercises
+          const wouldViolateSpacing = wouldViolateHighRecoverySpacing(
+            sessionIdx,
+            exercise,
+            sessionTemplates,
+            sessionExerciseLists,
+            frequency
+          );
+          
+          if (!alreadyInSession && !wouldViolateSpacing) {
             sessionList.push(exercise);
             assignedExercises.add(exercise.id);
             diagnostics.assignments.push({
@@ -308,6 +427,83 @@ export function generateWorkoutProgramFromCustomExercises(
     }
   }
 
+  // High-recovery exercise spacing (for 4-5 day splits only)
+  // Prevents the SAME high-recovery exercise from appearing on consecutive days
+  if (frequency >= 4) {
+    const { getConsecutiveDayPairs } = require("./muscle-groups");
+    const consecutivePairs = getConsecutiveDayPairs(sessionTemplates);
+
+    for (const [dayA, dayB] of consecutivePairs) {
+      const exercisesInA = sessionExerciseLists[dayA];
+      const exercisesInB = sessionExerciseLists[dayB];
+
+      const highRecoveryInA = exercisesInA.filter(isHighRecoveryExercise);
+      const duplicateHighRecovery = highRecoveryInA.filter((exA) =>
+        exercisesInB.some((exB) => exB.id === exA.id && isHighRecoveryExercise(exB))
+      );
+
+      for (const exerciseToMove of duplicateHighRecovery) {
+        const alternateSession = findNonConsecutiveSession(
+          dayB,
+          exerciseToMove,
+          sessionTemplates,
+          sessionExerciseLists,
+          MAX_EXERCISES_PER_SESSION
+        );
+
+        if (alternateSession !== null) {
+          const exerciseIndex = sessionExerciseLists[dayB].findIndex(
+            (ex) => ex.id === exerciseToMove.id
+          );
+          if (exerciseIndex !== -1) {
+            sessionExerciseLists[dayB].splice(exerciseIndex, 1);
+            sessionExerciseLists[alternateSession].push(exerciseToMove);
+            
+            diagnostics.assignments.push({
+              exerciseId: exerciseToMove.id,
+              exerciseName: exerciseToMove.name,
+              primaryMuscle: exerciseToMove.muscle_groups[0],
+              assignedSessionIndex: alternateSession,
+              assignedSessionName: sessionTemplates[alternateSession]?.name ??
+                `Session ${alternateSession + 1}`,
+              pass: "minimum",
+              reason: `Moved from session ${dayB + 1} to avoid high-recovery exercise on consecutive days`,
+            });
+          }
+        } else {
+          const alternateForA = findNonConsecutiveSession(
+            dayA,
+            exerciseToMove,
+            sessionTemplates,
+            sessionExerciseLists,
+            MAX_EXERCISES_PER_SESSION
+          );
+
+          if (alternateForA !== null) {
+            const exerciseIndex = sessionExerciseLists[dayA].findIndex(
+              (ex) => ex.id === exerciseToMove.id
+            );
+            if (exerciseIndex !== -1) {
+              sessionExerciseLists[dayA].splice(exerciseIndex, 1);
+              sessionExerciseLists[alternateForA].push(exerciseToMove);
+              
+              diagnostics.assignments.push({
+                exerciseId: exerciseToMove.id,
+                exerciseName: exerciseToMove.name,
+                primaryMuscle: exerciseToMove.muscle_groups[0],
+                assignedSessionIndex: alternateForA,
+                assignedSessionName: sessionTemplates[alternateForA]?.name ??
+                  `Session ${alternateForA + 1}`,
+                pass: "minimum",
+                reason: `Moved from session ${dayA + 1} to avoid high-recovery exercise on consecutive days`,
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
   const sessions: ProgramSession[] = sessionTemplates.map((template, index) => {
     const sessionExercises = sessionExerciseLists[index];
     const orderedExercises = orderExercises(sessionExercises);
@@ -319,7 +515,7 @@ export function generateWorkoutProgramFromCustomExercises(
         sessionIndex: index,
         sessionName: template.name,
         order: idx + 1,
-        reason: exercise.is_compound ? "Compound exercises first" : "Isolation after compounds",
+        reason: `Priority ${exercise.priority} ordering`,
       });
     });
 

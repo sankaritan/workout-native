@@ -23,6 +23,15 @@ import type {
   SetsRepsScheme,
 } from "./types";
 import type { Exercise, MuscleGroup } from "@/lib/storage/types";
+import type { SessionTemplate } from "./muscle-groups";
+
+/**
+ * Determines if an exercise requires significant recovery time
+ * Currently: Priority 1 + Barbell equipment (the "big 4" lifts: Bench, Squat, Deadlift, Barbell Row)
+ */
+export function isHighRecoveryExercise(exercise: Exercise): boolean {
+  return exercise.priority === 1 && exercise.equipment_required === "Barbell";
+}
 
 /**
  * Get sets/reps scheme based on training focus
@@ -71,7 +80,7 @@ export function generateWorkoutProgram(
       maxExercisesPerSession
     );
 
-    // Order exercises (compound first)
+    // Order exercises (priority-based)
     const orderedExercises = orderExercises(selectedExercises);
 
     // Create program exercises with sets/reps
@@ -311,6 +320,128 @@ function rebalanceExercisesAcrossSessions(
 }
 
 /**
+ * Find a session that is not consecutive to the source session
+ * and is compatible with the given exercise
+ * 
+ * @param sourceSessionIdx - The index of the session to find an alternative for
+ * @param exercise - The exercise that needs to be moved
+ * @param sessionTemplates - All session templates
+ * @param sessionExerciseLists - Current exercise assignments for all sessions
+ * @param maxExercises - Maximum exercises allowed per session
+ * @returns Session index to move to, or null if none found
+ */
+function findNonConsecutiveSession(
+  sourceSessionIdx: number,
+  exercise: Exercise,
+  sessionTemplates: SessionTemplate[],
+  sessionExerciseLists: Exercise[][],
+  maxExercises: number
+): number | null {
+  const sourceDayOfWeek = sessionTemplates[sourceSessionIdx].dayOfWeek;
+
+  // First pass: Find non-consecutive sessions without high-recovery exercises
+  for (let i = 0; i < sessionTemplates.length; i++) {
+    if (i === sourceSessionIdx) continue;
+
+    const targetDayOfWeek = sessionTemplates[i].dayOfWeek;
+    const isConsecutive = Math.abs(targetDayOfWeek - sourceDayOfWeek) === 1;
+
+    if (isConsecutive) continue;
+
+    // Check muscle compatibility
+    const isCompatible = exercise.muscle_groups.some((mg) =>
+      sessionTemplates[i].muscles.includes(mg)
+    );
+    if (!isCompatible) continue;
+
+    // Check capacity
+    if (sessionExerciseLists[i].length >= maxExercises) continue;
+
+    // Check if exercise already exists in this session
+    const alreadyExists = sessionExerciseLists[i].some((ex) => ex.id === exercise.id);
+    if (alreadyExists) continue;
+
+    // Prefer sessions without high-recovery exercises
+    const hasHighRecovery = sessionExerciseLists[i].some(isHighRecoveryExercise);
+    if (!hasHighRecovery) {
+      return i;
+    }
+  }
+
+  // Second pass: Any non-consecutive compatible session with room
+  for (let i = 0; i < sessionTemplates.length; i++) {
+    if (i === sourceSessionIdx) continue;
+
+    const targetDayOfWeek = sessionTemplates[i].dayOfWeek;
+    const isConsecutive = Math.abs(targetDayOfWeek - sourceDayOfWeek) === 1;
+
+    if (isConsecutive) continue;
+
+    const isCompatible = exercise.muscle_groups.some((mg) =>
+      sessionTemplates[i].muscles.includes(mg)
+    );
+
+    if (!isCompatible) continue;
+
+    if (sessionExerciseLists[i].length >= maxExercises) continue;
+
+    const alreadyExists = sessionExerciseLists[i].some((ex) => ex.id === exercise.id);
+    if (alreadyExists) continue;
+
+    return i;
+  }
+
+  return null;
+}
+
+/**
+ * Check if adding an exercise to a session would violate high-recovery spacing rules
+ * For 4-5 day splits, high-recovery exercises shouldn't appear on consecutive days
+ * 
+ * @param sessionIdx - The session we want to add to
+ * @param exercise - The exercise we want to add
+ * @param sessionTemplates - All session templates
+ * @param sessionExerciseLists - Current exercise assignments
+ * @param frequency - Training frequency
+ * @returns true if adding would violate spacing, false if safe to add
+ */
+function wouldViolateHighRecoverySpacing(
+  sessionIdx: number,
+  exercise: Exercise,
+  sessionTemplates: SessionTemplate[],
+  sessionExerciseLists: Exercise[][],
+  frequency: number
+): boolean {
+  // Only apply to 4-5 day splits and high-recovery exercises
+  if (frequency < 4 || !isHighRecoveryExercise(exercise)) {
+    return false;
+  }
+
+  const currentDayOfWeek = sessionTemplates[sessionIdx].dayOfWeek;
+
+  // Check if this exercise exists in any consecutive session
+  for (let i = 0; i < sessionTemplates.length; i++) {
+    if (i === sessionIdx) continue;
+
+    const otherDayOfWeek = sessionTemplates[i].dayOfWeek;
+    const isConsecutive = Math.abs(otherDayOfWeek - currentDayOfWeek) === 1;
+
+    if (isConsecutive) {
+      // Check if the same exercise exists in this consecutive session
+      const exerciseExistsInConsecutive = sessionExerciseLists[i].some(
+        (ex) => ex.id === exercise.id
+      );
+
+      if (exerciseExistsInConsecutive) {
+        return true; // Would violate spacing
+      }
+    }
+  }
+
+  return false; // Safe to add
+}
+
+/**
  * Generate workout program from user-customized exercises
  * Uses flat array of exercises selected by the user
  * Intelligently distributes exercises across sessions ensuring ALL exercises are included
@@ -345,12 +476,7 @@ export function generateWorkoutProgramFromCustomExercises(
         !assignedExercises.has(exercise.id)
     );
 
-    // Sort: compound first
-    const sorted = primaryMatches.sort((a, b) => {
-      if (a.is_compound && !b.is_compound) return -1;
-      if (!a.is_compound && b.is_compound) return 1;
-      return 0;
-    });
+    const sorted = primaryMatches.sort((a, b) => a.priority - b.priority);
 
     // Take up to max exercises per session
     const selected = sorted.slice(0, MAX_EXERCISES_PER_SESSION);
@@ -424,12 +550,7 @@ export function generateWorkoutProgramFromCustomExercises(
     const unassignedPool = customExercises.filter((ex) => !assignedExercises.has(ex.id));
     const assignedPool = customExercises
       .filter((ex) => assignedExercises.has(ex.id))
-      .sort((a, b) => {
-        // Compound exercises first
-        if (a.is_compound && !b.is_compound) return -1;
-        if (!a.is_compound && b.is_compound) return 1;
-        return 0;
-      });
+      .sort((a, b) => a.priority - b.priority);
 
     const exercisePool = [...unassignedPool, ...assignedPool];
 
@@ -455,8 +576,17 @@ export function generateWorkoutProgramFromCustomExercises(
           template.muscles.includes(mg)
         );
         const alreadyInSession = sessionList.some((ex) => ex.id === exercise.id);
+        
+        // Check if adding would violate high-recovery spacing
+        const wouldViolateSpacing = wouldViolateHighRecoverySpacing(
+          sessionIdx,
+          exercise,
+          sessionTemplates,
+          sessionExerciseLists,
+          frequency
+        );
 
-        if (isCompatible && !alreadyInSession) {
+        if (isCompatible && !alreadyInSession && !wouldViolateSpacing) {
           sessionList.push(exercise);
           assignedExercises.add(exercise.id);
           addedInThisIteration = true;
@@ -469,7 +599,17 @@ export function generateWorkoutProgramFromCustomExercises(
       if (!added) {
         for (const exercise of exercisePool) {
           const alreadyInSession = sessionList.some((ex) => ex.id === exercise.id);
-          if (!alreadyInSession) {
+          
+          // Check spacing even for non-compatible exercises
+          const wouldViolateSpacing = wouldViolateHighRecoverySpacing(
+            sessionIdx,
+            exercise,
+            sessionTemplates,
+            sessionExerciseLists,
+            frequency
+          );
+          
+          if (!alreadyInSession && !wouldViolateSpacing) {
             sessionList.push(exercise);
             assignedExercises.add(exercise.id);
             addedInThisIteration = true;
@@ -482,6 +622,78 @@ export function generateWorkoutProgramFromCustomExercises(
     // If we couldn't add anything, stop trying
     if (!addedInThisIteration) {
       break;
+    }
+  }
+
+  // High-recovery exercise spacing (for 4-5 day splits only)
+  // Prevents the SAME high-recovery exercise from appearing on consecutive days
+  // It's OK to have different high-recovery exercises on consecutive days
+  if (frequency >= 4) {
+    const { getConsecutiveDayPairs } = require("./muscle-groups");
+    const consecutivePairs = getConsecutiveDayPairs(sessionTemplates);
+
+    for (const [dayA, dayB] of consecutivePairs) {
+      const exercisesInA = sessionExerciseLists[dayA];
+      const exercisesInB = sessionExerciseLists[dayB];
+
+      // Find high-recovery exercises that appear in BOTH consecutive days
+      const highRecoveryInA = exercisesInA.filter(isHighRecoveryExercise);
+      const duplicateHighRecovery = highRecoveryInA.filter((exA) =>
+        exercisesInB.some((exB) => exB.id === exA.id && isHighRecoveryExercise(exB))
+      );
+
+      // Move duplicate high-recovery exercises from dayB to a non-consecutive day
+      for (const exerciseToMove of duplicateHighRecovery) {
+        const alternateSession = findNonConsecutiveSession(
+          dayB,
+          exerciseToMove,
+          sessionTemplates,
+          sessionExerciseLists,
+          MAX_EXERCISES_PER_SESSION
+        );
+
+        if (alternateSession !== null) {
+          // Remove from dayB
+          const exerciseIndex = sessionExerciseLists[dayB].findIndex(
+            (ex) => ex.id === exerciseToMove.id
+          );
+          if (exerciseIndex !== -1) {
+            sessionExerciseLists[dayB].splice(exerciseIndex, 1);
+            // Add to alternate session
+            sessionExerciseLists[alternateSession].push(exerciseToMove);
+            console.log(
+              `Spacing: Moved ${exerciseToMove.name} from session ${dayB + 1} to ${alternateSession + 1} to avoid back-to-back heavy lifting`
+            );
+          }
+        } else {
+          // Try moving from dayA instead
+          const alternateForA = findNonConsecutiveSession(
+            dayA,
+            exerciseToMove,
+            sessionTemplates,
+            sessionExerciseLists,
+            MAX_EXERCISES_PER_SESSION
+          );
+
+          if (alternateForA !== null) {
+            const exerciseIndex = sessionExerciseLists[dayA].findIndex(
+              (ex) => ex.id === exerciseToMove.id
+            );
+            if (exerciseIndex !== -1) {
+              sessionExerciseLists[dayA].splice(exerciseIndex, 1);
+              sessionExerciseLists[alternateForA].push(exerciseToMove);
+              console.log(
+                `Spacing: Moved ${exerciseToMove.name} from session ${dayA + 1} to ${alternateForA + 1} to avoid back-to-back heavy lifting`
+              );
+            }
+          } else {
+            // Could not find alternative - log warning but continue
+            console.warn(
+              `Warning: Could not space high-recovery exercise ${exerciseToMove.name} appearing on consecutive days ${dayA + 1} and ${dayB + 1}`
+            );
+          }
+        }
+      }
     }
   }
 

@@ -77,12 +77,7 @@ export function selectExercisesForMuscles(
       muscleGroup
     );
 
-    // Sort by compound first
-    const sorted = muscleExercises.sort((a, b) => {
-      if (a.is_compound && !b.is_compound) return -1;
-      if (!a.is_compound && b.is_compound) return 1;
-      return 0;
-    });
+    const sorted = muscleExercises.sort((a, b) => a.priority - b.priority);
 
     // Take up to exercisesPerMuscle
     const toAdd = sorted.slice(0, exercisesPerMuscle);
@@ -98,22 +93,24 @@ export function selectExercisesForMuscles(
 }
 
 /**
- * Order exercises with compound movements first
+ * Order exercises by priority, then alphabetically by name
+ * This ensures consistent ordering across sessions (e.g., Deadlift always before Squat)
  */
 export function orderExercises(exercises: Exercise[]): Exercise[] {
   return [...exercises].sort((a, b) => {
-    // Compound exercises first
-    if (a.is_compound && !b.is_compound) return -1;
-    if (!a.is_compound && b.is_compound) return 1;
-    // Maintain original order within same type
-    return 0;
+    // Primary sort: by priority (compounds first)
+    if (a.priority !== b.priority) {
+      return a.priority - b.priority;
+    }
+    // Secondary sort: alphabetical by name for consistent ordering
+    return a.name.localeCompare(b.name);
   });
 }
 
 /**
  * Select initial exercises based on training frequency
  * Returns flat array of exercises (2 per relevant muscle group)
- * Prioritizes compound exercises, filters by available equipment
+ * Prioritizes by priority tiers, filters by available equipment
  */
 export function selectInitialExercises(
   availableExercises: Exercise[],

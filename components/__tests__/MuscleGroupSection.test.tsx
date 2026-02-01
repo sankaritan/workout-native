@@ -16,7 +16,7 @@ describe("MuscleGroupSection", () => {
       muscle_group: "Chest",
       muscle_groups: ["Chest", "Shoulders", "Arms"],
       equipment_required: "Barbell",
-      is_compound: true,
+      priority: 2,
       description: null,
     },
     {
@@ -25,7 +25,7 @@ describe("MuscleGroupSection", () => {
       muscle_group: "Chest",
       muscle_groups: ["Chest"],
       equipment_required: "Dumbbell",
-      is_compound: false,
+      priority: 4,
       description: null,
     },
   ];

@@ -134,3 +134,19 @@ function getDayOfWeek(sessionIndex: number, frequency: number): number {
   }
   return sessionIndex + 1;
 }
+
+/**
+ * Get pairs of consecutive session indices based on dayOfWeek
+ * Returns array of [dayA, dayB] where dayB is immediately after dayA
+ * E.g., for Upper/Lower: [[0,1], [2,3]] (Mon/Tue, Thu/Fri)
+ * E.g., for PPL: [[0,1], [1,2]] (Mon/Tue, Tue/Wed)
+ */
+export function getConsecutiveDayPairs(sessions: SessionTemplate[]): [number, number][] {
+  const pairs: [number, number][] = [];
+  for (let i = 0; i < sessions.length - 1; i++) {
+    if (sessions[i + 1].dayOfWeek - sessions[i].dayOfWeek === 1) {
+      pairs.push([i, i + 1]);
+    }
+  }
+  return pairs;
+}

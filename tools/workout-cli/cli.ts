@@ -1,6 +1,7 @@
 import readline from "node:readline";
 import { EXERCISES } from "../../lib/storage/seed-data";
 import type { Exercise, Equipment } from "../../lib/storage/types";
+import { EXERCISE_PRIORITY_LABELS } from "../../lib/storage/types";
 import { filterExercisesByEquipment } from "./algorithm/exercise-selector";
 import { selectInitialExercises } from "./algorithm/exercise-selector";
 import { generateWorkoutProgramFromCustomExercises } from "./algorithm/day-splitter";
@@ -9,6 +10,8 @@ import {
   printSelectionTable,
   printPlanTable,
   printAvailableExercises,
+  printSelectionVerbose,
+  printPlanVerbose,
 } from "./formatter";
 
 type Focus = "Balanced" | "Strength" | "Endurance";
@@ -16,13 +19,19 @@ type Focus = "Balanced" | "Strength" | "Endurance";
 interface CliState {
   input: GenerationInput;
   selectedExercises: Exercise[];
+  verbose: boolean;
 }
 
-function parseArgs(): { input: GenerationInput } {
+function parseArgs(): { input: GenerationInput; verbose: boolean } {
   const args = process.argv.slice(2);
   const argMap = new Map<string, string>();
+  let verbose = false;
 
   args.forEach((arg) => {
+    if (arg === "--verbose") {
+      verbose = true;
+      return;
+    }
     if (!arg.startsWith("--")) return;
     const [key, value] = arg.replace(/^--/, "").split("=");
     if (key && value !== undefined) {
@@ -44,6 +53,7 @@ function parseArgs(): { input: GenerationInput } {
       focus,
       equipment,
     },
+    verbose,
   };
 }
 
@@ -54,7 +64,7 @@ function buildExerciseCatalog(): Exercise[] {
     muscle_group: exercise.muscle_group,
     muscle_groups: exercise.muscle_groups,
     equipment_required: exercise.equipment_required,
-    is_compound: exercise.is_compound,
+    priority: exercise.priority,
     description: exercise.description ?? null,
   }));
 }
@@ -87,6 +97,9 @@ function runSelection(state: CliState, catalog: Exercise[]): void {
     diagnostics.filteredByEquipment,
     diagnostics.relevantMuscles
   );
+  if (state.verbose) {
+    printSelectionVerbose(diagnostics.muscleBreakdown);
+  }
 }
 
 function generatePlan(state: CliState): void {
@@ -96,6 +109,9 @@ function generatePlan(state: CliState): void {
   );
 
   printPlanTable(diagnostics.assignments, diagnostics.ordering, program.sessions);
+  if (state.verbose) {
+    printPlanVerbose(diagnostics.assignments);
+  }
 
   if (diagnostics.unassigned.length > 0) {
     console.log("Unassigned exercises:");
@@ -116,6 +132,7 @@ function printHelp(): void {
   console.log("  set frequency <n>   Change frequency and re-run selection");
   console.log("  set equipment <x>   Change equipment and re-run selection");
   console.log("  set focus <x>       Change focus (Balanced|Strength|Endurance)");
+  console.log("  verbose             Toggle verbose logging");
   console.log("  help                Show commands");
   console.log("  exit                Quit");
   console.log("");
@@ -125,7 +142,7 @@ function formatExerciseList(exercises: Exercise[]): void {
   exercises.forEach((exercise, index) => {
     console.log(
       `${index + 1}. ${exercise.name} (${exercise.muscle_groups[0]}, ${
-        exercise.is_compound ? "Compound" : "Isolation"
+        EXERCISE_PRIORITY_LABELS[exercise.priority]
       })`
     );
   });
@@ -257,6 +274,11 @@ async function startInteractive(state: CliState, catalog: Exercise[]): Promise<v
         printHelp();
         break;
       }
+      case "verbose": {
+        state.verbose = !state.verbose;
+        console.log(`Verbose mode: ${state.verbose ? "on" : "off"}`);
+        break;
+      }
       case "exit": {
         rl.close();
         return;
@@ -272,17 +294,19 @@ async function startInteractive(state: CliState, catalog: Exercise[]): Promise<v
 }
 
 async function main(): Promise<void> {
-  const { input } = parseArgs();
+  const { input, verbose } = parseArgs();
   const catalog = buildExerciseCatalog();
 
   const state: CliState = {
     input,
     selectedExercises: [],
+    verbose,
   };
 
   console.log(`Frequency: ${input.frequency} days`);
   console.log(`Focus: ${input.focus}`);
   console.log(`Equipment: ${input.equipment.join(", ")}`);
+  console.log(`Verbose: ${verbose ? "on" : "off"}`);
   console.log("");
 
   runSelection(state, catalog);

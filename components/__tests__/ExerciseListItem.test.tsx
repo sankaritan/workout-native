@@ -16,7 +16,7 @@ describe("ExerciseListItem", () => {
       muscle_group: "Chest",
       muscle_groups: ["Chest", "Shoulders", "Arms"],
       equipment_required: "Barbell",
-      is_compound: true,
+      priority: 2,
       description: "Compound chest exercise",
     },
     sets: 3,

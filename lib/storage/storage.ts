@@ -223,7 +223,7 @@ export function getExercisesByMuscleGroup(muscleGroup: MuscleGroup): Exercise[] 
 export function getCompoundExercises(): Exercise[] {
   ensureInitialized();
   return cache.exercises
-    .filter((e) => e.is_compound)
+    .filter((e) => e.priority <= 3)
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 

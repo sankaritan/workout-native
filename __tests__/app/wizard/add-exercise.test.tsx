@@ -25,11 +25,11 @@ mockMaterialIcons();
 // Mock storage to return test exercises
 jest.mock("@/lib/storage/storage", () => ({
   getAllExercises: jest.fn().mockReturnValue([
-    { id: 1, name: "Bench Press", muscle_group: "Chest", muscle_groups: ["Chest", "Shoulders", "Arms"], equipment_required: "Barbell", is_compound: true, description: "Compound chest exercise" },
-    { id: 2, name: "Push-up", muscle_group: "Chest", muscle_groups: ["Chest", "Arms"], equipment_required: "Bodyweight", is_compound: true, description: "Bodyweight chest exercise" },
-    { id: 3, name: "Dumbbell Fly", muscle_group: "Chest", muscle_groups: ["Chest"], equipment_required: "Dumbbell", is_compound: false, description: "Isolation chest exercise" },
-    { id: 4, name: "Cable Crossover", muscle_group: "Chest", muscle_groups: ["Chest"], equipment_required: "Cables", is_compound: false, description: null },
-    { id: 5, name: "Deadlift", muscle_group: "Back", muscle_groups: ["Back", "Legs", "Core"], equipment_required: "Barbell", is_compound: true, description: null },
+    { id: 1, name: "Bench Press", muscle_group: "Chest", muscle_groups: ["Chest", "Shoulders", "Arms"], equipment_required: "Barbell", priority: 1, description: "Compound chest exercise" },
+    { id: 2, name: "Push-up", muscle_group: "Chest", muscle_groups: ["Chest", "Arms"], equipment_required: "Bodyweight", priority: 3, description: "Bodyweight chest exercise" },
+    { id: 3, name: "Dumbbell Fly", muscle_group: "Chest", muscle_groups: ["Chest"], equipment_required: "Dumbbell", priority: 4, description: "Isolation chest exercise" },
+    { id: 4, name: "Cable Crossover", muscle_group: "Chest", muscle_groups: ["Chest"], equipment_required: "Cables", priority: 4, description: null },
+    { id: 5, name: "Deadlift", muscle_group: "Back", muscle_groups: ["Back", "Legs", "Core"], equipment_required: "Barbell", priority: 1, description: null },
   ]),
 }));
 

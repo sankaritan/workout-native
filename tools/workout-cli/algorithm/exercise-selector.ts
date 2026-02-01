@@ -1,4 +1,9 @@
-import type { Exercise, MuscleGroup, Equipment } from "../../../lib/storage/types";
+import type {
+  Exercise,
+  MuscleGroup,
+  Equipment,
+  ExercisePriority,
+} from "../../../lib/storage/types";
 import { getMuscleGroupsForFrequency } from "./muscle-groups";
 
 export interface SelectionReason {
@@ -6,7 +11,7 @@ export interface SelectionReason {
   exerciseName: string;
   primaryMuscle: MuscleGroup;
   equipment: Equipment | null;
-  isCompound: boolean;
+  priority: ExercisePriority;
   reason: string;
 }
 
@@ -14,6 +19,11 @@ export interface SelectionDiagnostics {
   filteredByEquipment: number;
   relevantMuscles: MuscleGroup[];
   reasons: SelectionReason[];
+  muscleBreakdown: Array<{
+    muscle: MuscleGroup;
+    candidateCount: number;
+    selectedNames: string[];
+  }>;
 }
 
 export function filterExercisesByEquipment(
@@ -55,9 +65,12 @@ export function filterExercisesByPrimaryMuscle(
 
 export function orderExercises(exercises: Exercise[]): Exercise[] {
   return [...exercises].sort((a, b) => {
-    if (a.is_compound && !b.is_compound) return -1;
-    if (!a.is_compound && b.is_compound) return 1;
-    return 0;
+    // Primary sort: by priority (compounds first)
+    if (a.priority !== b.priority) {
+      return a.priority - b.priority;
+    }
+    // Secondary sort: alphabetical by name for consistent ordering
+    return a.name.localeCompare(b.name);
   });
 }
 
@@ -71,6 +84,11 @@ export function selectInitialExercises(
 
   const selected: Exercise[] = [];
   const reasons: SelectionReason[] = [];
+  const muscleBreakdown: Array<{
+    muscle: MuscleGroup;
+    candidateCount: number;
+    selectedNames: string[];
+  }> = [];
 
   for (const muscleGroup of relevantMuscleGroups) {
     const muscleExercises = filterExercisesByPrimaryMuscle(
@@ -81,6 +99,12 @@ export function selectInitialExercises(
     const sorted = orderExercises(muscleExercises);
     const chosen = sorted.slice(0, 2);
 
+    muscleBreakdown.push({
+      muscle: muscleGroup,
+      candidateCount: muscleExercises.length,
+      selectedNames: chosen.map((exercise) => exercise.name),
+    });
+
     chosen.forEach((exercise, index) => {
       selected.push(exercise);
       reasons.push({
@@ -88,10 +112,8 @@ export function selectInitialExercises(
         exerciseName: exercise.name,
         primaryMuscle: exercise.muscle_groups[0],
         equipment: exercise.equipment_required,
-        isCompound: exercise.is_compound,
-        reason: `${muscleGroup} slot ${index + 1}/2, ${
-          exercise.is_compound ? "compound" : "isolation"
-        } priority`,
+        priority: exercise.priority,
+        reason: `${muscleGroup} slot ${index + 1}/2, priority ${exercise.priority}`,
       });
     });
   }
@@ -102,6 +124,7 @@ export function selectInitialExercises(
       filteredByEquipment: filteredByEquipment.length,
       relevantMuscles: relevantMuscleGroups,
       reasons,
+      muscleBreakdown,
     },
   };
 }

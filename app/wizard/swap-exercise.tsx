@@ -14,6 +14,7 @@ import { FilterPill } from "@/components/ui/FilterPill";
 import { getAllExercises } from "@/lib/storage/storage";
 import { filterExercisesByEquipment, filterExercisesByMuscleGroups } from "@/lib/workout-generator/exercise-selector";
 import type { Exercise, MuscleGroup } from "@/lib/storage/types";
+import { isCompoundPriority } from "@/lib/storage/types";
 
 // All muscle groups for filtering
 const MUSCLE_GROUPS: MuscleGroup[] = ["Chest", "Back", "Shoulders", "Arms", "Legs", "Core"];
@@ -59,7 +60,7 @@ export default function SwapExerciseScreen() {
 
     // Filter compound only
     if (compoundOnly) {
-      filtered = filtered.filter((ex) => ex.is_compound);
+      filtered = filtered.filter((ex) => isCompoundPriority(ex.priority));
     }
 
     // Exclude the current exercise
@@ -80,9 +81,8 @@ export default function SwapExerciseScreen() {
         if (!aPrimaryMatch && bPrimaryMatch) return 1;
       }
 
-      // Within same match level, compound exercises first
-      if (a.is_compound && !b.is_compound) return -1;
-      if (!a.is_compound && b.is_compound) return 1;
+      // Within same match level, priority order
+      if (a.priority !== b.priority) return a.priority - b.priority;
 
       // Finally sort alphabetically
       return a.name.localeCompare(b.name);

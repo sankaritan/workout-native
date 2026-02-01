@@ -1,4 +1,5 @@
 import type { Exercise } from "../../lib/storage/types";
+import { EXERCISE_PRIORITY_LABELS } from "../../lib/storage/types";
 import type { ProgramSession } from "./algorithm/types";
 import type {
   AssignmentReason,
@@ -39,8 +40,8 @@ export function printSelectionTable(
   console.log(`Relevant muscles: ${relevantMuscles.join(", ") || "None"}`);
   console.log("");
 
-  const headers = ["#", "Exercise", "Primary", "Equipment", "Type", "Why Selected"];
-  const widths = [3, 28, 10, 12, 9, 40];
+  const headers = ["#", "Exercise", "Primary", "Equipment", "Tier", "Why Selected"];
+  const widths = [3, 28, 10, 12, 10, 40];
 
   console.log(buildRow(headers, widths));
   console.log(buildDivider(widths));
@@ -51,12 +52,31 @@ export function printSelectionTable(
       reason.exerciseName,
       reason.primaryMuscle,
       reason.equipment ?? "Bodyweight",
-      reason.isCompound ? "Compound" : "Isolation",
+      EXERCISE_PRIORITY_LABELS[reason.priority],
       reason.reason,
     ];
     console.log(buildRow(cells, widths));
   });
 
+  console.log("");
+}
+
+export function printSelectionVerbose(
+  muscleBreakdown: Array<{
+    muscle: string;
+    candidateCount: number;
+    selectedNames: string[];
+  }>
+): void {
+  printSection("SELECTION DETAILS");
+  muscleBreakdown.forEach((entry) => {
+    console.log(`${entry.muscle}: ${entry.candidateCount} candidates`);
+    if (entry.selectedNames.length > 0) {
+      console.log(`  Selected: ${entry.selectedNames.join(", ")}`);
+    } else {
+      console.log("  Selected: none");
+    }
+  });
   console.log("");
 }
 
@@ -118,10 +138,41 @@ export function printPlanTable(
   });
 }
 
+export function printPlanVerbose(assignments: AssignmentReason[]): void {
+  printSection("ASSIGNMENT DETAILS");
+  const grouped = new Map<string, AssignmentReason[]>();
+
+  assignments.forEach((assignment) => {
+    if (!grouped.has(assignment.pass)) {
+      grouped.set(assignment.pass, []);
+    }
+    grouped.get(assignment.pass)?.push(assignment);
+  });
+
+  const order: Array<AssignmentReason["pass"]> = [
+    "primary",
+    "secondary",
+    "rebalance",
+    "minimum",
+  ];
+
+  order.forEach((pass) => {
+    const list = grouped.get(pass) ?? [];
+    if (list.length === 0) return;
+    console.log(pass.toUpperCase());
+    list.forEach((assignment) => {
+      console.log(
+        `  ${assignment.exerciseName} -> ${assignment.assignedSessionName} (${assignment.reason})`
+      );
+    });
+  });
+  console.log("");
+}
+
 export function printAvailableExercises(exercises: Exercise[]): void {
   printSection("AVAILABLE EXERCISES");
-  const widths = [28, 10, 12, 9];
-  const headers = ["Exercise", "Primary", "Equipment", "Type"];
+  const widths = [28, 10, 12, 10];
+  const headers = ["Exercise", "Primary", "Equipment", "Tier"];
   console.log(buildRow(headers, widths));
   console.log(buildDivider(widths));
 
@@ -130,7 +181,7 @@ export function printAvailableExercises(exercises: Exercise[]): void {
       exercise.name,
       exercise.muscle_groups[0],
       exercise.equipment_required ?? "Bodyweight",
-      exercise.is_compound ? "Compound" : "Isolation",
+      EXERCISE_PRIORITY_LABELS[exercise.priority],
     ];
     console.log(buildRow(cells, widths));
   });

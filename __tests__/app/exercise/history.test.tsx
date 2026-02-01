@@ -66,7 +66,7 @@ describe("ExerciseHistoryScreen", () => {
       name: "Bench Press",
       muscle_group: "Chest",
       equipment_required: "Barbell",
-      is_compound: true,
+      priority: 1,
       description: null,
     });
 
@@ -85,7 +85,7 @@ describe("ExerciseHistoryScreen", () => {
       name: "Bench Press",
       muscle_group: "Chest",
       equipment_required: "Barbell",
-      is_compound: true,
+      priority: 2,
       description: null,
     });
 
@@ -138,7 +138,7 @@ describe("ExerciseHistoryScreen", () => {
       name: "Bench Press",
       muscle_group: "Chest",
       equipment_required: "Barbell",
-      is_compound: true,
+      priority: 2,
       description: null,
     });
 
@@ -183,7 +183,7 @@ describe("ExerciseHistoryScreen", () => {
       name: "Bench Press",
       muscle_group: "Chest",
       equipment_required: "Barbell",
-      is_compound: true,
+      priority: 2,
       description: null,
     });
 
@@ -213,7 +213,7 @@ describe("ExerciseHistoryScreen", () => {
       name: "Bench Press",
       muscle_group: "Chest",
       equipment_required: "Barbell",
-      is_compound: true,
+      priority: 1,
       description: null,
     });
 
@@ -258,7 +258,7 @@ describe("ExerciseHistoryScreen", () => {
       name: "Bench Press",
       muscle_group: "Chest",
       equipment_required: "Barbell",
-      is_compound: true,
+      priority: 2,
       description: null,
     });
 

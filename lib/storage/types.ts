@@ -3,13 +3,38 @@
  */
 
 // Exercise Library
+export type ExercisePriority = 1 | 2 | 3 | 4 | 5;
+
+export const EXERCISE_PRIORITY_LABELS: Record<ExercisePriority, string> = {
+  1: "Primary",
+  2: "Secondary",
+  3: "Accessory",
+  4: "Isolation",
+  5: "Core",
+};
+
+export const EXERCISE_PRIORITY_BADGES: Record<
+  ExercisePriority,
+  { background: string; text: string }
+> = {
+  1: { background: "bg-primary/20", text: "text-primary" },
+  2: { background: "bg-blue-500/20", text: "text-blue-400" },
+  3: { background: "bg-amber-500/20", text: "text-amber-400" },
+  4: { background: "bg-gray-500/20", text: "text-gray-400" },
+  5: { background: "bg-gray-500/20", text: "text-gray-400" },
+};
+
+export function isCompoundPriority(priority: ExercisePriority): boolean {
+  return priority <= 3;
+}
+
 export interface Exercise {
   id: number;
   name: string;
   muscle_group: MuscleGroup; // DEPRECATED: Keep for compatibility, always matches muscle_groups[0]
   muscle_groups: MuscleGroup[]; // Array of muscles worked: [primary, ...secondaries]
   equipment_required: Equipment | null;
-  is_compound: boolean;
+  priority: ExercisePriority;
   description: string | null;
 }
 

@@ -55,8 +55,8 @@ describe("Seed Data", () => {
       }
     });
 
-    it("has at least 15 compound exercises", () => {
-      const compoundExercises = EXERCISES.filter((ex) => ex.is_compound);
+    it("has at least 15 priority compound exercises", () => {
+      const compoundExercises = EXERCISES.filter((ex) => ex.priority <= 3);
       expect(compoundExercises.length).toBeGreaterThanOrEqual(15);
     });
 
@@ -103,7 +103,7 @@ describe("Seed Data", () => {
 
       expect(benchPress).toBeDefined();
       expect(benchPress?.muscle_group).toBe("Chest");
-      expect(benchPress?.is_compound).toBe(true);
+      expect(benchPress?.priority).toBeLessThanOrEqual(3);
       expect(benchPress?.equipment_required).toBe("Barbell");
     });
 
@@ -134,7 +134,7 @@ describe("Seed Data", () => {
     it("can query compound exercises", () => {
       const compound = getCompoundExercises();
       expect(compound.length).toBeGreaterThanOrEqual(15);
-      expect(compound.every((ex) => ex.is_compound === true)).toBe(true);
+      expect(compound.every((ex) => ex.priority <= 3)).toBe(true);
     });
 
     it("returns all exercises sorted by name", () => {
@@ -167,7 +167,7 @@ describe("Seed Data", () => {
       const compoundByGroup: Record<string, number> = {};
 
       for (const exercise of EXERCISES) {
-        if (exercise.is_compound) {
+        if (exercise.priority <= 3) {
           compoundByGroup[exercise.muscle_group] =
             (compoundByGroup[exercise.muscle_group] || 0) + 1;
         }
@@ -196,7 +196,7 @@ describe("Seed Data", () => {
     });
 
     it("compound exercises have appropriate multi-muscle mappings", () => {
-      const compoundExercises = EXERCISES.filter((ex) => ex.is_compound);
+      const compoundExercises = EXERCISES.filter((ex) => ex.priority <= 3);
 
       // At least 30% of compound exercises should work multiple muscle groups
       const multiMuscleCompounds = compoundExercises.filter(
@@ -229,7 +229,9 @@ describe("Seed Data", () => {
     });
 
     it("isolation exercises have single muscle group", () => {
-      const isolationExercises = EXERCISES.filter((ex) => !ex.is_compound);
+      const isolationExercises = EXERCISES.filter(
+        (ex) => ex.priority >= 4 && ex.muscle_group !== "Core"
+      );
 
       // Most isolation exercises should target a single muscle group
       const singleMuscleIsolation = isolationExercises.filter(

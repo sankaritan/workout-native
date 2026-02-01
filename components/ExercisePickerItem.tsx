@@ -8,7 +8,11 @@ import React from "react";
 import { View, Text, Pressable } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { cn } from "@/lib/utils/cn";
-import type { Exercise } from "@/lib/storage/types";
+import {
+  EXERCISE_PRIORITY_BADGES,
+  EXERCISE_PRIORITY_LABELS,
+  type Exercise,
+} from "@/lib/storage/types";
 import { theme } from "@/constants/theme";
 
 export interface ExercisePickerItemProps {
@@ -40,20 +44,20 @@ export function ExercisePickerItem({
           <Text className="text-white font-semibold text-base">
             {exercise.name}
           </Text>
-          {/* Compound/Isolated Badge */}
+          {/* Priority Tier Badge */}
           <View
             className={cn(
               "px-2 py-0.5 rounded",
-              exercise.is_compound ? "bg-primary/20" : "bg-gray-500/20"
+              EXERCISE_PRIORITY_BADGES[exercise.priority].background
             )}
           >
             <Text
               className={cn(
                 "text-xs font-medium",
-                exercise.is_compound ? "text-primary" : "text-gray-400"
+                EXERCISE_PRIORITY_BADGES[exercise.priority].text
               )}
             >
-              {exercise.is_compound ? "Compound" : "Isolated"}
+              {EXERCISE_PRIORITY_LABELS[exercise.priority]}
             </Text>
           </View>
         </View>
