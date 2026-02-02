@@ -85,7 +85,9 @@ export default function WorkoutDetailScreen() {
   };
 
   const handleBack = () => {
-    router.back();
+    // Navigate to home instead of using router.back() to avoid
+    // going back to wizard review page with reset state
+    router.push("/");
   };
 
   // Calculate progress
