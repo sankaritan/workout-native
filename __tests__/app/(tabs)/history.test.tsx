@@ -283,11 +283,8 @@ describe("HistoryScreen", () => {
         expect(screen.getByText("History")).toBeTruthy();
       });
 
-      // Next button should not be rendered (no chevron-right icon)
-      const allViews = screen.UNSAFE_root.findAllByType('View');
-      // Check that there's no visible next button by checking if chevron-right is not pressable
-      // Since the next button is replaced with an empty View, we can't directly test the icon
       // The test passes if the component renders without errors
+      // Next button is replaced with an empty View when viewing current month
     });
 
     it("shows empty calendar for current month when latest data is in past", async () => {
