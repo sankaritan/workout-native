@@ -88,12 +88,8 @@ export default function PlanReviewScreen() {
     // Reset wizard state
     resetState();
     
-    // Navigate to the newly created plan instead of home
-    if (savedPlanId) {
-      router.push(`/workout/${savedPlanId}`);
-    } else {
-      router.push("/");
-    }
+    // Navigate to home - the dashboard will show the new plan
+    router.push("/");
   };
 
   /**
