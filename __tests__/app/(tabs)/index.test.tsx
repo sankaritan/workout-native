@@ -32,7 +32,7 @@ describe("HomeScreen", () => {
 
   describe("Empty state (no active plan)", () => {
     beforeEach(() => {
-      (storage.getActiveWorkoutPlan as jest.Mock).mockReturnValue(null);
+      (storage.getAllWorkoutPlans as jest.Mock).mockReturnValue([]);
     });
 
     it("renders empty state when no active plan", async () => {
@@ -70,6 +70,8 @@ describe("HomeScreen", () => {
       weekly_frequency: 4,
       duration_weeks: 8,
       estimated_duration_minutes: 60,
+      focus: "Balanced" as const,
+      equipment_used: ["Barbell", "Dumbbell"] as const,
       created_at: "2024-01-01T00:00:00.000Z",
       is_active: true,
     };
@@ -102,202 +104,52 @@ describe("HomeScreen", () => {
     ];
 
     beforeEach(() => {
-      (storage.getActiveWorkoutPlan as jest.Mock).mockReturnValue(mockPlan);
+      (storage.getAllWorkoutPlans as jest.Mock).mockReturnValue([mockPlan]);
       (storage.getSessionTemplatesByPlanId as jest.Mock).mockReturnValue(
         mockSessions
       );
       (storage.getCompletedSessionsByPlanId as jest.Mock).mockReturnValue([]);
-      (storage.getInProgressSessionByPlanId as jest.Mock).mockReturnValue(null);
-      (storage.hasAnyCompletedSets as jest.Mock).mockReturnValue(false);
+      (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue([]);
     });
 
-    it("renders active plan when exists", async () => {
+    it("renders plans list when plans exist", async () => {
       render(<HomeScreen />);
 
       await waitFor(() => {
-        expect(screen.getByText("Your Workout Plan")).toBeTruthy();
-        expect(screen.getByText("4-Day Balanced")).toBeTruthy();
+        expect(screen.getByText("Your workout plans")).toBeTruthy();
       });
     });
 
-    it("shows plan details", async () => {
+    it("shows plan card with correct title format", async () => {
       render(<HomeScreen />);
 
       await waitFor(() => {
-        expect(screen.getByText(/Week 1 of 8/)).toBeTruthy();
-        expect(screen.getByText(/4x per week/)).toBeTruthy();
+        // Title should be "[Goal] [Frequency]" e.g., "Balanced 4x/week"
+        expect(screen.getByText("Balanced 4x/week")).toBeTruthy();
       });
     });
 
-    it("displays progress bar", async () => {
+    it("shows equipment in plan card", async () => {
       render(<HomeScreen />);
 
       await waitFor(() => {
-        expect(screen.getByText(/0% complete/)).toBeTruthy();
+        expect(screen.getByText("Barbell, Dumbbell")).toBeTruthy();
       });
     });
 
-    it("shows next session", async () => {
+    it("shows next session in plan card", async () => {
       render(<HomeScreen />);
 
       await waitFor(() => {
-        expect(screen.getByText("Next Up")).toBeTruthy();
-        // Upper Body A appears in multiple places, use getAllByText
-        const upperBodyTexts = screen.getAllByText("Upper Body A");
-        expect(upperBodyTexts.length).toBeGreaterThan(0);
+        expect(screen.getByText("Next up: Upper Body A")).toBeTruthy();
       });
     });
 
-    it("displays start session button", async () => {
+    it("displays generate new plan button", async () => {
       render(<HomeScreen />);
 
       await waitFor(() => {
-        expect(screen.getByTestId("start-session-button")).toBeTruthy();
-      });
-    });
-
-    it("shows all sessions list", async () => {
-      render(<HomeScreen />);
-
-      await waitFor(() => {
-        expect(screen.getByText("All Sessions")).toBeTruthy();
-        // Sessions appear in multiple places, check they exist
-        expect(screen.getAllByText("Upper Body A").length).toBeGreaterThan(0);
-        expect(screen.getByText("Lower Body")).toBeTruthy();
-        expect(screen.getByText("Upper Body B")).toBeTruthy();
-      });
-    });
-
-    it("calculates progress correctly with completed sessions", async () => {
-      const completedSessions = [
-        {
-          id: 1,
-          workout_plan_id: 1,
-          session_template_id: 1,
-          started_at: "2024-01-01T10:00:00.000Z",
-          completed_at: "2024-01-01T11:00:00.000Z",
-          notes: null,
-        },
-        {
-          id: 2,
-          workout_plan_id: 1,
-          session_template_id: 2,
-          started_at: "2024-01-02T10:00:00.000Z",
-          completed_at: "2024-01-02T11:00:00.000Z",
-          notes: null,
-        },
-      ];
-
-      (storage.getCompletedSessionsByPlanId as jest.Mock).mockReturnValue(
-        completedSessions
-      );
-
-      render(<HomeScreen />);
-
-      await waitFor(() => {
-        // 2 completed out of 32 total (4 sessions/week * 8 weeks) = 6%
-        expect(screen.getByText(/6% complete/)).toBeTruthy();
-      });
-    });
-
-    it("shows completed checkmarks on finished sessions", async () => {
-      // Complete all 3 sessions so the next session (cycling back to first) is marked as done before
-      const completedSessions = [
-        {
-          id: 1,
-          workout_plan_id: 1,
-          session_template_id: 1,
-          started_at: "2024-01-01T10:00:00.000Z",
-          completed_at: "2024-01-01T11:00:00.000Z",
-          notes: null,
-        },
-        {
-          id: 2,
-          workout_plan_id: 1,
-          session_template_id: 2,
-          started_at: "2024-01-02T10:00:00.000Z",
-          completed_at: "2024-01-02T11:00:00.000Z",
-          notes: null,
-        },
-        {
-          id: 3,
-          workout_plan_id: 1,
-          session_template_id: 3,
-          started_at: "2024-01-03T10:00:00.000Z",
-          completed_at: "2024-01-03T11:00:00.000Z",
-          notes: null,
-        },
-      ];
-
-      (storage.getCompletedSessionsByPlanId as jest.Mock).mockReturnValue(
-        completedSessions
-      );
-
-      render(<HomeScreen />);
-
-      await waitFor(() => {
-        // When all sessions are completed, it cycles back and shows "Done before"
-        expect(screen.getByText("Done before")).toBeTruthy();
-      });
-    });
-
-    it("identifies next uncompleted session", async () => {
-      const completedSessions = [
-        {
-          id: 1,
-          workout_plan_id: 1,
-          session_template_id: 1,
-          started_at: "2024-01-01T10:00:00.000Z",
-          completed_at: "2024-01-01T11:00:00.000Z",
-          notes: null,
-        },
-      ];
-
-      (storage.getCompletedSessionsByPlanId as jest.Mock).mockReturnValue(
-        completedSessions
-      );
-
-      render(<HomeScreen />);
-
-      await waitFor(() => {
-        // Next session should be "Lower Body" since Upper Body A is completed
-        expect(screen.getAllByText("Lower Body").length).toBeGreaterThan(0);
-        // "Next Up" section should be present
-        expect(screen.getByText("Next Up")).toBeTruthy();
-        // Should have "NEXT" badge in the all sessions list
-        expect(screen.getAllByText("NEXT").length).toBeGreaterThan(0);
-      });
-    });
-
-    it("displays monthly workout stats", async () => {
-      const now = new Date();
-      const completedSessions = [
-        {
-          id: 1,
-          workout_plan_id: 1,
-          session_template_id: 1,
-          started_at: now.toISOString(),
-          completed_at: now.toISOString(),
-          notes: null,
-        },
-        {
-          id: 2,
-          workout_plan_id: 1,
-          session_template_id: 2,
-          started_at: now.toISOString(),
-          completed_at: now.toISOString(),
-          notes: null,
-        },
-      ];
-
-      (storage.getCompletedSessionsByPlanId as jest.Mock).mockReturnValue(
-        completedSessions
-      );
-
-      render(<HomeScreen />);
-
-      await waitFor(() => {
-        expect(screen.getByText(/2 workouts this month/)).toBeTruthy();
+        expect(screen.getByText("Generate new workout plan")).toBeTruthy();
       });
     });
   });

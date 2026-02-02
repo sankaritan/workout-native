@@ -10,11 +10,51 @@ import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { WorkoutPlan } from "@/lib/storage/types";
-import { getCompletedSessionsByDateRange } from "@/lib/storage/storage";
+import { getCompletedSessionsByDateRange, getSessionTemplatesByPlanId, getCompletedSessionsByPlanId } from "@/lib/storage/storage";
+import { BalanceIcon } from "@/components/icons";
 
 interface PlansListDashboardProps {
   plans: WorkoutPlan[];
 }
+
+/**
+ * Get the appropriate icon component for a workout goal/focus
+ */
+const getGoalIcon = (focus: "Balanced" | "Strength" | "Endurance") => {
+  switch (focus) {
+    case "Strength":
+      return { type: "material" as const, name: "fitness-center" as const };
+    case "Balanced":
+      return { type: "custom" as const, component: BalanceIcon };
+    case "Endurance":
+      return { type: "material" as const, name: "directions-run" as const };
+  }
+};
+
+/**
+ * Get the next session name for a workout plan
+ */
+const getNextSessionName = (plan: WorkoutPlan): string | null => {
+  const sessions = getSessionTemplatesByPlanId(plan.id);
+  if (sessions.length === 0) return null;
+
+  const completedSessions = getCompletedSessionsByPlanId(plan.id);
+  
+  // Get completed session template IDs (only truly completed ones)
+  const completedTemplateIds = new Set(
+    completedSessions
+      .filter(s => s.completed_at !== null)
+      .map(s => s.session_template_id)
+  );
+
+  // Find first session that hasn't been completed yet (in sequence order)
+  const nextSession = sessions
+    .sort((a, b) => a.sequence_order - b.sequence_order)
+    .find(s => !completedTemplateIds.has(s.id));
+
+  // If all sessions completed at least once, return first session (cycle through)
+  return nextSession?.name || sessions[0]?.name || null;
+};
 
 export default function PlansListDashboard({ plans }: PlansListDashboardProps) {
   const insets = useSafeAreaInsets();
@@ -55,6 +95,19 @@ export default function PlansListDashboard({ plans }: PlansListDashboardProps) {
     return frequency;
   };
 
+  // Format plan title: "[Goal] [Frequency]" e.g., "Balanced 3x/week"
+  const formatPlanTitle = (plan: WorkoutPlan) => {
+    return `${plan.focus} ${plan.weekly_frequency}x/week`;
+  };
+
+  // Format equipment list: "Dumbbell, Barbell"
+  const formatEquipment = (plan: WorkoutPlan) => {
+    if (!plan.equipment_used || plan.equipment_used.length === 0) {
+      return "No equipment";
+    }
+    return plan.equipment_used.join(", ");
+  };
+
   return (
     <View className="flex-1 bg-background-dark">
       {/* Header */}
@@ -78,47 +131,64 @@ export default function PlansListDashboard({ plans }: PlansListDashboardProps) {
       >
         {/* Plan Cards */}
         <View className="gap-4 mb-6">
-          {plans.map((plan) => (
-            <Pressable
-              key={plan.id}
-              onPress={() => handlePlanPress(plan.id)}
-              className="bg-surface-dark rounded-3xl p-5 border border-white/5 active:scale-[0.99]"
-              accessibilityRole="button"
-              accessibilityLabel={`View ${plan.name}`}
-            >
-              <View className="flex-row gap-4 items-center">
-                {/* Icon Area */}
-                <View 
-                  className="size-20 rounded-2xl items-center justify-center overflow-hidden border border-white/10"
-                  style={{ backgroundColor: 'rgba(19, 236, 109, 0.15)' }}
-                >
-                  {/* Decorative background elements */}
-                  <View className="absolute inset-0 items-center justify-center opacity-40">
-                    <View className="absolute w-full h-1 rotate-45" style={{ backgroundColor: 'rgba(19, 236, 109, 0.4)' }} />
-                    <View className="absolute w-full h-1 -rotate-45" style={{ backgroundColor: 'rgba(19, 236, 109, 0.4)' }} />
-                    <View className="w-10 h-10 rounded-full border-2" style={{ borderColor: 'rgba(19, 236, 109, 0.3)' }} />
+          {plans.map((plan) => {
+            const goalIcon = getGoalIcon(plan.focus);
+            const nextSession = getNextSessionName(plan);
+            
+            return (
+              <Pressable
+                key={plan.id}
+                onPress={() => handlePlanPress(plan.id)}
+                className="bg-surface-dark rounded-3xl p-5 border border-white/5 active:scale-[0.99]"
+                accessibilityRole="button"
+                accessibilityLabel={`View ${plan.name}`}
+              >
+                <View className="flex-row gap-4 items-center">
+                  {/* Icon Area */}
+                  <View 
+                    className="size-20 rounded-2xl items-center justify-center overflow-hidden border border-white/10"
+                    style={{ backgroundColor: 'rgba(19, 236, 109, 0.15)' }}
+                  >
+                    {/* Decorative background elements */}
+                    <View className="absolute inset-0 items-center justify-center opacity-40">
+                      <View className="absolute w-full h-1 rotate-45" style={{ backgroundColor: 'rgba(19, 236, 109, 0.4)' }} />
+                      <View className="absolute w-full h-1 -rotate-45" style={{ backgroundColor: 'rgba(19, 236, 109, 0.4)' }} />
+                      <View className="w-10 h-10 rounded-full border-2" style={{ borderColor: 'rgba(19, 236, 109, 0.3)' }} />
+                    </View>
+                    {goalIcon.type === 'material' ? (
+                      <MaterialIcons name={goalIcon.name} size={32} color="#13ec6d" />
+                    ) : (
+                      <goalIcon.component size={32} color="#13ec6d" />
+                    )}
                   </View>
-                  <MaterialIcons name="fitness-center" size={32} color="#13ec6d" />
-                </View>
 
-                {/* Plan Info */}
-                <View className="flex-1 min-w-0">
-                  <Text 
-                    className="text-xl font-bold text-white mb-1"
-                    numberOfLines={1}
-                  >
-                    {plan.name}
-                  </Text>
-                  <Text 
-                    className="text-sm text-gray-400"
-                    numberOfLines={1}
-                  >
-                    {formatPlanSubtitle(plan)}
-                  </Text>
+                  {/* Plan Info */}
+                  <View className="flex-1 min-w-0">
+                    <Text 
+                      className="text-xl font-bold text-white mb-1"
+                      numberOfLines={1}
+                    >
+                      {formatPlanTitle(plan)}
+                    </Text>
+                    <Text 
+                      className="text-sm text-gray-400 mb-0.5"
+                      numberOfLines={1}
+                    >
+                      {formatEquipment(plan)}
+                    </Text>
+                    {nextSession && (
+                      <Text 
+                        className="text-sm text-gray-400"
+                        numberOfLines={1}
+                      >
+                        Next up: {nextSession}
+                      </Text>
+                    )}
+                  </View>
                 </View>
-              </View>
-            </Pressable>
-          ))}
+              </Pressable>
+            );
+          })}
         </View>
 
         {/* Stats Section */}
