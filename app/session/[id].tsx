@@ -380,7 +380,7 @@ export default function WorkoutSessionScreen() {
                 <View className="flex-row items-center gap-3">
                   <MaterialIcons name="history" size={20} color="#9db9a8" />
                   <Text className="text-sm font-medium text-white/90">
-                    Last Time: {previousSet.weight}lbs × {previousSet.reps} reps
+                    Last Time: {previousSet.weight}kgs × {previousSet.reps} reps
                   </Text>
                 </View>
               </View>

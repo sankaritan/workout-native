@@ -160,7 +160,7 @@ describe("WorkoutSessionScreen", () => {
     render(<WorkoutSessionScreen />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Last Time: 135lbs × 10 reps/)).toBeTruthy();
+      expect(screen.getByText(/Last Time: 135kgs × 10 reps/)).toBeTruthy();
     });
   });
 
