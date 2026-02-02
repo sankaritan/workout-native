@@ -12,6 +12,7 @@ import { EquipmentCard } from "@/components/ui/EquipmentCard";
 import { BackButton } from "@/components/BackButton";
 import { WizardContinueButton } from "@/components/ui/WizardContinueButton";
 import { useWizard } from "@/lib/wizard-context";
+import { BarbellIcon } from "@/components/icons";
 import type { Equipment } from "@/lib/storage/types";
 
 // Equipment options based on mockup and database types
@@ -19,13 +20,13 @@ const EQUIPMENT_OPTIONS: Array<{
   value: Equipment;
   name: string;
   description: string;
-  icon: keyof typeof MaterialIcons.glyphMap;
+  icon: keyof typeof MaterialIcons.glyphMap | React.ComponentType<{ size?: number; color?: string }>;
 }> = [
   {
     value: "Barbell",
     name: "Barbell",
     description: "Standard bar",
-    icon: "horizontal-rule",
+    icon: BarbellIcon,
   },
   {
     value: "Dumbbell",
