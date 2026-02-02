@@ -39,7 +39,8 @@ describe("HomeScreen", () => {
       render(<HomeScreen />);
 
       await waitFor(() => {
-        expect(screen.getByText("Welcome to your new routine")).toBeTruthy();
+        expect(screen.getByText(/Let's create/)).toBeTruthy();
+        expect(screen.getByText("Generate Your First Plan")).toBeTruthy();
       });
     });
 
@@ -56,7 +57,7 @@ describe("HomeScreen", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(/don't have a workout plan yet/i)
+          screen.getByText(/Tell us about your fitness goals/)
         ).toBeTruthy();
       });
     });
