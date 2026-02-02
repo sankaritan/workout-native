@@ -283,6 +283,22 @@ describe("WorkoutSessionScreen", () => {
     });
   });
 
+  it("navigates to workout plan on back button press", async () => {
+    render(<WorkoutSessionScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("back-button")).toBeTruthy();
+    });
+
+    const backButton = screen.getByTestId("back-button");
+    fireEvent.press(backButton);
+
+    // Since showAlert auto-calls confirm in our mock, the navigation happens immediately
+    await waitFor(() => {
+      expect(router.replace).toHaveBeenCalledWith("/workout/1");
+    });
+  });
+
   it("navigates back if session not found", async () => {
     (getSessionWithExercises as jest.Mock).mockReturnValue(null);
 
