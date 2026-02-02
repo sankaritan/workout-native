@@ -36,6 +36,7 @@ export default function WorkoutSessionScreen() {
   const [completedSessionId, setCompletedSessionId] = useState<number | null>(null);
   const [exerciseSets, setExerciseSets] = useState<Map<number, SetData[]>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
+  const [workoutPlanId, setWorkoutPlanId] = useState<number | null>(null);
 
   // Get current exercise data (with fallback)
   const currentExercise = session?.exercises[currentExerciseIndex];
@@ -120,18 +121,26 @@ export default function WorkoutSessionScreen() {
                 });
               }
 
-              // Navigate back - session stays in progress (completed_at = null)
-              router.replace("/(tabs)");
+              // Navigate back to the workout plan view
+              if (workoutPlanId) {
+                router.replace(`/workout/${workoutPlanId}`);
+              } else {
+                router.replace("/(tabs)");
+              }
             } catch (error) {
               console.error("Failed to save progress:", error);
               // Navigate back anyway
-              router.replace("/(tabs)");
+              if (workoutPlanId) {
+                router.replace(`/workout/${workoutPlanId}`);
+              } else {
+                router.replace("/(tabs)");
+              }
             }
           },
         },
       ]
     );
-  }, [exerciseSets, completedSessionId]);
+  }, [exerciseSets, completedSessionId, workoutPlanId]);
 
   /**
    * Finish workout and save all data
@@ -179,8 +188,12 @@ export default function WorkoutSessionScreen() {
                 updateCompletedSession(completedSessionId, now);
               }
 
-              // Navigate back to home
-              router.replace("/(tabs)");
+              // Navigate back to the workout plan view
+              if (workoutPlanId) {
+                router.replace(`/workout/${workoutPlanId}`);
+              } else {
+                router.replace("/(tabs)");
+              }
             } catch (error) {
               console.error("Failed to save workout:", error);
               showAlert("Error", "Failed to save workout");
@@ -189,7 +202,7 @@ export default function WorkoutSessionScreen() {
         },
       ]
     );
-  }, [exerciseSets, completedSessionId]);
+  }, [exerciseSets, completedSessionId, workoutPlanId]);
 
   // Load session data
   useEffect(() => {
@@ -204,6 +217,7 @@ export default function WorkoutSessionScreen() {
       }
 
       setSession(sessionData);
+      setWorkoutPlanId(sessionData.workout_plan_id);
 
       // Check if there's an in-progress session for this template
       const existingSession = getInProgressSessionByTemplateId(sessionTemplateId);

@@ -279,7 +279,7 @@ describe("WorkoutSessionScreen", () => {
     // Since window.confirm returns true in our mock, the confirm callback executes immediately
     await waitFor(() => {
       expect(updateCompletedSession).toHaveBeenCalled();
-      expect(router.replace).toHaveBeenCalledWith("/(tabs)");
+      expect(router.replace).toHaveBeenCalledWith("/workout/1");
     });
   });
 
