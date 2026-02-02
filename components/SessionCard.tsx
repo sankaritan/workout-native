@@ -16,7 +16,7 @@ export interface SessionCardProps {
 }
 
 export function SessionCard({ session, dayNumber }: SessionCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const exerciseCount = session.exercises.length;
   const exerciseText = exerciseCount === 1 ? "exercise" : "exercises";

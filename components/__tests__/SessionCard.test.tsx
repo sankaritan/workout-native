@@ -62,34 +62,36 @@ describe("SessionCard", () => {
     expect(screen.getByText("2 exercises")).toBeTruthy();
   });
 
-  it("starts collapsed", () => {
+  it("starts expanded", () => {
     render(<SessionCard session={mockSession} />);
-    // Exercises should not be visible initially
-    expect(screen.queryByText("Bench Press")).toBeNull();
-  });
-
-  it("expands when clicked", () => {
-    const { getByTestId } = render(<SessionCard session={mockSession} />);
-    const card = getByTestId("session-card");
-
-    fireEvent.press(card);
-
-    // Exercises should now be visible
+    // Exercises should be visible initially
     expect(screen.getByText("Bench Press")).toBeTruthy();
     expect(screen.getByText("Pull-up")).toBeTruthy();
   });
 
-  it("collapses when clicked again", () => {
+  it("collapses when clicked", () => {
     const { getByTestId } = render(<SessionCard session={mockSession} />);
     const card = getByTestId("session-card");
 
-    // Expand
+    // Click to collapse (starts expanded)
     fireEvent.press(card);
-    expect(screen.getByText("Bench Press")).toBeTruthy();
 
-    // Collapse
+    // Exercises should now be hidden
+    expect(screen.queryByText("Bench Press")).toBeNull();
+    expect(screen.queryByText("Pull-up")).toBeNull();
+  });
+
+  it("expands when clicked again", () => {
+    const { getByTestId } = render(<SessionCard session={mockSession} />);
+    const card = getByTestId("session-card");
+
+    // Collapse (starts expanded)
     fireEvent.press(card);
     expect(screen.queryByText("Bench Press")).toBeNull();
+
+    // Expand again
+    fireEvent.press(card);
+    expect(screen.getByText("Bench Press")).toBeTruthy();
   });
 
   it("renders singular exercise text when only one exercise", () => {

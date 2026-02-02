@@ -229,7 +229,7 @@ export default function PlanReviewScreen() {
             Training Sessions
           </Text>
           <Text className="text-sm text-gray-400">
-            Tap to expand and view exercises
+            Tap to collapse and hide exercises
           </Text>
         </View>
 
