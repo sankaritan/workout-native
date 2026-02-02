@@ -22,7 +22,7 @@ import type {
   ProgramExercise,
   SetsRepsScheme,
 } from "./types";
-import type { Exercise, MuscleGroup } from "@/lib/storage/types";
+import type { Exercise, MuscleGroup, Equipment } from "@/lib/storage/types";
 import type { SessionTemplate } from "./muscle-groups";
 
 /**
@@ -798,6 +798,17 @@ function validateMuscleGroupCoverage(
  * Returns the created plan ID
  */
 export function saveWorkoutProgram(program: WorkoutProgram): number {
+  // Collect all unique equipment used across all exercises in the program
+  const equipmentSet = new Set<Equipment>();
+  program.sessions.forEach((session) => {
+    session.exercises.forEach((programEx) => {
+      if (programEx.exercise.equipment_required) {
+        equipmentSet.add(programEx.exercise.equipment_required);
+      }
+    });
+  });
+  const equipment_used = Array.from(equipmentSet);
+
   // Insert workout plan
   const planId = insertWorkoutPlan({
     name: program.name,
@@ -805,6 +816,8 @@ export function saveWorkoutProgram(program: WorkoutProgram): number {
     weekly_frequency: program.sessionsPerWeek,
     duration_weeks: program.durationWeeks,
     estimated_duration_minutes: 60,
+    focus: program.focus,
+    equipment_used,
     created_at: new Date().toISOString(),
     is_active: true,
   });

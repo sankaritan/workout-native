@@ -1229,6 +1229,8 @@ export function seedTestWorkoutPlan(): void {
       weekly_frequency: 3,
       duration_weeks: 8,
       estimated_duration_minutes: 60,
+      focus: "Balanced",
+      equipment_used: ["Barbell", "Dumbbell"],
       created_at: new Date().toISOString(),
       is_active: true,
     });
