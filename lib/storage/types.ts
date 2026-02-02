@@ -50,8 +50,8 @@ export interface WorkoutPlan {
   weekly_frequency: number; // 2-5 sessions per week
   duration_weeks: number; // 4, 6, 8, or 12
   estimated_duration_minutes: number | null;
-  focus: "Balanced" | "Strength" | "Endurance"; // Training goal/focus
-  equipment_used: Equipment[]; // Equipment used in this plan
+  focus?: "Balanced" | "Strength" | "Endurance"; // Training goal/focus (optional for backward compatibility)
+  equipment_used?: Equipment[]; // Equipment used in this plan (optional for backward compatibility)
   created_at: string; // ISO datetime string
   is_active: boolean;
 }

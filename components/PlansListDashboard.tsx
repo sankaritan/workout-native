@@ -97,7 +97,8 @@ export default function PlansListDashboard({ plans }: PlansListDashboardProps) {
 
   // Format plan title: "[Goal] [Frequency]" e.g., "Balanced 3x/week"
   const formatPlanTitle = (plan: WorkoutPlan) => {
-    return `${plan.focus} ${plan.weekly_frequency}x/week`;
+    const focus = plan.focus || "Balanced"; // Default to Balanced for backward compatibility
+    return `${focus} ${plan.weekly_frequency}x/week`;
   };
 
   // Format equipment list: "Dumbbell, Barbell"
@@ -132,7 +133,8 @@ export default function PlansListDashboard({ plans }: PlansListDashboardProps) {
         {/* Plan Cards */}
         <View className="gap-4 mb-6">
           {plans.map((plan) => {
-            const goalIcon = getGoalIcon(plan.focus);
+            const focus = plan.focus || "Balanced"; // Default to Balanced for backward compatibility
+            const goalIcon = getGoalIcon(focus);
             const nextSession = getNextSessionName(plan);
             
             return (
