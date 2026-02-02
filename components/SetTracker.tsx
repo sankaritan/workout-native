@@ -156,6 +156,22 @@ export function SetTracker({
   };
 
   /**
+   * Adjust reps by delta (for +/- buttons)
+   */
+  const adjustReps = (index: number, delta: number) => {
+    setSets((prev) =>
+      prev.map((set, i) => {
+        if (i === index) {
+          const currentReps = set.reps ?? 0;
+          const newReps = Math.max(0, currentReps + delta);
+          return { ...set, reps: newReps };
+        }
+        return set;
+      }),
+    );
+  };
+
+  /**
    * Add a new set
    */
   const addSet = () => {
@@ -174,18 +190,23 @@ export function SetTracker({
   return (
     <View testID={testID} className="gap-2">
       {/* Header Row */}
-      <View className="flex-row items-center gap-2 px-2">
+      <View className="flex-row items-center gap-2 px-2 justify-center">
         <View style={{ width: 64 }}>
           <Text className="text-[10px] uppercase tracking-wider font-bold text-text-muted text-center">
             Adjust Wt
           </Text>
         </View>
-        <View style={{ width: 80 }}>
+        <View style={{ width: 60 }}>
           <Text className="text-[10px] uppercase tracking-wider font-bold text-text-muted text-center">
-            lbs
+            kgs
           </Text>
         </View>
-        <View style={{ width: 80 }}>
+        <View style={{ width: 64 }}>
+          <Text className="text-[10px] uppercase tracking-wider font-bold text-text-muted text-center">
+            Adjust Reps
+          </Text>
+        </View>
+        <View style={{ width: 40 }}>
           <Text className="text-[10px] uppercase tracking-wider font-bold text-text-muted text-center">
             Reps
           </Text>
@@ -206,7 +227,7 @@ export function SetTracker({
         return (
           <View
             key={set.setNumber}
-            className="flex-row items-center gap-2 rounded-lg p-3"
+            className="flex-row items-center gap-2 rounded-lg p-3 justify-center"
             style={[
               styles.setRowDefault,
               isCompleted && styles.setRowCompleted,
@@ -221,7 +242,7 @@ export function SetTracker({
               className="flex-row items-center justify-center gap-1"
             >
               <Pressable
-                onPress={() => adjustWeight(index, -5)}
+                onPress={() => adjustWeight(index, -2.5)}
                 disabled={isCompleted}
                 testID={`weight-minus-${set.setNumber}`}
                 className="h-8 w-8 rounded items-center justify-center"
@@ -238,7 +259,7 @@ export function SetTracker({
                 />
               </Pressable>
               <Pressable
-                onPress={() => adjustWeight(index, 5)}
+                onPress={() => adjustWeight(index, 2.5)}
                 disabled={isCompleted}
                 testID={`weight-plus-${set.setNumber}`}
                 className="h-8 w-8 rounded items-center justify-center"
@@ -257,7 +278,7 @@ export function SetTracker({
             </View>
 
             {/* Weight Input */}
-            <View style={{ width: 80 }}>
+            <View style={{ width: 60 }}>
               <TextInput
                 value={set.weight?.toString() || ""}
                 onChangeText={(text) => {
@@ -269,6 +290,7 @@ export function SetTracker({
                 keyboardType="numeric"
                 editable={!isCompleted}
                 testID={`weight-input-${set.setNumber}`}
+                maxLength={5}
                 className="rounded border text-center font-medium p-0"
                 style={[
                   styles.input,
@@ -279,8 +301,49 @@ export function SetTracker({
               />
             </View>
 
+            {/* +/- Reps Adjustment Buttons */}
+            <View
+              style={{ width: 64 }}
+              className="flex-row items-center justify-center gap-1"
+            >
+              <Pressable
+                onPress={() => adjustReps(index, -1)}
+                disabled={isCompleted}
+                testID={`reps-minus-${set.setNumber}`}
+                className="h-8 w-8 rounded items-center justify-center"
+                style={[
+                  styles.button,
+                  isCompleted && styles.buttonDisabled,
+                  isActive ? styles.buttonActive : styles.buttonInactive,
+                ]}
+              >
+                <MaterialIcons
+                  name="remove"
+                  size={18}
+                  color={isActive ? theme.colors.text.secondary : theme.colors.text.muted}
+                />
+              </Pressable>
+              <Pressable
+                onPress={() => adjustReps(index, 1)}
+                disabled={isCompleted}
+                testID={`reps-plus-${set.setNumber}`}
+                className="h-8 w-8 rounded items-center justify-center"
+                style={[
+                  styles.button,
+                  isCompleted && styles.buttonDisabled,
+                  isActive ? styles.buttonActive : styles.buttonInactive,
+                ]}
+              >
+                <MaterialIcons
+                  name="add"
+                  size={18}
+                  color={isActive ? theme.colors.text.secondary : theme.colors.text.muted}
+                />
+              </Pressable>
+            </View>
+
             {/* Reps Input */}
-            <View style={{ width: 80 }}>
+            <View style={{ width: 40 }}>
               <TextInput
                 value={set.reps?.toString() || ""}
                 onChangeText={(text) => {
@@ -292,6 +355,7 @@ export function SetTracker({
                 keyboardType="number-pad"
                 editable={!isCompleted}
                 testID={`reps-input-${set.setNumber}`}
+                maxLength={2}
                 className="rounded border text-center font-medium p-0"
                 style={[
                   styles.input,

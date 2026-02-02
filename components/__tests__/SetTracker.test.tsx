@@ -34,7 +34,8 @@ describe("SetTracker", () => {
     );
 
     expect(screen.getByText("Adjust Wt")).toBeTruthy();
-    expect(screen.getByText("lbs")).toBeTruthy();
+    expect(screen.getByText("kgs")).toBeTruthy();
+    expect(screen.getByText("Adjust Reps")).toBeTruthy();
     expect(screen.getByText("Reps")).toBeTruthy();
     expect(screen.getByText("Done")).toBeTruthy();
   });
@@ -250,7 +251,7 @@ describe("SetTracker", () => {
   });
 
   describe("weight adjustment buttons", () => {
-    it("increases weight by 5 when plus button is pressed", () => {
+    it("increases weight by 2.5 when plus button is pressed", () => {
       render(
         <SetTracker
           targetSets={3}
@@ -261,7 +262,7 @@ describe("SetTracker", () => {
         />,
       );
 
-      // First set should start with 100lbs (from previous)
+      // First set should start with 100kgs (from previous)
       const weightInput = screen.getByTestId("weight-input-1");
       expect(weightInput.props.value).toBe("100");
 
@@ -269,11 +270,11 @@ describe("SetTracker", () => {
       const plusButton = screen.getByTestId("weight-plus-1");
       fireEvent.press(plusButton);
 
-      // Weight should now be 105
-      expect(weightInput.props.value).toBe("105");
+      // Weight should now be 102.5
+      expect(weightInput.props.value).toBe("102.5");
     });
 
-    it("decreases weight by 5 when minus button is pressed", () => {
+    it("decreases weight by 2.5 when minus button is pressed", () => {
       render(
         <SetTracker
           targetSets={3}
@@ -291,8 +292,8 @@ describe("SetTracker", () => {
       const minusButton = screen.getByTestId("weight-minus-1");
       fireEvent.press(minusButton);
 
-      // Weight should now be 95
-      expect(weightInput.props.value).toBe("95");
+      // Weight should now be 97.5
+      expect(weightInput.props.value).toBe("97.5");
     });
 
     it("does not go below 0 when minus button is pressed", () => {
@@ -305,9 +306,9 @@ describe("SetTracker", () => {
       );
 
       const weightInput = screen.getByTestId("weight-input-1");
-      // Set weight to 3
-      fireEvent.changeText(weightInput, "3");
-      expect(weightInput.props.value).toBe("3");
+      // Set weight to 2
+      fireEvent.changeText(weightInput, "2");
+      expect(weightInput.props.value).toBe("2");
 
       // Press minus button - should go to 0, not negative
       const minusButton = screen.getByTestId("weight-minus-1");
@@ -333,8 +334,8 @@ describe("SetTracker", () => {
       const plusButton = screen.getByTestId("weight-plus-2");
       fireEvent.press(plusButton);
 
-      // Weight should now be 5
-      expect(weightInput.props.value).toBe("5");
+      // Weight should now be 2.5
+      expect(weightInput.props.value).toBe("2.5");
     });
 
     it("disables adjustment buttons for completed sets", () => {
@@ -355,6 +356,126 @@ describe("SetTracker", () => {
       // Buttons should be disabled (have opacity in style)
       const plusButton = screen.getByTestId("weight-plus-1");
       const minusButton = screen.getByTestId("weight-minus-1");
+      // Check that disabled buttons have opacity styling
+      expect(plusButton.props.style).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ opacity: 0.3 })
+        ])
+      );
+      expect(minusButton.props.style).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ opacity: 0.3 })
+        ])
+      );
+    });
+  });
+
+  describe("reps adjustment buttons", () => {
+    it("increases reps by 1 when plus button is pressed", () => {
+      render(
+        <SetTracker
+          targetSets={3}
+          targetReps={10}
+          previousWeight={100}
+          previousReps={10}
+          onSetsChange={mockOnSetsChange}
+        />,
+      );
+
+      // First set should start with 10 reps (from previous)
+      const repsInput = screen.getByTestId("reps-input-1");
+      expect(repsInput.props.value).toBe("10");
+
+      // Press plus button
+      const plusButton = screen.getByTestId("reps-plus-1");
+      fireEvent.press(plusButton);
+
+      // Reps should now be 11
+      expect(repsInput.props.value).toBe("11");
+    });
+
+    it("decreases reps by 1 when minus button is pressed", () => {
+      render(
+        <SetTracker
+          targetSets={3}
+          targetReps={10}
+          previousWeight={100}
+          previousReps={10}
+          onSetsChange={mockOnSetsChange}
+        />,
+      );
+
+      const repsInput = screen.getByTestId("reps-input-1");
+      expect(repsInput.props.value).toBe("10");
+
+      // Press minus button
+      const minusButton = screen.getByTestId("reps-minus-1");
+      fireEvent.press(minusButton);
+
+      // Reps should now be 9
+      expect(repsInput.props.value).toBe("9");
+    });
+
+    it("does not go below 0 when minus button is pressed", () => {
+      render(
+        <SetTracker
+          targetSets={3}
+          targetReps={10}
+          onSetsChange={mockOnSetsChange}
+        />,
+      );
+
+      const repsInput = screen.getByTestId("reps-input-2");
+      // Set reps to 0 (start from nothing)
+      fireEvent.changeText(repsInput, "0");
+      expect(repsInput.props.value).toBe("0");
+
+      // Press minus button - should stay at 0, not go negative
+      const minusButton = screen.getByTestId("reps-minus-2");
+      fireEvent.press(minusButton);
+
+      expect(repsInput.props.value).toBe("0");
+    });
+
+    it("starts from 0 when pressing plus on empty reps", () => {
+      render(
+        <SetTracker
+          targetSets={3}
+          targetReps={10}
+          onSetsChange={mockOnSetsChange}
+        />,
+      );
+
+      // Second set has no reps
+      const repsInput = screen.getByTestId("reps-input-2");
+      expect(repsInput.props.value).toBe("");
+
+      // Press plus button
+      const plusButton = screen.getByTestId("reps-plus-2");
+      fireEvent.press(plusButton);
+
+      // Reps should now be 1
+      expect(repsInput.props.value).toBe("1");
+    });
+
+    it("disables adjustment buttons for completed sets", () => {
+      render(
+        <SetTracker
+          targetSets={3}
+          targetReps={10}
+          previousWeight={100}
+          previousReps={10}
+          onSetsChange={mockOnSetsChange}
+        />,
+      );
+
+      // Complete first set
+      const checkbox = screen.getByTestId("complete-checkbox-1");
+      fireEvent.press(checkbox);
+
+      // Buttons should be disabled (have opacity in style)
+      const plusButton = screen.getByTestId("reps-plus-1");
+      const minusButton = screen.getByTestId("reps-minus-1");
       // Check that disabled buttons have opacity styling
       expect(plusButton.props.style).toEqual(
         expect.arrayContaining([
