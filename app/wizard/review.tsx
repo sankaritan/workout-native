@@ -21,7 +21,6 @@ export default function PlanReviewScreen() {
   const { state, updateState, resetState } = useWizard();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [savedPlanId, setSavedPlanId] = useState<number | null>(null);
 
   const { generatedProgram, customExercises, initialGeneratedProgram, initialCustomExercises, frequency, equipment, focus } = state;
 
@@ -60,11 +59,7 @@ export default function PlanReviewScreen() {
             );
           }
 
-          // Save to storage and mark as active
-          const planId = saveWorkoutProgram(program);
-          setSavedPlanId(planId);
-
-          // Update state with generated program
+          // Update state with generated program (don't save yet - only save when user accepts)
           updateState({ generatedProgram: program });
         } catch (err) {
           console.error("Failed to generate program:", err);
@@ -80,18 +75,23 @@ export default function PlanReviewScreen() {
 
   /**
    * Handle accept plan button press
-   * Plan is already saved and marked as active during generation
+   * Save the workout plan and navigate to it
    */
   const handleAcceptPlan = () => {
     console.log("Plan accepted!");
 
-    // Reset wizard state
-    resetState();
-    
-    // Navigate to the newly created plan instead of home
-    if (savedPlanId) {
-      router.push(`/workout/${savedPlanId}`);
+    // Save the workout program to storage
+    if (generatedProgram) {
+      const planId = saveWorkoutProgram(generatedProgram);
+      
+      // Reset wizard state
+      resetState();
+      
+      // Navigate to the newly created plan
+      router.push(`/workout/${planId}`);
     } else {
+      // No program to save, just go home
+      resetState();
       router.push("/");
     }
   };
