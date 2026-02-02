@@ -20,6 +20,7 @@ import {
   initStorage,
   isStorageInitialized,
   getCompletedSessionsByDateRange,
+  getAllCompletedSessions,
   getSessionTemplateById,
   getCompletedSetsBySessionId,
   getExerciseById,
@@ -52,8 +53,57 @@ interface SessionDetails extends WorkoutSessionCompleted {
   totalSets: number;
 }
 
+/**
+ * Get unique months (YYYY-MM) that have completed workout sessions
+ * Returns sorted array from oldest to newest
+ */
+function getMonthsWithData(sessions: WorkoutSessionCompleted[]): string[] {
+  const monthsSet = new Set<string>();
+  
+  sessions.forEach((session) => {
+    if (session.completed_at) {
+      const date = new Date(session.started_at);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      monthsSet.add(monthKey);
+    }
+  });
+  
+  return Array.from(monthsSet).sort();
+}
+
+/**
+ * Get the latest month with workout data, or current month if no data
+ */
+function getInitialMonth(): Date {
+  const allSessions = getAllCompletedSessions().filter((s) => s.completed_at !== null);
+  
+  if (allSessions.length === 0) {
+    return new Date(); // Current month if no data
+  }
+  
+  // Find the latest month with data
+  const monthsWithData = getMonthsWithData(allSessions);
+  const currentMonth = new Date();
+  const currentMonthKey = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, "0")}`;
+  
+  // If current month has data or is later than all data months, show current month
+  if (monthsWithData.includes(currentMonthKey) || monthsWithData.length === 0) {
+    return currentMonth;
+  }
+  
+  // Check if current month is later than the latest data month
+  const latestDataMonth = monthsWithData[monthsWithData.length - 1];
+  if (currentMonthKey > latestDataMonth) {
+    return currentMonth;
+  }
+  
+  // Otherwise show the latest month with data
+  const [year, month] = latestDataMonth.split("-").map(Number);
+  return new Date(year, month - 1, 1);
+}
+
 export default function HistoryScreen() {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState<Date | null>(null);
   const [completedSessions, setCompletedSessions] = useState<
     WorkoutSessionCompleted[]
   >([]);
@@ -62,16 +112,33 @@ export default function HistoryScreen() {
   >([]);
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [allMonthsWithData, setAllMonthsWithData] = useState<string[]>([]);
 
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
+  // Initialize current date on mount
+  useEffect(() => {
+    async function initializeDate() {
+      if (!isStorageInitialized()) {
+        await initStorage();
+      }
+      const initialDate = getInitialMonth();
+      setCurrentDate(initialDate);
+    }
+    initializeDate();
+  }, []);
+
+  const year = currentDate?.getFullYear() ?? new Date().getFullYear();
+  const month = currentDate?.getMonth() ?? new Date().getMonth();
 
   // Load completed sessions for current month
   useEffect(() => {
-    loadCompletedSessions();
-  }, [year, month]);
+    if (currentDate) {
+      loadCompletedSessions();
+    }
+  }, [year, month, currentDate]);
 
   async function loadCompletedSessions() {
+    if (!currentDate) return;
+    
     try {
       if (!isStorageInitialized()) {
         await initStorage();
@@ -89,6 +156,11 @@ export default function HistoryScreen() {
       // Only include completed sessions (not in-progress)
       const completed = sessions.filter((s) => s.completed_at !== null);
       setCompletedSessions(completed);
+      
+      // Also load all months with data for navigation
+      const allSessions = getAllCompletedSessions().filter((s) => s.completed_at !== null);
+      const monthsWithData = getMonthsWithData(allSessions);
+      setAllMonthsWithData(monthsWithData);
     } catch (error) {
       console.error("Failed to load completed sessions:", error);
     } finally {
@@ -104,6 +176,33 @@ export default function HistoryScreen() {
   // Navigate to next month
   function goToNextMonth() {
     setCurrentDate(new Date(year, month + 1, 1));
+  }
+
+  // Check if we should show the previous month button
+  function shouldShowPreviousButton(): boolean {
+    if (!currentDate) return false;
+    
+    const currentMonthKey = `${year}-${String(month + 1).padStart(2, "0")}`;
+    
+    // Find if there's any month with data before current month
+    return allMonthsWithData.some((monthKey) => monthKey < currentMonthKey);
+  }
+
+  // Check if we should show the next month button
+  function shouldShowNextButton(): boolean {
+    if (!currentDate) return false;
+    
+    const now = new Date();
+    const currentMonthKey = `${year}-${String(month + 1).padStart(2, "0")}`;
+    const todayMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    
+    // Never show next button if viewing current month
+    if (currentMonthKey >= todayMonthKey) {
+      return false;
+    }
+    
+    // Find if there's any month with data after current month
+    return allMonthsWithData.some((monthKey) => monthKey > currentMonthKey);
   }
 
   // Handle day press - show sessions for that day
@@ -201,7 +300,7 @@ export default function HistoryScreen() {
 
   const streak = calculateStreak();
 
-  if (loading) {
+  if (loading || !currentDate) {
     return (
       <View className="flex-1 bg-background-dark items-center justify-center">
         <ActivityIndicator size="large" color="#13ec6d" />
@@ -209,8 +308,12 @@ export default function HistoryScreen() {
     );
   }
 
-  // Empty state when no workouts completed
-  if (completedSessions.length === 0) {
+  const showPrevButton = shouldShowPreviousButton();
+  const showNextButton = shouldShowNextButton();
+
+  // Empty state when no workouts completed ever
+  const hasAnyWorkouts = allMonthsWithData.length > 0;
+  if (!hasAnyWorkouts) {
     return (
       <View className="flex-1 bg-background-dark items-center justify-center px-6">
         <MaterialIcons name="calendar-today" size={80} color="#9db9a8" />
@@ -238,21 +341,29 @@ export default function HistoryScreen() {
 
         {/* Month Navigation */}
         <View className="flex-row items-center justify-between px-6 py-2">
-          <Pressable
-            onPress={goToPreviousMonth}
-            className="p-2 rounded-full active:bg-white/10"
-          >
-            <MaterialIcons name="chevron-left" size={24} color="#9db9a8" />
-          </Pressable>
+          {showPrevButton ? (
+            <Pressable
+              onPress={goToPreviousMonth}
+              className="p-2 rounded-full active:bg-white/10"
+            >
+              <MaterialIcons name="chevron-left" size={24} color="#9db9a8" />
+            </Pressable>
+          ) : (
+            <View className="p-2 w-10" />
+          )}
           <Text className="text-2xl font-bold text-white tracking-tight">
             {MONTH_NAMES[month]} {year}
           </Text>
-          <Pressable
-            onPress={goToNextMonth}
-            className="p-2 rounded-full active:bg-white/10"
-          >
-            <MaterialIcons name="chevron-right" size={24} color="#9db9a8" />
-          </Pressable>
+          {showNextButton ? (
+            <Pressable
+              onPress={goToNextMonth}
+              className="p-2 rounded-full active:bg-white/10"
+            >
+              <MaterialIcons name="chevron-right" size={24} color="#9db9a8" />
+            </Pressable>
+          ) : (
+            <View className="p-2 w-10" />
+          )}
         </View>
 
         {/* Calendar */}

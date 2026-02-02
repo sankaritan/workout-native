@@ -366,6 +366,13 @@ export function getCompletedSessionsByDateRange(
     .sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime());
 }
 
+export function getAllCompletedSessions(): WorkoutSessionCompleted[] {
+  ensureInitialized();
+  return [...cache.completedSessions].sort(
+    (a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime()
+  );
+}
+
 export function insertCompletedSession(session: WorkoutSessionCompletedInsert): number {
   ensureInitialized();
   const id = getNextId("completedSessions");
