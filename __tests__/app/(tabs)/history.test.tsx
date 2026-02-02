@@ -8,6 +8,7 @@ jest.mock("@/lib/storage/storage", () => ({
   initStorage: jest.fn(),
   isStorageInitialized: jest.fn(),
   getCompletedSessionsByDateRange: jest.fn(),
+  getAllCompletedSessions: jest.fn(),
   getSessionTemplateById: jest.fn(),
   getCompletedSetsBySessionId: jest.fn(),
   getExerciseById: jest.fn(),
@@ -70,6 +71,7 @@ describe("HistoryScreen", () => {
     jest.clearAllMocks();
     (storage.isStorageInitialized as jest.Mock).mockReturnValue(true);
     (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue([]);
+    (storage.getAllCompletedSessions as jest.Mock).mockReturnValue([]);
     (storage.getSessionTemplateById as jest.Mock).mockReturnValue(null);
     (storage.getCompletedSetsBySessionId as jest.Mock).mockReturnValue([]);
   });
@@ -90,9 +92,9 @@ describe("HistoryScreen", () => {
 
   describe("With Workout Data", () => {
     beforeEach(() => {
-      (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue(
-        createMockSessionsForCurrentMonth()
-      );
+      const mockSessions = createMockSessionsForCurrentMonth();
+      (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue(mockSessions);
+      (storage.getAllCompletedSessions as jest.Mock).mockReturnValue(mockSessions);
       (storage.getSessionTemplateById as jest.Mock).mockReturnValue(createMockTemplate());
       (storage.getCompletedSetsBySessionId as jest.Mock).mockReturnValue(createMockSets());
     });
@@ -134,31 +136,6 @@ describe("HistoryScreen", () => {
       expect(screen.getByText("Days")).toBeTruthy();
     });
 
-    it("renders month/year toggle buttons", async () => {
-      render(<HistoryScreen />);
-
-      await waitFor(() => {
-        expect(screen.getByText("Month")).toBeTruthy();
-      });
-
-      expect(screen.getByText("Year")).toBeTruthy();
-    });
-
-    it("can toggle between month and year view", async () => {
-      render(<HistoryScreen />);
-
-      await waitFor(() => {
-        expect(screen.getByText("Month")).toBeTruthy();
-      });
-
-      const yearButton = screen.getByText("Year");
-      fireEvent.press(yearButton);
-
-      // Both buttons should still exist after toggle
-      expect(screen.getByText("Month")).toBeTruthy();
-      expect(screen.getByText("Year")).toBeTruthy();
-    });
-
     it("modal is not visible initially", async () => {
       render(<HistoryScreen />);
 
@@ -173,9 +150,9 @@ describe("HistoryScreen", () => {
 
   describe("Month Navigation", () => {
     beforeEach(() => {
-      (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue(
-        createMockSessionsForCurrentMonth()
-      );
+      const mockSessions = createMockSessionsForCurrentMonth();
+      (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue(mockSessions);
+      (storage.getAllCompletedSessions as jest.Mock).mockReturnValue(mockSessions);
     });
 
     it("calls getCompletedSessionsByDateRange on mount", async () => {
