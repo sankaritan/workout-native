@@ -12,13 +12,14 @@ import { BackButton } from "@/components/BackButton";
 import { WizardContinueButton } from "@/components/ui/WizardContinueButton";
 import { useWizard } from "@/lib/wizard-context";
 import { cn } from "@/lib/utils/cn";
+import { BalanceIcon } from "@/components/icons";
 
 // Focus options based on design mock - order: Strength, Balanced, Endurance
 const FOCUS_OPTIONS: Array<{
   value: "Balanced" | "Strength" | "Endurance";
   label: string;
   description: string;
-  icon: keyof typeof MaterialIcons.glyphMap;
+  icon: keyof typeof MaterialIcons.glyphMap | React.ComponentType<{ size?: number; color?: string }>;
 }> = [
   {
     value: "Strength",
@@ -30,7 +31,7 @@ const FOCUS_OPTIONS: Array<{
     value: "Balanced",
     label: "Balanced",
     description: "Moderate reps. Focus on muscle size (hypertrophy).",
-    icon: "crop-square",
+    icon: BalanceIcon,
   },
   {
     value: "Endurance",
@@ -149,11 +150,18 @@ export default function FocusScreen() {
                     isSelected ? "bg-primary/20" : "bg-surface-dark-highlight"
                   )}
                 >
-                  <MaterialIcons
-                    name={option.icon}
-                    size={24}
-                    color="#13ec6d"
-                  />
+                  {typeof option.icon === 'string' ? (
+                    <MaterialIcons
+                      name={option.icon}
+                      size={24}
+                      color="#13ec6d"
+                    />
+                  ) : (
+                    React.createElement(option.icon, {
+                      size: 24,
+                      color: "#13ec6d",
+                    })
+                  )}
                 </View>
 
                 {/* Text content */}

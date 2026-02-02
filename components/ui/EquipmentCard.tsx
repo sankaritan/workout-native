@@ -15,8 +15,8 @@ export interface EquipmentCardProps extends Omit<PressableProps, "children"> {
   name: string;
   /** Description text */
   description: string;
-  /** Icon name from MaterialIcons */
-  icon: keyof typeof MaterialIcons.glyphMap;
+  /** Icon name from MaterialIcons or a custom React component */
+  icon: keyof typeof MaterialIcons.glyphMap | React.ComponentType<{ size?: number; color?: string }>;
   /** Whether the card is selected */
   selected: boolean;
   /** Callback when card is pressed */
@@ -86,11 +86,18 @@ export function EquipmentCard({
             : "bg-white/5"
         )}
       >
-        <MaterialIcons
-          name={icon}
-          size={28}
-          color={selected ? theme.colors.primary.DEFAULT : theme.colors.text.primary}
-        />
+        {typeof icon === 'string' ? (
+          <MaterialIcons
+            name={icon}
+            size={28}
+            color={selected ? theme.colors.primary.DEFAULT : theme.colors.text.primary}
+          />
+        ) : (
+          React.createElement(icon, {
+            size: 28,
+            color: selected ? theme.colors.primary.DEFAULT : theme.colors.text.primary,
+          })
+        )}
       </View>
 
       {/* Text content */}
