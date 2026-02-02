@@ -88,8 +88,12 @@ export default function PlanReviewScreen() {
     // Reset wizard state
     resetState();
     
-    // Navigate to home - the dashboard will show the new plan
-    router.push("/");
+    // Navigate to the newly created plan instead of home
+    if (savedPlanId) {
+      router.push(`/workout/${savedPlanId}`);
+    } else {
+      router.push("/");
+    }
   };
 
   /**
@@ -149,27 +153,18 @@ export default function PlanReviewScreen() {
     );
   }
 
-  // Handle missing program (no custom exercises provided)
+  // Redirect to wizard start if no program is available
+  // This shouldn't happen in normal flow, but handle it gracefully
+  useEffect(() => {
+    if (!generatedProgram && !isGenerating && !error && !customExercises) {
+      router.replace("/wizard/frequency");
+    }
+  }, [generatedProgram, isGenerating, error, customExercises]);
+
+  // Handle missing program - if we get here without a program, we're still generating or have an error
+  // The redirect useEffect will handle the edge case where we truly have no program
   if (!generatedProgram) {
-    return (
-      <View className="flex-1 bg-background-dark items-center justify-center px-6">
-        <MaterialIcons name="error-outline" size={64} color="#ef4444" />
-        <Text className="text-xl font-bold text-white mt-4 mb-2">
-          No Plan Found
-        </Text>
-        <Text className="text-gray-400 text-center mb-6">
-          Please go through the wizard to generate a workout plan.
-        </Text>
-        <Pressable
-          onPress={() => router.push("/wizard/frequency")}
-          className="bg-primary rounded-xl px-6 py-3"
-        >
-          <Text className="text-background-dark font-bold">
-            Start Wizard
-          </Text>
-        </Pressable>
-      </View>
-    );
+    return null;
   }
 
   return (
