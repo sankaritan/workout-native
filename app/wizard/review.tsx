@@ -81,17 +81,18 @@ export default function PlanReviewScreen() {
     console.log("Plan accepted!");
 
     // Save the workout program to storage
+    let planId: number | null = null;
     if (generatedProgram) {
-      const planId = saveWorkoutProgram(generatedProgram);
-      
-      // Reset wizard state
-      resetState();
-      
-      // Navigate to the newly created plan
+      planId = saveWorkoutProgram(generatedProgram);
+    }
+    
+    // Reset wizard state
+    resetState();
+    
+    // Navigate to the newly created plan or home
+    if (planId) {
       router.push(`/workout/${planId}`);
     } else {
-      // No program to save, just go home
-      resetState();
       router.push("/");
     }
   };

@@ -100,10 +100,16 @@ describe("Plan Review Screen", () => {
     }, { timeout: 1000 });
     
     // Verify that even after waiting, saveWorkoutProgram was not called
+    // This confirms the fix: saveWorkoutProgram is no longer called in useEffect
+    // It will only be called when the user explicitly clicks "Accept Plan"
     expect(engine.saveWorkoutProgram).not.toHaveBeenCalled();
     
-    // Note: We can't easily simulate clicking "Accept Plan" in this test
-    // because the screen shows "No Plan Found" when there's no wizard state.
-    // The key assertion here is that saveWorkoutProgram is NOT called automatically.
+    // Note: Full integration test of clicking "Accept Plan" would require:
+    // 1. Setting up complete wizard state with frequency, equipment, focus, and customExercises
+    // 2. Waiting for the program generation to complete
+    // 3. Finding and clicking the "Accept Plan" button
+    // 4. Verifying saveWorkoutProgram was called exactly once
+    // This is better suited for an E2E test. The key assertion here is that
+    // saveWorkoutProgram is NOT called automatically during rendering/generation.
   });
 });
