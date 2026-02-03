@@ -1,22 +1,72 @@
 # Workout App
 
-> _"workout every day, keep doctor away"_
+<table>
+<tr>
+<td width="60%">
+
+_"Workout a day, keeps doctor away"_
 
 A fitness/workout planning and tracking application built with Expo (React Native) for web and iOS platforms.
 
+> **🚧 Beta Forever Badge**
+> 
+> 1. This started as a learning project and it probably shows! 
+> 1. Security bugs are likely chilling in the codebase, mobile testing has been... let's call it "selective"
+> 1. There's no backend because who needs one? Just backup and restore your data locally like it's 2010.
+
+Workout App helps you design, track, and analyze your fitness journey with three core capabilities. Create personalized workout plans through an intuitive wizard that generates scientifically-backed programs based on your weekly frequency, available equipment, and training focus. Choose between hypertrophy, strength, or endurance goals, and select program durations from 4 to 12 weeks.
+
+Track your workouts in real-time with an easy-to-use interface that logs sets, reps, and weights while showing your previous performance data to help you progressively overload. Review your fitness progress with a comprehensive history calendar that visualizes completed workouts. View detailed exercise-specific charts that track your strength gains over time.
+
+</td>
+<td width="40%">
+
+<img src="intro-image.png" alt="Workout App Screenshot" width="100%">
+
+</td>
+</tr>
+</table>
+
 ## Features
 
-Workout App helps you design, track, and analyze your fitness journey with three core capabilities. Create personalized workout plans through an intuitive wizard that generates scientifically-backed programs based on your weekly frequency, available equipment, and training focus. Choose between hypertrophy, strength, or endurance goals, and select program durations from 4 to 12 weeks. Track your workouts in real-time with an easy-to-use interface that logs sets, reps, and weights while showing your previous performance data to help you progressively overload.
+### Plan Creation Wizard
 
-Review your fitness progress with a comprehensive history calendar that visualizes completed workouts. View detailed exercise-specific charts that track your strength gains over time. The app uses rule-based algorithms to distribute muscle groups across sessions and ensures proper recovery time between training the same muscles. All your data is persisted locally for seamless cross-platform use on web and iOS.
+A 5-step wizard generates personalized workout plans:
 
-### Main Features
+1. **Frequency** - Choose 2-5 training days per week (determines training split)
+2. **Equipment** - Select available equipment: barbells, dumbbells, cables, machines, kettlebells, or bodyweight
+3. **Training Focus** - Pick your goal: Strength (5x3-5 reps), Balanced (3x8-12), or Endurance (3x15-20)
+4. **Exercise Review** - Customize exercises per muscle group: swap alternatives, add extras, or remove
+5. **Plan Review** - Reorder exercises with drag-and-drop, set program duration (4-12 weeks)
 
-- **Personalized Workout Plans** - Generate custom programs via wizard based on frequency, equipment, and goals
-- **Real-Time Workout Tracking** - Log sets, reps, and weights with progressive overload support
-- **Progress Analytics** - View history calendar and exercise-specific strength progression charts
-- **Rule-Based Programming** - Smart muscle group distribution and recovery time management
-- **Cross-Platform** - Works seamlessly on web and iOS with local data persistence
+**Training Splits** (auto-selected based on frequency):
+- 2-3 days/week → Full Body
+- 4 days/week → Upper/Lower
+- 5+ days/week → Push/Pull/Legs
+
+### Workout Tracking
+
+- **Set Logger** - Tap +/- buttons to adjust weight, reps per set
+- **Auto-prefill** - Completed set values copy to next set automatically
+- **Previous Performance** - See last session's numbers for each exercise
+- **Pause/Resume** - In-progress workouts save automatically, continue anytime
+- **Personal Records** - Tracks your max weight per exercise
+
+### Progress Analytics
+
+- **History Calendar** - Monthly view with workout days highlighted
+- **Workout Streaks** - Track consecutive training days
+- **Progress Charts** - Per-exercise weight progression over time
+
+### Data Management
+
+- **Local Storage** - All data persisted on-device via AsyncStorage
+- **Backup/Restore** - Export all data to JSON file, import on any device
+- **No Account Required** - Zero backend, zero signup, your data stays yours
+
+### Exercise Library
+
+108+ exercises covering 6 muscle groups (Chest, Back, Shoulders, Arms, Legs, Core) across 6 equipment types. The generator uses smart muscle distribution to ensure proper recovery between sessions.
 
 ## Tech Stack
 
@@ -24,7 +74,10 @@ Review your fitness progress with a comprehensive history calendar that visualiz
 - **Language**: TypeScript (strict mode)
 - **Routing**: Expo Router (file-based routing)
 - **Styling**: NativeWind v4 (Tailwind CSS for React Native)
-- **Storage**: AsyncStorage (cross-platform data persistence)
+- **Storage**: AsyncStorage with in-memory caching
+- **Backup**: expo-file-system, expo-document-picker, expo-sharing
+- **Drag & Drop**: @dnd-kit (web), react-native-draggable-flatlist (native)
+- **Charts**: Custom SVG-based ProgressChart component
 - **Testing**: Jest + React Native Testing Library
 - **Icons**: MaterialIcons from @expo/vector-icons
 - **Fonts**: Lexend (display), Noto Sans (body)
@@ -86,20 +139,25 @@ npm run typecheck      # Run TypeScript type checking
 ```
 workout-app/
 ├── app/                    # Expo Router routes (file-based routing)
-│   ├── (tabs)/            # Route groups (parentheses don't affect URL)
-│   ├── +html.tsx          # Special routes (HTML customization for web)
-│   ├── +not-found.tsx     # 404 page handler
-│   └── _layout.tsx        # Root layout with fonts
+│   ├── (tabs)/            # Tab navigation: home, history, settings
+│   ├── wizard/            # 5-step plan creation wizard
+│   ├── workout/           # Workout plan detail view
+│   ├── session/           # Active workout tracking
+│   ├── exercise/          # Exercise history and progress charts
+│   └── _layout.tsx        # Root layout with fonts and navigation
 ├── components/
-│   ├── ui/                # Reusable UI components (Button, etc.)
-│   └── __tests__/         # Component tests
+│   ├── ui/                # Reusable UI components (Button, Card, etc.)
+│   ├── SetTracker.tsx     # Weight/reps logging component
+│   ├── ProgressChart.tsx  # SVG line chart for progress
+│   ├── Calendar.tsx       # Monthly calendar with highlights
+│   └── SortableList.tsx   # Drag-drop reordering (platform-specific)
 ├── lib/
-│   ├── utils/             # Utility functions (cn.ts for classnames)
-│   └── storage/           # Database and preferences logic
+│   ├── storage/           # AsyncStorage wrapper, types, seed data
+│   ├── backup/            # JSON export/import functionality
+│   ├── workout-generator/ # Plan generation algorithm
+│   └── utils/             # Utility functions (cn.ts for classnames)
 ├── constants/
 │   └── theme.ts           # Design tokens and theme configuration
-├── __tests__/             # Integration/route tests
-├── design-assets/         # Original design mockups for reference
 └── global.css             # Global styles for NativeWind
 ```
 
