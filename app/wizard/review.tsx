@@ -4,17 +4,19 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BackButton } from "@/components/BackButton";
+import { DraggableExerciseItem } from "@/components/DraggableExerciseItem";
+import { SortableList } from "@/components/SortableList";
 import { WizardContinueButton } from "@/components/ui/WizardContinueButton";
-import { useWizard } from "@/lib/wizard-context";
-import { WorkoutPlanCard } from "@/components/WorkoutPlanCard";
 import { WorkoutDesignInfo } from "@/components/WorkoutDesignInfo";
-import { SessionCard } from "@/components/SessionCard";
+import { WorkoutPlanCard } from "@/components/WorkoutPlanCard";
+import { useWizard } from "@/lib/wizard-context";
 import { generateWorkoutProgramFromCustomExercises, saveWorkoutProgram } from "@/lib/workout-generator/engine";
+import type { ProgramExercise } from "@/lib/workout-generator/types";
 
 export default function PlanReviewScreen() {
   const insets = useSafeAreaInsets();
@@ -59,7 +61,7 @@ export default function PlanReviewScreen() {
             );
           }
 
-          // Update state with generated program (don't save yet - only save when user accepts)
+          // Update state with generated program (save on accept)
           updateState({ generatedProgram: program });
         } catch (err) {
           console.error("Failed to generate program:", err);
@@ -75,36 +77,37 @@ export default function PlanReviewScreen() {
 
   /**
    * Handle accept plan button press
-   * Save the workout plan and navigate to it
+   * Save the current (possibly modified) program and navigate to it
    */
   const handleAcceptPlan = () => {
     console.log("Plan accepted!");
 
-    // Save the workout program to storage
-    let planId: number | null = null;
-    if (generatedProgram) {
-      planId = saveWorkoutProgram(generatedProgram);
+    if (!generatedProgram) {
+      console.error("No program to save");
+      router.push("/");
+      return;
     }
-    
+
+    // Normalize exercise order based on current array order
+    const normalizedProgram = {
+      ...generatedProgram,
+      sessions: generatedProgram.sessions.map((session) => ({
+        ...session,
+        exercises: session.exercises.map((ex, idx) => ({
+          ...ex,
+          order: idx + 1,
+        })),
+      })),
+    };
+
+    // Save the current program state (includes any reordering/swaps)
+    const finalPlanId = saveWorkoutProgram(normalizedProgram);
+
     // Reset wizard state
     resetState();
-    
-    // Navigate to the newly created plan or home
-    if (planId) {
-      router.push(`/workout/${planId}`);
-    } else {
-      router.push("/");
-    }
-  };
 
-  /**
-   * Handle regenerate button press
-   * Go back to exercises screen to modify
-   */
-  const handleRegenerate = () => {
-    // Clear generated program so it regenerates when coming back
-    updateState({ generatedProgram: undefined });
-    router.back();
+    // Navigate to the newly created plan
+    router.push(`/workout/${finalPlanId}`);
   };
 
   /**
@@ -114,6 +117,44 @@ export default function PlanReviewScreen() {
     // Clear generated program so it regenerates when coming back
     updateState({ generatedProgram: undefined });
     router.back();
+  };
+
+  /**
+   * Handle exercise reordering within a session
+   */
+  const handleExerciseReorder = (sessionIndex: number, newExercises: ProgramExercise[]) => {
+    if (!generatedProgram) return;
+
+    // Update order property based on new array index
+    const updatedExercises = newExercises.map((ex, idx) => ({
+      ...ex,
+      order: idx + 1, // 1-based order
+    }));
+
+    // Clone program and update the session
+    const updatedProgram = {
+      ...generatedProgram,
+      sessions: generatedProgram.sessions.map((session, idx) =>
+        idx === sessionIndex
+          ? { ...session, exercises: updatedExercises }
+          : session
+      ),
+    };
+
+    updateState({ generatedProgram: updatedProgram });
+  };
+
+  /**
+   * Handle exercise swap navigation
+   */
+  const handleSwapExercise = (sessionIndex: number, exerciseIndex: number) => {
+    router.push({
+      pathname: "/wizard/review-swap-exercise",
+      params: {
+        sessionIndex: String(sessionIndex),
+        exerciseIndex: String(exerciseIndex),
+      },
+    });
   };
 
   // Handle loading state
@@ -229,13 +270,50 @@ export default function PlanReviewScreen() {
             Training Sessions
           </Text>
           <Text className="text-sm text-gray-400">
-            Tap to collapse and hide exercises
+            Drag to reorder or tap edit to swap exercises
           </Text>
         </View>
 
-        {/* Session Cards */}
-        {generatedProgram.sessions.map((session, idx) => (
-          <SessionCard key={idx} session={session} dayNumber={idx + 1} />
+        {/* Session Cards with Draggable Exercises */}
+        {generatedProgram.sessions.map((session, sessionIdx) => (
+          <View key={sessionIdx} className="mb-6">
+            {/* Session Header */}
+            <View className="bg-surface-dark rounded-t-2xl px-4 pt-4 pb-3 border border-b-0 border-white/10">
+              <View className="flex-row items-center justify-between mb-2">
+                <View className="flex-row items-center flex-1">
+                  <View className="bg-primary/20 rounded-full px-3 py-1 mr-3">
+                    <Text className="text-primary font-bold text-xs">
+                      Day {sessionIdx + 1}
+                    </Text>
+                  </View>
+                  <Text className="text-lg font-bold text-white flex-1">
+                    {session.name}
+                  </Text>
+                </View>
+              </View>
+              <Text className="text-sm text-gray-400">
+                {session.exercises.length} {session.exercises.length === 1 ? "exercise" : "exercises"}
+              </Text>
+            </View>
+
+            {/* Draggable Exercise List */}
+            <View className="bg-surface-dark rounded-b-2xl px-4 pb-4 border border-t-0 border-white/10">
+              <SortableList
+                data={session.exercises}
+                renderItem={(exercise, idx, drag, isActive, dragHandleProps) => (
+                  <DraggableExerciseItem
+                    exercise={exercise}
+                    onSwap={() => handleSwapExercise(sessionIdx, idx)}
+                    drag={drag}
+                    isActive={isActive}
+                    dragHandleProps={dragHandleProps}
+                  />
+                )}
+                onReorder={(newExercises) => handleExerciseReorder(sessionIdx, newExercises)}
+                keyExtractor={(exercise, idx) => `${sessionIdx}-${exercise.exercise.id}-${idx}`}
+              />
+            </View>
+          </View>
         ))}
       </ScrollView>
 
@@ -244,30 +322,14 @@ export default function PlanReviewScreen() {
         className="absolute bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 p-4 w-full"
         style={{ paddingBottom: insets.bottom + 24 }}
       >
-        <View className="gap-3">
-          {/* Accept Plan Button */}
-          <WizardContinueButton
-            onPress={handleAcceptPlan}
-            label="Accept Plan"
-            icon="check-circle"
-            testID="accept-button"
-            accessibilityLabel="Accept workout plan"
-          />
-
-          {/* Edit Exercises Button */}
-          <Pressable
-            onPress={handleRegenerate}
-            testID="edit-button"
-            accessibilityRole="button"
-            accessibilityLabel="Edit exercises"
-            className="flex-row items-center justify-center gap-2 bg-surface-dark border border-white/10 rounded-xl px-6 py-4 active:scale-[0.98]"
-          >
-            <MaterialIcons name="edit" size={20} color="#ffffff" />
-            <Text className="text-white text-base font-bold">
-              Edit Exercises
-            </Text>
-          </Pressable>
-        </View>
+        {/* Accept Plan Button */}
+        <WizardContinueButton
+          onPress={handleAcceptPlan}
+          label="Accept Plan"
+          icon="check-circle"
+          testID="accept-button"
+          accessibilityLabel="Accept workout plan"
+        />
       </View>
     </View>
   );

@@ -9,7 +9,7 @@ import { seedExercises, seedMockWorkoutHistory, seedTestWorkoutPlan } from "@/li
 import { getAllWorkoutPlans, resetStorage } from "@/lib/storage/storage";
 import { showAlert } from "@/lib/utils/alert";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -320,6 +320,45 @@ export default function TestScreen() {
                 <MaterialIcons name="delete-forever" size={20} color="#ef4444" />
                 <Text className="text-red-500 font-bold">
                   {isProcessing ? "Processing..." : "Clear Data"}
+                </Text>
+              </View>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* UI Component Tests Section */}
+        <View className="mb-6">
+          <Text className="text-xl font-bold text-white mb-4">
+            UI Component Tests
+          </Text>
+
+          {/* Drag & Drop Test Card */}
+          <View className="bg-surface-dark rounded-2xl p-6 mb-4 border border-white/5">
+            <View className="flex-row items-start gap-4 mb-4">
+              <View className="bg-purple-500/10 p-3 rounded-xl">
+                <MaterialIcons name="drag-indicator" size={28} color="#a855f7" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-white font-bold text-lg mb-1">
+                  Drag & Drop Test
+                </Text>
+                <Text className="text-gray-400 text-sm leading-relaxed">
+                  Test the react-native-reanimated-dnd library on your platform. 
+                  Verify drag-and-drop works smoothly before implementing in the wizard.
+                </Text>
+              </View>
+            </View>
+
+            <Pressable
+              onPress={() => router.push("/test-drag-drop" as any)}
+              className="bg-purple-500/20 border border-purple-500/30 rounded-xl py-3 px-6 active:scale-[0.98]"
+              accessibilityRole="button"
+              accessibilityLabel="Open drag and drop test"
+            >
+              <View className="flex-row items-center justify-center gap-2">
+                <MaterialIcons name="touch-app" size={20} color="#a855f7" />
+                <Text className="text-purple-400 font-bold">
+                  Test Drag & Drop
                 </Text>
               </View>
             </Pressable>
