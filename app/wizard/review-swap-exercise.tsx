@@ -4,7 +4,7 @@
  * Similar to swap-exercise.tsx but operates on generatedProgram.sessions
  */
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { View, Text, ScrollView } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -35,23 +35,8 @@ export default function ReviewSwapExerciseScreen() {
     return session.exercises[exerciseIndex]?.exercise;
   }, [state.generatedProgram, sessionIndex, exerciseIndex]);
 
-  // Get all exercises currently in the program (to exclude from swap options)
-  const selectedExerciseIds = useMemo(() => {
-    if (!state.generatedProgram?.sessions) return [];
-    return state.generatedProgram.sessions.flatMap((session) =>
-      session.exercises.map((ex) => ex.exercise.id)
-    );
-  }, [state.generatedProgram]);
-
   // Filter state - pre-select primary muscle group of current exercise
   const [selectedMuscleFilters, setSelectedMuscleFilters] = useState<MuscleGroup[]>([]);
-
-  // Pre-select filter based on current exercise's primary muscle group
-  useEffect(() => {
-    if (currentExercise && currentExercise.muscle_groups.length > 0) {
-      setSelectedMuscleFilters([currentExercise.muscle_groups[0]]);
-    }
-  }, [currentExercise]);
 
   // Get available exercises for swapping
   const availableExercises = useMemo(() => {
@@ -67,14 +52,6 @@ export default function ReviewSwapExerciseScreen() {
     if (selectedMuscleFilters.length > 0) {
       filtered = filterExercisesByMuscleGroups(filtered, selectedMuscleFilters);
     }
-
-    // Exclude the current exercise
-    if (currentExercise) {
-      filtered = filtered.filter((exercise) => exercise.id !== currentExercise.id);
-    }
-
-    // Exclude already-selected exercises in the program
-    filtered = filtered.filter((exercise) => !selectedExerciseIds.includes(exercise.id));
 
     // Sort: best matches first (primary muscle matches), then priority, then alphabetically
     return filtered.sort((a, b) => {
@@ -93,7 +70,7 @@ export default function ReviewSwapExerciseScreen() {
       // Finally sort alphabetically
       return a.name.localeCompare(b.name);
     });
-  }, [state.equipment, selectedMuscleFilters, currentExercise, selectedExerciseIds]);
+  }, [state.equipment, selectedMuscleFilters]);
 
   /**
    * Toggle muscle group filter
@@ -182,6 +159,11 @@ export default function ReviewSwapExerciseScreen() {
               onToggle={() => toggleMuscleFilter(muscle)}
             />
           ))}
+          <FilterPill
+            label="All"
+            selected={selectedMuscleFilters.length === 0}
+            onToggle={() => setSelectedMuscleFilters([])}
+          />
         </View>
       </View>
 
