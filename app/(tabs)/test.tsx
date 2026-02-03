@@ -9,7 +9,7 @@ import { seedExercises, seedMockWorkoutHistory, seedTestWorkoutPlan } from "@/li
 import { getAllWorkoutPlans, resetStorage } from "@/lib/storage/storage";
 import { showAlert } from "@/lib/utils/alert";
 import { MaterialIcons } from "@expo/vector-icons";
-import { router, useFocusEffect } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -82,29 +82,45 @@ export default function TestScreen() {
     console.log("Clear Data button pressed");
     setSuccessMessage(null);
     
-    try {
-      setIsProcessing(true);
-      console.log("Starting clear data process...");
-      
-      await resetStorage();
-      console.log("Storage reset complete");
-      
-      // Seed exercises back (we always need the exercise library)
-      seedExercises();
-      console.log("Exercises re-seeded");
-      
-      // Reload stats
-      loadDataStats();
-      console.log("Stats reloaded");
-      
-      setSuccessMessage("✓ All workout data cleared!");
-    } catch (error) {
-      console.error("Failed to clear data:", error);
-      Alert.alert("Error", `Failed to clear data: ${error}`);
-    } finally {
-      setIsProcessing(false);
-      console.log("Clear data process finished");
-    }
+    showAlert(
+      "Clear All Data",
+      "This will permanently delete all your workout plans, sessions, and history. Consider exporting a backup first. This action cannot be undone. Continue?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Clear Data",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setIsProcessing(true);
+              console.log("Starting clear data process...");
+              
+              await resetStorage();
+              console.log("Storage reset complete");
+              
+              // Seed exercises back (we always need the exercise library)
+              seedExercises();
+              console.log("Exercises re-seeded");
+              
+              // Reload stats
+              loadDataStats();
+              console.log("Stats reloaded");
+              
+              setSuccessMessage("✓ All workout data cleared!");
+            } catch (error) {
+              console.error("Failed to clear data:", error);
+              Alert.alert("Error", `Failed to clear data: ${error}`);
+            } finally {
+              setIsProcessing(false);
+              console.log("Clear data process finished");
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleExportBackup = async () => {
@@ -184,10 +200,10 @@ export default function TestScreen() {
         {/* Header */}
         <View className="mb-6">
           <Text className="text-3xl font-bold text-white mb-2">
-            Test & Development
+            Settings
           </Text>
           <Text className="text-gray-400">
-            Tools for testing app features and states
+            Manage your data and developer tools
           </Text>
         </View>
 
@@ -202,168 +218,6 @@ export default function TestScreen() {
             </View>
           </View>
         )}
-
-        {/* Current Data Status */}
-        <View className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-4">
-          <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-blue-400 font-bold">Current Data Status</Text>
-            <Pressable onPress={loadDataStats} className="p-1">
-              <MaterialIcons name="refresh" size={20} color="#3b82f6" />
-            </Pressable>
-          </View>
-          <View className="flex-row items-center gap-4">
-            <View className="flex-1">
-              <Text className="text-blue-300 text-sm">Workout Plans</Text>
-              <Text className="text-white font-bold text-2xl">{planCount}</Text>
-            </View>
-            <View className="flex-1">
-              <Text className="text-blue-300 text-sm">Status</Text>
-              <Text className="text-white font-bold text-lg">
-                {planCount === 0 ? "Empty ✓" : "Has Data"}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Warning Banner - Show if data exists */}
-        {planCount > 0 && (
-          <View className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-4 flex-row items-start gap-3">
-            <MaterialIcons name="info" size={24} color="#eab308" />
-            <View className="flex-1">
-              <Text className="text-yellow-500 font-bold mb-1">
-                Old Data Detected
-              </Text>
-              <Text className="text-yellow-500/80 text-sm">
-                You have existing workout data from a previous app run. Use "Clear Data" below to test the empty state.
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* Development Tools Banner */}
-        <View className="bg-gray-500/10 border border-gray-500/30 rounded-xl p-4 mb-8 flex-row items-start gap-3">
-          <MaterialIcons name="code" size={24} color="#9ca3af" />
-          <View className="flex-1">
-            <Text className="text-gray-400 font-bold mb-1">
-              Development Tools
-            </Text>
-            <Text className="text-gray-500 text-sm">
-              These features are for testing and development only. Use with caution.
-            </Text>
-          </View>
-        </View>
-
-        {/* Data Management Section */}
-        <View className="mb-6">
-          <Text className="text-xl font-bold text-white mb-4">
-            Data Management
-          </Text>
-
-          {/* Seed Data Card */}
-          <View className="bg-surface-dark rounded-2xl p-6 mb-4 border border-white/5">
-            <View className="flex-row items-start gap-4 mb-4">
-              <View className="bg-primary/10 p-3 rounded-xl">
-                <MaterialIcons name="add-circle" size={28} color="#13ec6d" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-white font-bold text-lg mb-1">
-                  Seed Sample Data
-                </Text>
-                <Text className="text-gray-400 text-sm leading-relaxed">
-                  Populates the app with pre-generated sample workouts, exercises, and history. 
-                  Useful for testing features with data.
-                </Text>
-              </View>
-            </View>
-
-            <Pressable
-              onPress={handleSeedData}
-              disabled={isProcessing}
-              className="bg-primary rounded-xl py-3 px-6 active:scale-[0.98]"
-              accessibilityRole="button"
-              accessibilityLabel="Seed sample data"
-            >
-              <View className="flex-row items-center justify-center gap-2">
-                <MaterialIcons name="cloud-download" size={20} color="#102218" />
-                <Text className="text-background-dark font-bold">
-                  {isProcessing ? "Processing..." : "Seed Data"}
-                </Text>
-              </View>
-            </Pressable>
-          </View>
-
-          {/* Clear Data Card */}
-          <View className="bg-surface-dark rounded-2xl p-6 border border-white/5">
-            <View className="flex-row items-start gap-4 mb-4">
-              <View className="bg-red-500/10 p-3 rounded-xl">
-                <MaterialIcons name="delete-outline" size={28} color="#ef4444" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-white font-bold text-lg mb-1">
-                  Clear All Data
-                </Text>
-                <Text className="text-gray-400 text-sm leading-relaxed">
-                  Removes all workout plans, sessions, and history from the app. 
-                  Useful for testing the empty state dashboard.
-                </Text>
-              </View>
-            </View>
-
-            <Pressable
-              onPress={handleClearData}
-              disabled={isProcessing}
-              className="bg-red-500/20 border border-red-500/30 rounded-xl py-3 px-6 active:scale-[0.98]"
-              accessibilityRole="button"
-              accessibilityLabel="Clear all data"
-            >
-              <View className="flex-row items-center justify-center gap-2">
-                <MaterialIcons name="delete-forever" size={20} color="#ef4444" />
-                <Text className="text-red-500 font-bold">
-                  {isProcessing ? "Processing..." : "Clear Data"}
-                </Text>
-              </View>
-            </Pressable>
-          </View>
-        </View>
-
-        {/* UI Component Tests Section */}
-        <View className="mb-6">
-          <Text className="text-xl font-bold text-white mb-4">
-            UI Component Tests
-          </Text>
-
-          {/* Drag & Drop Test Card */}
-          <View className="bg-surface-dark rounded-2xl p-6 mb-4 border border-white/5">
-            <View className="flex-row items-start gap-4 mb-4">
-              <View className="bg-purple-500/10 p-3 rounded-xl">
-                <MaterialIcons name="drag-indicator" size={28} color="#a855f7" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-white font-bold text-lg mb-1">
-                  Drag & Drop Test
-                </Text>
-                <Text className="text-gray-400 text-sm leading-relaxed">
-                  Test the react-native-reanimated-dnd library on your platform. 
-                  Verify drag-and-drop works smoothly before implementing in the wizard.
-                </Text>
-              </View>
-            </View>
-
-            <Pressable
-              onPress={() => router.push("/test-drag-drop" as any)}
-              className="bg-purple-500/20 border border-purple-500/30 rounded-xl py-3 px-6 active:scale-[0.98]"
-              accessibilityRole="button"
-              accessibilityLabel="Open drag and drop test"
-            >
-              <View className="flex-row items-center justify-center gap-2">
-                <MaterialIcons name="touch-app" size={20} color="#a855f7" />
-                <Text className="text-purple-400 font-bold">
-                  Test Drag & Drop
-                </Text>
-              </View>
-            </Pressable>
-          </View>
-        </View>
 
         {/* Backup & Restore Section */}
         <View className="mb-6">
@@ -436,19 +290,142 @@ export default function TestScreen() {
               </View>
             </Pressable>
           </View>
+
+          {/* Info about Backup & Restore */}
+          <View className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+            <View className="flex-row items-start gap-3">
+              <MaterialIcons name="info-outline" size={20} color="#3b82f6" />
+              <View className="flex-1">
+                <Text className="text-blue-400 text-sm leading-relaxed">
+                  <Text className="font-bold">Tip:</Text> Use "Export Data" to create backups 
+                  before testing destructive operations. You can restore your data anytime 
+                  using "Import Data".
+                </Text>
+              </View>
+            </View>
+          </View>
         </View>
 
-        {/* Info Section */}
-        <View className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
-          <View className="flex-row items-start gap-3">
-            <MaterialIcons name="info-outline" size={20} color="#3b82f6" />
+        {/* Developer Tools Section */}
+        <View className="mb-6">
+          <Text className="text-xl font-bold text-white mb-4">
+            Developer Tools
+          </Text>
+
+          {/* Development Tools Banner */}
+          <View className="bg-gray-500/10 border border-gray-500/30 rounded-xl p-4 mb-4 flex-row items-start gap-3">
+            <MaterialIcons name="code" size={24} color="#9ca3af" />
             <View className="flex-1">
-              <Text className="text-blue-400 text-sm leading-relaxed">
-                <Text className="font-bold">Tip:</Text> Use "Export Data" to create backups 
-                before testing destructive operations. You can restore your data anytime 
-                using "Import Data".
+              <Text className="text-gray-400 font-bold mb-1">
+                For Development & Testing
+              </Text>
+              <Text className="text-gray-500 text-sm">
+                These features are for testing and development only. Use with caution.
               </Text>
             </View>
+          </View>
+
+          {/* Current Data Status */}
+          <View className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-4">
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-blue-400 font-bold">Current Data Status</Text>
+              <Pressable onPress={loadDataStats} className="p-1">
+                <MaterialIcons name="refresh" size={20} color="#3b82f6" />
+              </Pressable>
+            </View>
+            <View className="flex-row items-center gap-4">
+              <View className="flex-1">
+                <Text className="text-blue-300 text-sm">Workout Plans</Text>
+                <Text className="text-white font-bold text-2xl">{planCount}</Text>
+              </View>
+              <View className="flex-1">
+                <Text className="text-blue-300 text-sm">Status</Text>
+                <Text className="text-white font-bold text-lg">
+                  {planCount === 0 ? "Empty ✓" : "Has Data"}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Warning Banner - Show if data exists */}
+          {planCount > 0 && (
+            <View className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-4 flex-row items-start gap-3">
+              <MaterialIcons name="info" size={24} color="#eab308" />
+              <View className="flex-1">
+                <Text className="text-yellow-500 font-bold mb-1">
+                  Old Data Detected
+                </Text>
+                <Text className="text-yellow-500/80 text-sm">
+                  You have existing workout data from a previous app run. Use "Clear Data" below to test the empty state.
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {/* Seed Data Card */}
+          <View className="bg-surface-dark rounded-2xl p-6 mb-4 border border-white/5">
+            <View className="flex-row items-start gap-4 mb-4">
+              <View className="bg-primary/10 p-3 rounded-xl">
+                <MaterialIcons name="add-circle" size={28} color="#13ec6d" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-white font-bold text-lg mb-1">
+                  Seed Sample Data
+                </Text>
+                <Text className="text-gray-400 text-sm leading-relaxed">
+                  Populates the app with pre-generated sample workouts, exercises, and history. 
+                  Useful for testing features with data.
+                </Text>
+              </View>
+            </View>
+
+            <Pressable
+              onPress={handleSeedData}
+              disabled={isProcessing}
+              className="bg-primary rounded-xl py-3 px-6 active:scale-[0.98]"
+              accessibilityRole="button"
+              accessibilityLabel="Seed sample data"
+            >
+              <View className="flex-row items-center justify-center gap-2">
+                <MaterialIcons name="cloud-download" size={20} color="#102218" />
+                <Text className="text-background-dark font-bold">
+                  {isProcessing ? "Processing..." : "Seed Data"}
+                </Text>
+              </View>
+            </Pressable>
+          </View>
+
+          {/* Clear Data Card */}
+          <View className="bg-surface-dark rounded-2xl p-6 mb-4 border border-white/5">
+            <View className="flex-row items-start gap-4 mb-4">
+              <View className="bg-red-500/10 p-3 rounded-xl">
+                <MaterialIcons name="delete-outline" size={28} color="#ef4444" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-white font-bold text-lg mb-1">
+                  Clear All Data
+                </Text>
+                <Text className="text-gray-400 text-sm leading-relaxed">
+                  Removes all workout plans, sessions, and history from the app. 
+                  Useful for testing the empty state dashboard.
+                </Text>
+              </View>
+            </View>
+
+            <Pressable
+              onPress={handleClearData}
+              disabled={isProcessing}
+              className="bg-red-500/20 border border-red-500/30 rounded-xl py-3 px-6 active:scale-[0.98]"
+              accessibilityRole="button"
+              accessibilityLabel="Clear all data"
+            >
+              <View className="flex-row items-center justify-center gap-2">
+                <MaterialIcons name="delete-forever" size={20} color="#ef4444" />
+                <Text className="text-red-500 font-bold">
+                  {isProcessing ? "Processing..." : "Clear Data"}
+                </Text>
+              </View>
+            </Pressable>
           </View>
         </View>
       </View>
