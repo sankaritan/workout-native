@@ -22,6 +22,7 @@ jest.mock("@/lib/storage/storage", () => ({
   deleteCompletedSetsBySessionId: jest.fn(),
   getWorkoutPlanById: jest.fn(),
   getInProgressSessionByTemplateId: jest.fn(),
+  getLatestCompletedSessionByTemplateId: jest.fn(),
   getCompletedSetsBySessionId: jest.fn(),
 }));
 
@@ -59,6 +60,7 @@ import {
   insertCompletedSet,
   deleteCompletedSetsBySessionId,
   getInProgressSessionByTemplateId,
+  getLatestCompletedSessionByTemplateId,
   getCompletedSetsBySessionId,
 } from "@/lib/storage/storage";
 import { showAlert } from "@/lib/utils/alert";
@@ -119,6 +121,7 @@ describe("WorkoutSessionScreen", () => {
     });
     (insertCompletedSession as jest.Mock).mockReturnValue(1);
     (getInProgressSessionByTemplateId as jest.Mock).mockReturnValue(null);
+    (getLatestCompletedSessionByTemplateId as jest.Mock).mockReturnValue(null);
     (getCompletedSetsBySessionId as jest.Mock).mockReturnValue([]);
     (deleteCompletedSetsBySessionId as jest.Mock).mockReturnValue(undefined);
     mockAlertCallback = null;
@@ -183,6 +186,58 @@ describe("WorkoutSessionScreen", () => {
         })
       );
     });
+  });
+
+  it("loads latest completed session sets when no in-progress session", async () => {
+    (getLastCompletedSetForExercise as jest.Mock).mockReturnValue(null);
+    const completedSession = {
+      id: 5,
+      workout_plan_id: 1,
+      session_template_id: 1,
+      started_at: "2025-02-01T08:00:00.000Z",
+      completed_at: "2025-02-01T09:00:00.000Z",
+      notes: null,
+    };
+    (getLatestCompletedSessionByTemplateId as jest.Mock).mockReturnValue(
+      completedSession
+    );
+    (getCompletedSetsBySessionId as jest.Mock).mockReturnValue([
+      {
+        id: 1,
+        completed_session_id: 5,
+        exercise_id: 1,
+        set_number: 1,
+        weight: 120,
+        reps: 8,
+        is_warmup: false,
+        completed_at: "2025-02-01T08:10:00.000Z",
+      },
+      {
+        id: 2,
+        completed_session_id: 5,
+        exercise_id: 1,
+        set_number: 2,
+        weight: 125,
+        reps: 6,
+        is_warmup: false,
+        completed_at: "2025-02-01T08:15:00.000Z",
+      },
+    ]);
+
+    render(<WorkoutSessionScreen />);
+
+    await waitFor(() => {
+      expect(insertCompletedSession).not.toHaveBeenCalled();
+      expect(getCompletedSetsBySessionId).toHaveBeenCalledWith(5);
+    });
+
+    expect(screen.getByTestId("weight-input-1").props.value).toBe("120");
+    expect(screen.getByTestId("reps-input-1").props.value).toBe("8");
+    expect(screen.getByTestId("weight-input-2").props.value).toBe("125");
+    expect(screen.getByTestId("reps-input-2").props.value).toBe("6");
+
+    fireEvent.changeText(screen.getByTestId("weight-input-1"), "130");
+    expect(screen.getByTestId("weight-input-1").props.value).toBe("130");
   });
 
   it("navigates to next exercise", async () => {

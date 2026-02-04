@@ -20,6 +20,7 @@ import {
   deleteCompletedSetsBySessionId,
   getWorkoutPlanById,
   getInProgressSessionByTemplateId,
+  getLatestCompletedSessionByTemplateId,
   getCompletedSetsBySessionId,
   type SessionWithExercises,
 } from "@/lib/storage/storage";
@@ -37,6 +38,8 @@ export default function WorkoutSessionScreen() {
   const [exerciseSets, setExerciseSets] = useState<Map<number, SetData[]>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [workoutPlanId, setWorkoutPlanId] = useState<number | null>(null);
+  const [isViewingCompletedSession, setIsViewingCompletedSession] = useState(false);
+  const [completedSessionCompletedAt, setCompletedSessionCompletedAt] = useState<string | null>(null);
 
   // Get current exercise data (with fallback)
   const currentExercise = session?.exercises[currentExerciseIndex];
@@ -45,7 +48,10 @@ export default function WorkoutSessionScreen() {
 
   // Get previous performance for current exercise
   const previousSet = currentExercise
-    ? getLastCompletedSetForExercise(currentExercise.exercise_id)
+    ? getLastCompletedSetForExercise(
+        currentExercise.exercise_id,
+        isViewingCompletedSession ? completedSessionId ?? undefined : undefined
+      )
     : null;
 
   /**
@@ -114,7 +120,7 @@ export default function WorkoutSessionScreen() {
                         weight: set.weight,
                         reps: set.reps,
                         is_warmup: set.isWarmup || false,
-                        completed_at: now,
+                        completed_at: set.completedAt ?? now,
                       });
                     }
                   });
@@ -140,7 +146,13 @@ export default function WorkoutSessionScreen() {
         },
       ]
     );
-  }, [exerciseSets, completedSessionId, workoutPlanId]);
+  }, [
+    exerciseSets,
+    completedSessionId,
+    workoutPlanId,
+    isViewingCompletedSession,
+    completedSessionCompletedAt,
+  ]);
 
   /**
    * Finish workout and save all data
@@ -165,27 +177,30 @@ export default function WorkoutSessionScreen() {
               }
 
               // Save all completed sets to database
-              const now = new Date().toISOString();
+               const now = new Date().toISOString();
 
-              exerciseSets.forEach((sets, exerciseId) => {
-                sets.forEach((set) => {
-                  if (set.isCompleted && set.weight !== null && set.reps !== null) {
-                    insertCompletedSet({
-                      completed_session_id: completedSessionId!,
-                      exercise_id: exerciseId,
-                      set_number: set.setNumber,
-                      weight: set.weight,
-                      reps: set.reps,
-                      is_warmup: set.isWarmup || false,
-                      completed_at: now,
-                    });
-                  }
-                });
-              });
+               exerciseSets.forEach((sets, exerciseId) => {
+                 sets.forEach((set) => {
+                    if (set.isCompleted && set.weight !== null && set.reps !== null) {
+                     insertCompletedSet({
+                       completed_session_id: completedSessionId!,
+                       exercise_id: exerciseId,
+                       set_number: set.setNumber,
+                       weight: set.weight,
+                       reps: set.reps,
+                       is_warmup: set.isWarmup || false,
+                       completed_at: set.completedAt ?? now,
+                     });
+                   }
+                 });
+               });
 
               // Mark session as completed
               if (completedSessionId) {
-                updateCompletedSession(completedSessionId, now);
+                const completedAt = isViewingCompletedSession
+                  ? completedSessionCompletedAt ?? now
+                  : now;
+                updateCompletedSession(completedSessionId, completedAt);
               }
 
               // Navigate back to the workout plan view
@@ -202,7 +217,7 @@ export default function WorkoutSessionScreen() {
         },
       ]
     );
-  }, [exerciseSets, completedSessionId, workoutPlanId]);
+  }, [exerciseSets, completedSessionId, workoutPlanId, isViewingCompletedSession]);
 
   // Load session data
   useEffect(() => {
@@ -223,9 +238,12 @@ export default function WorkoutSessionScreen() {
       const existingSession = getInProgressSessionByTemplateId(sessionTemplateId);
 
       let sessionId: number;
+      let viewingCompletedSession = false;
+      let existingSessionCompletedAt: string | null = null;
       if (existingSession) {
         // Continue existing session
         sessionId = existingSession.id;
+        existingSessionCompletedAt = existingSession.completed_at;
 
         // Load existing sets from the in-progress session
         const existingSets = getCompletedSetsBySessionId(sessionId);
@@ -236,30 +254,73 @@ export default function WorkoutSessionScreen() {
             if (!setsByExercise.has(set.exercise_id)) {
               setsByExercise.set(set.exercise_id, []);
             }
-            setsByExercise.get(set.exercise_id)!.push({
+            const exerciseSet = setsByExercise.get(set.exercise_id)!;
+            exerciseSet.push({
               setNumber: set.set_number,
               weight: set.weight,
               reps: set.reps,
               isCompleted: true,
               isWarmup: set.is_warmup,
+              completedAt: set.completed_at,
             });
+          });
+          setsByExercise.forEach((sets) => {
+            sets.sort((a, b) => a.setNumber - b.setNumber);
           });
           setExerciseSets(setsByExercise);
         }
       } else {
-        // Create new completed session record
-        const now = new Date().toISOString();
-        const planId = sessionData.workout_plan_id;
-        sessionId = insertCompletedSession({
-          workout_plan_id: planId,
-          session_template_id: sessionTemplateId,
-          started_at: now,
-          completed_at: null,
-          notes: null,
-        });
+        const latestCompletedSession = getLatestCompletedSessionByTemplateId(
+          sessionTemplateId
+        );
+        if (latestCompletedSession) {
+          sessionId = latestCompletedSession.id;
+          viewingCompletedSession = true;
+          existingSessionCompletedAt = latestCompletedSession.completed_at;
+
+          const existingSets = getCompletedSetsBySessionId(sessionId);
+          if (existingSets.length > 0) {
+            const setsByExercise = new Map<number, SetData[]>();
+            existingSets.forEach((set) => {
+              if (!setsByExercise.has(set.exercise_id)) {
+                setsByExercise.set(set.exercise_id, []);
+              }
+              const exerciseSet = setsByExercise.get(set.exercise_id)!;
+              exerciseSet.push({
+                setNumber: set.set_number,
+                weight: set.weight,
+                reps: set.reps,
+                isCompleted: true,
+                isWarmup: set.is_warmup,
+                completedAt: set.completed_at,
+              });
+            });
+            setsByExercise.forEach((sets) => {
+              sets.sort((a, b) => a.setNumber - b.setNumber);
+            });
+            setExerciseSets(setsByExercise);
+          }
+        } else {
+          // Create new completed session record
+          const now = new Date().toISOString();
+          const planId = sessionData.workout_plan_id;
+          sessionId = insertCompletedSession({
+            workout_plan_id: planId,
+            session_template_id: sessionTemplateId,
+            started_at: now,
+            completed_at: null,
+            notes: null,
+          });
+        }
       }
 
       setCompletedSessionId(sessionId);
+      if (viewingCompletedSession && existingSessionCompletedAt) {
+        setCompletedSessionCompletedAt(existingSessionCompletedAt);
+      } else {
+        setCompletedSessionCompletedAt(null);
+      }
+      setIsViewingCompletedSession(viewingCompletedSession);
       setIsLoading(false);
     } catch (error) {
       console.error("Failed to load session:", error);
@@ -409,6 +470,7 @@ export default function WorkoutSessionScreen() {
           previousWeight={previousSet?.weight}
           previousReps={previousSet?.reps}
           initialSets={exerciseSets.get(currentExercise.exercise_id)}
+          allowEditingCompleted={isViewingCompletedSession}
           onSetsChange={handleSetsChange}
           testID="set-tracker"
         />

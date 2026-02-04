@@ -428,6 +428,19 @@ export function getInProgressSessionByTemplateId(sessionTemplateId: number): Wor
   return inProgressSessions[0] ?? null;
 }
 
+/**
+ * Get most recently completed session for a specific session template
+ */
+export function getLatestCompletedSessionByTemplateId(
+  sessionTemplateId: number
+): WorkoutSessionCompleted | null {
+  ensureInitialized();
+  const completedSessions = cache.completedSessions
+    .filter((s) => s.session_template_id === sessionTemplateId && s.completed_at !== null)
+    .sort((a, b) => new Date(b.completed_at!).getTime() - new Date(a.completed_at!).getTime());
+  return completedSessions[0] ?? null;
+}
+
 // ============================================================================
 // Completed Exercise Set queries
 // ============================================================================
@@ -446,10 +459,18 @@ export function getCompletedSetsByExerciseId(exerciseId: number): ExerciseSetCom
     .sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime());
 }
 
-export function getLastCompletedSetForExercise(exerciseId: number): ExerciseSetCompleted | null {
+export function getLastCompletedSetForExercise(
+  exerciseId: number,
+  excludeSessionId?: number
+): ExerciseSetCompleted | null {
   ensureInitialized();
   const sets = cache.completedSets
-    .filter((s) => s.exercise_id === exerciseId && !s.is_warmup)
+    .filter(
+      (s) =>
+        s.exercise_id === exerciseId &&
+        !s.is_warmup &&
+        s.completed_session_id !== excludeSessionId
+    )
     .sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime());
   return sets[0] ?? null;
 }

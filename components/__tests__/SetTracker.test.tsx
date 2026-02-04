@@ -188,6 +188,37 @@ describe("SetTracker", () => {
     expect(screen.getByTestId("reps-input-1").props.editable).toBe(false);
   });
 
+  it("allows editing completed sets when enabled", () => {
+    render(
+      <SetTracker
+        targetSets={3}
+        targetReps={10}
+        allowEditingCompleted
+        initialSets={[
+          {
+            setNumber: 1,
+            weight: 100,
+            reps: 8,
+            isCompleted: true,
+            isWarmup: false,
+          },
+        ]}
+        onSetsChange={mockOnSetsChange}
+      />,
+    );
+
+    const weightInput = screen.getByTestId("weight-input-1");
+    const repsInput = screen.getByTestId("reps-input-1");
+    expect(weightInput.props.editable).toBe(true);
+    expect(repsInput.props.editable).toBe(true);
+
+    fireEvent.changeText(weightInput, "105");
+    fireEvent.changeText(repsInput, "9");
+
+    expect(weightInput.props.value).toBe("105");
+    expect(repsInput.props.value).toBe("9");
+  });
+
   it("adds new set when add button pressed", () => {
     render(
       <SetTracker
