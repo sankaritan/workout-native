@@ -14,9 +14,34 @@ import { Pressable, Text, TextInput, View } from "react-native";
 import { theme } from "@/constants/theme";
 import { setTrackerStyles as styles } from "@/lib/styles/setTracker";
 
+const weightToText = (weight: number | null) =>
+  weight === null ? "" : weight.toString();
+const decimalNumberPattern = /^\d*\.?\d*$/;
+// Supports weight entries like 9999.99.
+const maxWeightInputLength = 7;
+const normalizeSets = (setsToNormalize: SetData[]) =>
+  setsToNormalize.map((set) => ({
+    ...set,
+    weightText: set.weightText ?? weightToText(set.weight),
+  }));
+const createInitialSets = (
+  targetSets: number,
+  previousWeight?: number,
+  previousReps?: number,
+) =>
+  Array.from({ length: targetSets }, (_, i) => ({
+    setNumber: i + 1,
+    weight: i === 0 ? (previousWeight ?? null) : null,
+    weightText: i === 0 ? weightToText(previousWeight ?? null) : "",
+    reps: i === 0 ? (previousReps ?? null) : null,
+    isCompleted: false,
+    isWarmup: false,
+  }));
+
 export interface SetData {
   setNumber: number;
   weight: number | null;
+  weightText?: string;
   reps: number | null;
   isCompleted: boolean;
   isWarmup?: boolean;
@@ -54,14 +79,8 @@ export function SetTracker({
   // First set gets prefilled with previous exercise values
   const [sets, setSets] = useState<SetData[]>(() =>
     initialSets && initialSets.length > 0
-      ? initialSets
-      : Array.from({ length: targetSets }, (_, i) => ({
-          setNumber: i + 1,
-          weight: i === 0 ? (previousWeight ?? null) : null,
-          reps: i === 0 ? (previousReps ?? null) : null,
-          isCompleted: false,
-          isWarmup: false,
-        })),
+      ? normalizeSets(initialSets)
+      : createInitialSets(targetSets, previousWeight, previousReps),
   );
 
   // Update sets when initialSets changes (when navigating between exercises)
@@ -72,21 +91,13 @@ export function SetTracker({
       initialSets.length > 0 &&
       initialSets !== lastNotifiedSets.current
     ) {
-      setSets(initialSets);
+      setSets(normalizeSets(initialSets));
     } else if (
       !initialSets ||
       (initialSets.length === 0 && initialSets !== lastNotifiedSets.current)
     ) {
       // Reset to empty sets for new exercise - first set gets prefilled with previous values
-      setSets(
-        Array.from({ length: targetSets }, (_, i) => ({
-          setNumber: i + 1,
-          weight: i === 0 ? (previousWeight ?? null) : null,
-          reps: i === 0 ? (previousReps ?? null) : null,
-          isCompleted: false,
-          isWarmup: false,
-        })),
-      );
+      setSets(createInitialSets(targetSets, previousWeight, previousReps));
     }
   }, [initialSets, targetSets, previousWeight, previousReps]);
 
@@ -105,10 +116,42 @@ export function SetTracker({
   const updateSet = (
     index: number,
     field: keyof SetData,
-    value: number | boolean | null,
+    value: number | boolean | null | string,
   ) => {
     setSets((prev) =>
       prev.map((set, i) => (i === index ? { ...set, [field]: value } : set)),
+    );
+  };
+
+  /**
+   * Update weight data (supports decimals and partial input)
+   */
+  const updateWeight = (index: number, text: string) => {
+    const normalizedText = text.replace(",", ".");
+    if (normalizedText === "") {
+      setSets((prev) =>
+        prev.map((set, i) =>
+          i === index ? { ...set, weight: null, weightText: "" } : set,
+        ),
+      );
+      return;
+    }
+
+    if (!decimalNumberPattern.test(normalizedText)) {
+      return;
+    }
+
+    const parsedWeight = parseFloat(normalizedText);
+    setSets((prev) =>
+      prev.map((set, i) =>
+        i === index
+          ? {
+              ...set,
+              weight: Number.isNaN(parsedWeight) ? null : parsedWeight,
+              weightText: normalizedText,
+            }
+          : set,
+      ),
     );
   };
 
@@ -122,15 +165,23 @@ export function SetTracker({
         return prev;
       }
 
+    const currentWeightText =
+        currentSet.weightText ?? weightToText(currentSet.weight);
       return prev.map((set, i) => {
         if (i === index) {
           // Mark current set as completed
           return { ...set, isCompleted: true };
         } else if (i === index + 1 && !set.isCompleted) {
           // Prefill next set with current set's values (only if not already completed)
+          const shouldPrefillWeight = set.weight === null;
+          const nextWeight = shouldPrefillWeight ? currentSet.weight : set.weight;
+          const nextWeightText = shouldPrefillWeight
+            ? currentWeightText
+            : set.weightText ?? weightToText(nextWeight);
           return {
             ...set,
-            weight: set.weight ?? currentSet.weight,
+            weight: nextWeight,
+            weightText: nextWeightText,
             reps: set.reps ?? currentSet.reps,
           };
         }
@@ -148,7 +199,11 @@ export function SetTracker({
         if (i === index) {
           const currentWeight = set.weight ?? 0;
           const newWeight = Math.max(0, currentWeight + delta);
-          return { ...set, weight: newWeight };
+          return {
+            ...set,
+            weight: newWeight,
+            weightText: weightToText(newWeight),
+          };
         }
         return set;
       }),
@@ -180,6 +235,7 @@ export function SetTracker({
       {
         setNumber: prev.length + 1,
         weight: null,
+        weightText: "",
         reps: null,
         isCompleted: false,
         isWarmup: false,
@@ -280,17 +336,14 @@ export function SetTracker({
             {/* Weight Input */}
             <View style={{ width: 60 }}>
               <TextInput
-                value={set.weight?.toString() || ""}
-                onChangeText={(text) => {
-                  const num = text ? parseFloat(text) : null;
-                  updateSet(index, "weight", num);
-                }}
+                value={set.weightText ?? weightToText(set.weight)}
+                onChangeText={(text) => updateWeight(index, text)}
                 placeholder="-"
                 placeholderTextColor={isActive ? "#ffffff33" : "#ffffff20"}
-                keyboardType="numeric"
+                keyboardType="decimal-pad"
                 editable={!isCompleted}
                 testID={`weight-input-${set.setNumber}`}
-                maxLength={5}
+                maxLength={maxWeightInputLength}
                 className="rounded border text-center font-medium p-0"
                 style={[
                   styles.input,
