@@ -45,6 +45,7 @@ export interface SetData {
   reps: number | null;
   isCompleted: boolean;
   isWarmup?: boolean;
+  completedAt?: string;
 }
 
 export interface SetTrackerProps {
@@ -57,6 +58,8 @@ export interface SetTrackerProps {
   previousReps?: number;
   /** Initial sets data (for returning to already-started exercise) */
   initialSets?: SetData[];
+  /** Allow editing of completed sets */
+  allowEditingCompleted?: boolean;
   /** Callback when set data changes */
   onSetsChange: (sets: SetData[]) => void;
   /** Test ID */
@@ -69,6 +72,7 @@ export function SetTracker({
   previousWeight,
   previousReps,
   initialSets,
+  allowEditingCompleted = false,
   onSetsChange,
   testID,
 }: SetTrackerProps) {
@@ -119,7 +123,12 @@ export function SetTracker({
     value: number | boolean | null | string,
   ) => {
     setSets((prev) =>
-      prev.map((set, i) => (i === index ? { ...set, [field]: value } : set)),
+      prev.map((set, i) => {
+        if (i !== index) {
+          return set;
+        }
+        return { ...set, [field]: value };
+      }),
     );
   };
 
@@ -159,6 +168,7 @@ export function SetTracker({
    * Complete a set and prefill the next set with current values
    */
   const completeSet = (index: number) => {
+    const completedAt = new Date().toISOString();
     setSets((prev) => {
       const currentSet = prev[index];
       if (currentSet.weight === null || currentSet.reps === null) {
@@ -170,7 +180,11 @@ export function SetTracker({
       return prev.map((set, i) => {
         if (i === index) {
           // Mark current set as completed
-          return { ...set, isCompleted: true };
+          return {
+            ...set,
+            isCompleted: true,
+            completedAt: set.completedAt ?? completedAt,
+          };
         } else if (i === index + 1 && !set.isCompleted) {
           // Prefill next set with current set's values (only if not already completed)
           const shouldPrefillWeight = set.weight === null;
@@ -278,6 +292,7 @@ export function SetTracker({
       {sets.map((set, index) => {
         const isActive = index === activeSetIndex;
         const isCompleted = set.isCompleted;
+        const isReadOnly = set.isCompleted && !allowEditingCompleted && !set.isWarmup;
         const isFuture = index > activeSetIndex && activeSetIndex !== -1;
 
         return (
@@ -299,7 +314,7 @@ export function SetTracker({
             >
               <Pressable
                 onPress={() => adjustWeight(index, -2.5)}
-                disabled={isCompleted}
+                disabled={isReadOnly}
                 testID={`weight-minus-${set.setNumber}`}
                 className="h-8 w-8 rounded items-center justify-center"
                 style={[
@@ -316,7 +331,7 @@ export function SetTracker({
               </Pressable>
               <Pressable
                 onPress={() => adjustWeight(index, 2.5)}
-                disabled={isCompleted}
+                disabled={isReadOnly}
                 testID={`weight-plus-${set.setNumber}`}
                 className="h-8 w-8 rounded items-center justify-center"
                 style={[
@@ -340,8 +355,8 @@ export function SetTracker({
                 onChangeText={(text) => updateWeight(index, text)}
                 placeholder="-"
                 placeholderTextColor={isActive ? "#ffffff33" : "#ffffff20"}
-                keyboardType="decimal-pad"
-                editable={!isCompleted}
+                keyboardType="numeric"
+                editable={!isReadOnly}
                 testID={`weight-input-${set.setNumber}`}
                 maxLength={maxWeightInputLength}
                 className="rounded border text-center font-medium p-0"
@@ -361,7 +376,7 @@ export function SetTracker({
             >
               <Pressable
                 onPress={() => adjustReps(index, -1)}
-                disabled={isCompleted}
+                disabled={isReadOnly}
                 testID={`reps-minus-${set.setNumber}`}
                 className="h-8 w-8 rounded items-center justify-center"
                 style={[
@@ -378,7 +393,7 @@ export function SetTracker({
               </Pressable>
               <Pressable
                 onPress={() => adjustReps(index, 1)}
-                disabled={isCompleted}
+                disabled={isReadOnly}
                 testID={`reps-plus-${set.setNumber}`}
                 className="h-8 w-8 rounded items-center justify-center"
                 style={[
@@ -406,7 +421,7 @@ export function SetTracker({
                 placeholder="-"
                 placeholderTextColor={isActive ? "#ffffff33" : "#ffffff20"}
                 keyboardType="number-pad"
-                editable={!isCompleted}
+                editable={!isReadOnly}
                 testID={`reps-input-${set.setNumber}`}
                 maxLength={2}
                 className="rounded border text-center font-medium p-0"
