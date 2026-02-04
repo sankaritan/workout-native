@@ -137,7 +137,12 @@ export default function TestScreen() {
       setSuccessMessage("✓ Backup exported successfully!");
     } catch (error) {
       console.error("Failed to export backup:", error);
-      Alert.alert("Error", `Failed to export backup: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      // Don't show alert if user just cancelled the share dialog
+      if (!errorMessage.includes("cancelled") && !errorMessage.includes("canceled")) {
+        Alert.alert("Error", `Failed to export backup: ${errorMessage}`);
+      }
     } finally {
       setIsProcessing(false);
       console.log("Export process finished");
@@ -176,7 +181,11 @@ export default function TestScreen() {
             } catch (error) {
               console.error("Failed to import backup:", error);
               const errorMessage = error instanceof Error ? error.message : String(error);
-              Alert.alert("Import Failed", errorMessage);
+              
+              // Don't show alert if user just cancelled the file picker
+              if (!errorMessage.includes("cancelled") && !errorMessage.includes("canceled")) {
+                Alert.alert("Import Failed", errorMessage);
+              }
             } finally {
               setIsProcessing(false);
               console.log("Import process finished");

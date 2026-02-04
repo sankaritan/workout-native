@@ -3,6 +3,11 @@ import { render, screen, fireEvent, waitFor, act } from "@testing-library/react-
 import HistoryScreen from "@/app/(tabs)/history";
 import * as storage from "@/lib/storage/storage";
 
+// Mock expo-router
+jest.mock("expo-router", () => ({
+  useFocusEffect: jest.fn(),
+}));
+
 // Mock the storage module
 jest.mock("@/lib/storage/storage", () => ({
   initStorage: jest.fn(),

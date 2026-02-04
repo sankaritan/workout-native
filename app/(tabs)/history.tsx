@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useFocusEffect } from "expo-router";
 import { CancelButton } from "@/components/CancelButton";
 import { Calendar } from "@/components/Calendar";
 import {
@@ -130,13 +131,7 @@ export default function HistoryScreen() {
   const month = currentDate?.getMonth() ?? new Date().getMonth();
 
   // Load completed sessions for current month
-  useEffect(() => {
-    if (currentDate) {
-      loadCompletedSessions();
-    }
-  }, [year, month, currentDate]);
-
-  async function loadCompletedSessions() {
+  const loadCompletedSessions = React.useCallback(async () => {
     if (!currentDate) return;
     
     try {
@@ -144,9 +139,12 @@ export default function HistoryScreen() {
         await initStorage();
       }
 
+      const sessionYear = currentDate.getFullYear();
+      const sessionMonth = currentDate.getMonth();
+
       // Get start and end of current month
-      const startDate = new Date(year, month, 1);
-      const endDate = new Date(year, month + 1, 0, 23, 59, 59);
+      const startDate = new Date(sessionYear, sessionMonth, 1);
+      const endDate = new Date(sessionYear, sessionMonth + 1, 0, 23, 59, 59);
 
       const sessions = getCompletedSessionsByDateRange(
         startDate.toISOString(),
@@ -166,7 +164,23 @@ export default function HistoryScreen() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [currentDate]);
+
+  // Load data on mount and when month changes
+  useEffect(() => {
+    if (currentDate) {
+      loadCompletedSessions();
+    }
+  }, [currentDate, loadCompletedSessions]);
+
+  // Reload data when screen comes into focus (e.g., after importing data)
+  useFocusEffect(
+    React.useCallback(() => {
+      if (currentDate) {
+        loadCompletedSessions();
+      }
+    }, [currentDate, loadCompletedSessions])
+  );
 
   // Navigate to previous month
   function goToPreviousMonth() {

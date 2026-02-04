@@ -36,7 +36,14 @@ async function pickFileOnWeb(): Promise<string> {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".json,application/json";
+    
+    let isHandled = false; // Flag to prevent multiple resolutions
+    
+    // Handle file selection
     input.onchange = async () => {
+      if (isHandled) return;
+      isHandled = true;
+      
       const file = input.files?.[0];
       if (!file) return reject(new Error("No file selected"));
       try {
@@ -46,6 +53,30 @@ async function pickFileOnWeb(): Promise<string> {
         reject(err);
       }
     };
+    
+    // Handle cancellation - when user closes the file picker without selecting a file
+    // The 'cancel' event fires when the dialog is dismissed
+    input.oncancel = () => {
+      if (isHandled) return;
+      isHandled = true;
+      reject(new Error("File selection cancelled"));
+    };
+    
+    // Fallback: detect when focus returns to window without a file selected
+    // This handles cases where oncancel might not fire on all browsers
+    const handleFocus = () => {
+      // Use setTimeout to allow onchange to fire first if a file was selected
+      setTimeout(() => {
+        if (isHandled) return; // Already handled by onchange
+        if (!input.files || input.files.length === 0) {
+          isHandled = true;
+          reject(new Error("File selection cancelled"));
+        }
+      }, 300);
+    };
+    
+    window.addEventListener("focus", handleFocus, { once: true });
+    
     input.click();
   });
 }
