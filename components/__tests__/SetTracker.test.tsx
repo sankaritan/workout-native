@@ -79,6 +79,24 @@ describe("SetTracker", () => {
     expect(weightInput.props.value).toBe("135");
   });
 
+  it("keeps decimal weight input text", () => {
+    render(
+      <SetTracker
+        targetSets={3}
+        targetReps={10}
+        onSetsChange={mockOnSetsChange}
+      />,
+    );
+
+    const weightInput = screen.getByTestId("weight-input-1");
+    fireEvent.changeText(weightInput, "10.5");
+
+    expect(weightInput.props.value).toBe("10.5");
+    const lastCall =
+      mockOnSetsChange.mock.calls[mockOnSetsChange.mock.calls.length - 1][0];
+    expect(lastCall[0].weight).toBe(10.5);
+  });
+
   it("allows reps input", () => {
     render(
       <SetTracker
