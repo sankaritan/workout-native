@@ -335,7 +335,7 @@ export default function WorkoutDetailScreen() {
                           <Text className="text-white font-bold text-lg">
                             {session.name}
                           </Text>
-                          {isNext && !isCompleted && (
+                          {isNext && (
                             <View className="bg-primary/20 px-2 py-1 rounded">
                               <Text className="text-primary text-xs font-bold">
                                 NEXT
