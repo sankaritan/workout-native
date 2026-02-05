@@ -16,9 +16,11 @@ import {
   getInProgressSessionByPlanId,
   hasAnyCompletedSets,
   isStorageInitialized,
+  getLatestCompletedSessionByTemplateId,
 } from "@/lib/storage/storage";
 import type { WorkoutPlan, WorkoutSessionTemplate, WorkoutSessionCompleted } from "@/lib/storage/types";
 import { cn } from "@/lib/utils/cn";
+import { formatLastWorkoutDate } from "@/lib/utils/date";
 
 export default function WorkoutDetailScreen() {
   const insets = useSafeAreaInsets();
@@ -134,6 +136,12 @@ export default function WorkoutDetailScreen() {
     return completedSessions.some(
       s => s.session_template_id === sessionId && s.completed_at !== null
     );
+  };
+
+  // Get the last completed date for a session
+  const getLastCompletedDate = (sessionId: number): string | null => {
+    const lastCompleted = getLatestCompletedSessionByTemplateId(sessionId);
+    return lastCompleted?.completed_at || null;
   };
 
   // Calculate current week
@@ -257,12 +265,20 @@ export default function WorkoutDetailScreen() {
                       : "Next Up"}
                   </Text>
                 </View>
-                {isSessionCompleted(nextSession.id) && !inProgressSession && (
-                  <View className="flex-row items-center gap-1">
-                    <MaterialIcons name="check-circle" size={16} color="#13ec6d" />
-                    <Text className="text-primary text-xs">Done before</Text>
-                  </View>
-                )}
+                {(() => {
+                  const lastCompletedDate = getLastCompletedDate(nextSession.id);
+                  if (lastCompletedDate && !inProgressSession) {
+                    return (
+                      <View className="flex-row items-center gap-1">
+                        <MaterialIcons name="check-circle" size={16} color="#13ec6d" />
+                        <Text className="text-primary text-xs">
+                          Last workout: {formatLastWorkoutDate(lastCompletedDate)}
+                        </Text>
+                      </View>
+                    );
+                  }
+                  return null;
+                })()}
               </View>
 
               <Text className="text-xl font-bold text-white mb-2">
@@ -319,9 +335,6 @@ export default function WorkoutDetailScreen() {
                           <Text className="text-white font-bold text-lg">
                             {session.name}
                           </Text>
-                          {isCompleted && (
-                            <MaterialIcons name="check-circle" size={20} color="#13ec6d" />
-                          )}
                           {isNext && !isCompleted && (
                             <View className="bg-primary/20 px-2 py-1 rounded">
                               <Text className="text-primary text-xs font-bold">
@@ -333,6 +346,20 @@ export default function WorkoutDetailScreen() {
                         <Text className="text-text-muted text-sm">
                           Session {session.sequence_order} • {session.estimated_duration_minutes} min
                         </Text>
+                        {(() => {
+                          const lastCompletedDate = getLastCompletedDate(session.id);
+                          if (lastCompletedDate) {
+                            return (
+                              <View className="flex-row items-center gap-1 mt-1">
+                                <MaterialIcons name="check-circle" size={16} color="#13ec6d" />
+                                <Text className="text-primary text-xs">
+                                  Last workout: {formatLastWorkoutDate(lastCompletedDate)}
+                                </Text>
+                              </View>
+                            );
+                          }
+                          return null;
+                        })()}
                       </View>
                       <MaterialIcons
                         name="chevron-right"

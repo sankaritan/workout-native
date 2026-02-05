@@ -7,6 +7,7 @@ import {
   getFirstDayOfMonth,
   formatDateKey,
   parseISOToDateKey,
+  formatLastWorkoutDate,
 } from "../date";
 
 describe("date utilities", () => {
@@ -96,6 +97,41 @@ describe("date utilities", () => {
 
     it("should parse simple date string", () => {
       expect(parseISOToDateKey("2024-03-10")).toBe("2024-03-10");
+    });
+  });
+
+  describe("formatLastWorkoutDate", () => {
+    it("should format date as 'Month Day'", () => {
+      expect(formatLastWorkoutDate("2024-05-05T10:30:00.000Z")).toMatch(/^[A-Z][a-z]{2} \d{1,2}$/);
+    });
+
+    it("should format May 5 correctly", () => {
+      // Using UTC to avoid timezone issues
+      const date = new Date("2024-05-05T12:00:00.000Z");
+      const isoString = date.toISOString();
+      const result = formatLastWorkoutDate(isoString);
+      expect(result).toBe("May 5");
+    });
+
+    it("should format December 25 correctly", () => {
+      const date = new Date("2024-12-25T12:00:00.000Z");
+      const isoString = date.toISOString();
+      const result = formatLastWorkoutDate(isoString);
+      expect(result).toBe("Dec 25");
+    });
+
+    it("should format January 1 correctly", () => {
+      const date = new Date("2024-01-01T12:00:00.000Z");
+      const isoString = date.toISOString();
+      const result = formatLastWorkoutDate(isoString);
+      expect(result).toBe("Jan 1");
+    });
+
+    it("should handle single digit days without zero padding", () => {
+      const date = new Date("2024-03-09T12:00:00.000Z");
+      const isoString = date.toISOString();
+      const result = formatLastWorkoutDate(isoString);
+      expect(result).toBe("Mar 9");
     });
   });
 });
