@@ -43,3 +43,15 @@ export function parseISOToDateKey(isoString: string): string {
   const date = new Date(isoString);
   return formatDateKey(date);
 }
+
+/**
+ * Format a date as "Month Day" (e.g., "May 5", "Dec 25")
+ * @param isoString - ISO format date string
+ * @returns Formatted date string
+ */
+export function formatLastWorkoutDate(isoString: string): string {
+  const date = new Date(isoString);
+  const month = date.toLocaleDateString('en-US', { month: 'short' });
+  const day = date.getDate();
+  return `${month} ${day}`;
+}
