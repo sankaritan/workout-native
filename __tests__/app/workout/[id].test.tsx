@@ -51,9 +51,12 @@ describe("WorkoutDetailScreen - Next Label on All Sessions", () => {
   const mockPlan: WorkoutPlan = {
     id: 1,
     name: "Test Workout Plan",
+    description: null,
     weekly_frequency: 3,
     duration_weeks: 4,
+    estimated_duration_minutes: null,
     created_at: new Date().toISOString(),
+    is_active: true,
   };
 
   const mockSessions: WorkoutSessionTemplate[] = [
@@ -62,24 +65,24 @@ describe("WorkoutDetailScreen - Next Label on All Sessions", () => {
       workout_plan_id: 1,
       name: "Session 1",
       sequence_order: 1,
+      target_muscle_groups: JSON.stringify(["Chest", "Shoulders"]),
       estimated_duration_minutes: 45,
-      created_at: new Date().toISOString(),
     },
     {
       id: 2,
       workout_plan_id: 1,
       name: "Session 2",
       sequence_order: 2,
+      target_muscle_groups: JSON.stringify(["Back", "Arms"]),
       estimated_duration_minutes: 50,
-      created_at: new Date().toISOString(),
     },
     {
       id: 3,
       workout_plan_id: 1,
       name: "Session 3",
       sequence_order: 3,
+      target_muscle_groups: JSON.stringify(["Legs", "Core"]),
       estimated_duration_minutes: 40,
-      created_at: new Date().toISOString(),
     },
   ];
 
@@ -110,6 +113,7 @@ describe("WorkoutDetailScreen - Next Label on All Sessions", () => {
         workout_plan_id: 1,
         started_at: new Date().toISOString(),
         completed_at: new Date().toISOString(),
+        notes: null,
       },
     ];
     mockGetCompletedSessionsByPlanId.mockReturnValue(completedSessions);
@@ -135,6 +139,7 @@ describe("WorkoutDetailScreen - Next Label on All Sessions", () => {
         workout_plan_id: 1,
         started_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
         completed_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        notes: null,
       },
       {
         id: 101,
@@ -142,6 +147,7 @@ describe("WorkoutDetailScreen - Next Label on All Sessions", () => {
         workout_plan_id: 1,
         started_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
         completed_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        notes: null,
       },
       {
         id: 102,
@@ -149,6 +155,7 @@ describe("WorkoutDetailScreen - Next Label on All Sessions", () => {
         workout_plan_id: 1,
         started_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
         completed_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        notes: null,
       },
     ];
     mockGetCompletedSessionsByPlanId.mockReturnValue(completedSessions);
