@@ -22,7 +22,9 @@ jest.mock("@/lib/storage/storage", () => ({
   deleteCompletedSetsBySessionId: jest.fn(),
   getWorkoutPlanById: jest.fn(),
   getInProgressSessionByTemplateId: jest.fn(),
-  getLatestCompletedSessionByTemplateId: jest.fn(),
+  getCompletedSessionsByPlanId: jest.fn(),
+  getCompletedSessionForTemplateWeek: jest.fn(),
+  getCompletionCountForTemplate: jest.fn(),
   getCompletedSetsBySessionId: jest.fn(),
 }));
 
@@ -59,8 +61,11 @@ import {
   updateCompletedSession,
   insertCompletedSet,
   deleteCompletedSetsBySessionId,
+  getWorkoutPlanById,
   getInProgressSessionByTemplateId,
-  getLatestCompletedSessionByTemplateId,
+  getCompletedSessionsByPlanId,
+  getCompletedSessionForTemplateWeek,
+  getCompletionCountForTemplate,
   getCompletedSetsBySessionId,
 } from "@/lib/storage/storage";
 import { showAlert } from "@/lib/utils/alert";
@@ -111,6 +116,17 @@ const mockSession = {
   ],
 };
 
+const mockPlan = {
+  id: 1,
+  name: "Test Plan",
+  description: null,
+  weekly_frequency: 2,
+  duration_weeks: 8,
+  estimated_duration_minutes: 45,
+  created_at: "2025-02-01T00:00:00.000Z",
+  is_active: true,
+};
+
 describe("WorkoutSessionScreen", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -121,7 +137,10 @@ describe("WorkoutSessionScreen", () => {
     });
     (insertCompletedSession as jest.Mock).mockReturnValue(1);
     (getInProgressSessionByTemplateId as jest.Mock).mockReturnValue(null);
-    (getLatestCompletedSessionByTemplateId as jest.Mock).mockReturnValue(null);
+    (getWorkoutPlanById as jest.Mock).mockReturnValue(mockPlan);
+    (getCompletedSessionsByPlanId as jest.Mock).mockReturnValue([]);
+    (getCompletionCountForTemplate as jest.Mock).mockReturnValue(0);
+    (getCompletedSessionForTemplateWeek as jest.Mock).mockReturnValue(null);
     (getCompletedSetsBySessionId as jest.Mock).mockReturnValue([]);
     (deleteCompletedSetsBySessionId as jest.Mock).mockReturnValue(undefined);
     mockAlertCallback = null;
@@ -188,7 +207,7 @@ describe("WorkoutSessionScreen", () => {
     });
   });
 
-  it("loads latest completed session sets when no in-progress session", async () => {
+  it("loads completed session sets for current week", async () => {
     (getLastCompletedSetForExercise as jest.Mock).mockReturnValue(null);
     const completedSession = {
       id: 5,
@@ -198,9 +217,9 @@ describe("WorkoutSessionScreen", () => {
       completed_at: "2025-02-01T09:00:00.000Z",
       notes: null,
     };
-    (getLatestCompletedSessionByTemplateId as jest.Mock).mockReturnValue(
-      completedSession
-    );
+    (getCompletedSessionsByPlanId as jest.Mock).mockReturnValue([completedSession]);
+    (getCompletionCountForTemplate as jest.Mock).mockReturnValue(1);
+    (getCompletedSessionForTemplateWeek as jest.Mock).mockReturnValue(completedSession);
     (getCompletedSetsBySessionId as jest.Mock).mockReturnValue([
       {
         id: 1,
@@ -237,7 +256,44 @@ describe("WorkoutSessionScreen", () => {
     expect(screen.getByTestId("reps-input-2").props.value).toBe("6");
 
     fireEvent.changeText(screen.getByTestId("weight-input-1"), "130");
-    expect(screen.getByTestId("weight-input-1").props.value).toBe("130");
+    expect(screen.getByTestId("weight-input-1").props.value).toBe("120");
+  });
+
+  it("creates new session when template completed in prior week only", async () => {
+    const week1Completion = {
+      id: 10,
+      workout_plan_id: 1,
+      session_template_id: 1,
+      started_at: "2025-02-01T08:00:00.000Z",
+      completed_at: "2025-02-01T09:00:00.000Z",
+      notes: null,
+    };
+    const week2OtherSession = {
+      id: 11,
+      workout_plan_id: 1,
+      session_template_id: 2,
+      started_at: "2025-02-03T08:00:00.000Z",
+      completed_at: "2025-02-03T09:00:00.000Z",
+      notes: null,
+    };
+    (getCompletedSessionsByPlanId as jest.Mock).mockReturnValue([
+      week1Completion,
+      week2OtherSession,
+    ]);
+    (getCompletionCountForTemplate as jest.Mock).mockReturnValue(1);
+    (getCompletedSessionForTemplateWeek as jest.Mock).mockReturnValue(null);
+
+    render(<WorkoutSessionScreen />);
+
+    await waitFor(() => {
+      expect(insertCompletedSession).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workout_plan_id: 1,
+          session_template_id: 1,
+          completed_at: null,
+        })
+      );
+    });
   });
 
   it("navigates to next exercise", async () => {

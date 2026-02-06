@@ -18,10 +18,12 @@ import {
   updateCompletedSession,
   insertCompletedSet,
   deleteCompletedSetsBySessionId,
-  getWorkoutPlanById,
   getInProgressSessionByTemplateId,
-  getLatestCompletedSessionByTemplateId,
   getCompletedSetsBySessionId,
+  getCompletedSessionsByPlanId,
+  getCompletedSessionForTemplateWeek,
+  getCompletionCountForTemplate,
+  getWorkoutPlanById,
   type SessionWithExercises,
 } from "@/lib/storage/storage";
 import { cn } from "@/lib/utils/cn";
@@ -39,7 +41,6 @@ export default function WorkoutSessionScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [workoutPlanId, setWorkoutPlanId] = useState<number | null>(null);
   const [isViewingCompletedSession, setIsViewingCompletedSession] = useState(false);
-  const [completedSessionCompletedAt, setCompletedSessionCompletedAt] = useState<string | null>(null);
 
   // Get current exercise data (with fallback)
   const currentExercise = session?.exercises[currentExerciseIndex];
@@ -91,6 +92,14 @@ export default function WorkoutSessionScreen() {
    * Handle back/pause - exit without finishing
    */
   const handleBack = useCallback(() => {
+    if (isViewingCompletedSession) {
+      if (workoutPlanId) {
+        router.replace(`/workout/${workoutPlanId}`);
+      } else {
+        router.replace("/(tabs)");
+      }
+      return;
+    }
     showAlert(
       "Pause Workout",
       "Your progress will be saved and you can resume later.",
@@ -151,13 +160,15 @@ export default function WorkoutSessionScreen() {
     completedSessionId,
     workoutPlanId,
     isViewingCompletedSession,
-    completedSessionCompletedAt,
   ]);
 
   /**
    * Finish workout and save all data
    */
   const handleFinish = useCallback(() => {
+    if (isViewingCompletedSession) {
+      return;
+    }
     showAlert(
       "Finish Workout",
       "Are you sure you want to finish this workout?",
@@ -196,12 +207,9 @@ export default function WorkoutSessionScreen() {
                });
 
               // Mark session as completed
-              if (completedSessionId) {
-                const completedAt = isViewingCompletedSession
-                  ? completedSessionCompletedAt ?? now
-                  : now;
-                updateCompletedSession(completedSessionId, completedAt);
-              }
+               if (completedSessionId) {
+                 updateCompletedSession(completedSessionId, now);
+               }
 
               // Navigate back to the workout plan view
               if (workoutPlanId) {
@@ -239,12 +247,9 @@ export default function WorkoutSessionScreen() {
 
       let sessionId: number;
       let viewingCompletedSession = false;
-      let existingSessionCompletedAt: string | null = null;
       if (existingSession) {
         // Continue existing session
         sessionId = existingSession.id;
-        existingSessionCompletedAt = existingSession.completed_at;
-
         // Load existing sets from the in-progress session
         const existingSets = getCompletedSetsBySessionId(sessionId);
         if (existingSets.length > 0) {
@@ -270,40 +275,64 @@ export default function WorkoutSessionScreen() {
           setExerciseSets(setsByExercise);
         }
       } else {
-        const latestCompletedSession = getLatestCompletedSessionByTemplateId(
-          sessionTemplateId
-        );
-        if (latestCompletedSession) {
-          sessionId = latestCompletedSession.id;
-          viewingCompletedSession = true;
-          existingSessionCompletedAt = latestCompletedSession.completed_at;
+        const planId = sessionData.workout_plan_id;
+        const planCompletedSessions = getCompletedSessionsByPlanId(planId);
+        const completedCount = planCompletedSessions.filter(
+          (s) => s.completed_at !== null
+        ).length;
+        const plan = getWorkoutPlanById(planId);
+        const weeklyFrequency = plan?.weekly_frequency ?? 1;
+        const durationWeeks = plan?.duration_weeks ?? 1;
+        const calculatedWeek = Math.floor(completedCount / weeklyFrequency) + 1;
+        const currentWeek = Math.min(calculatedWeek, durationWeeks);
 
-          const existingSets = getCompletedSetsBySessionId(sessionId);
-          if (existingSets.length > 0) {
-            const setsByExercise = new Map<number, SetData[]>();
-            existingSets.forEach((set) => {
-              if (!setsByExercise.has(set.exercise_id)) {
-                setsByExercise.set(set.exercise_id, []);
-              }
-              const exerciseSet = setsByExercise.get(set.exercise_id)!;
-              exerciseSet.push({
-                setNumber: set.set_number,
-                weight: set.weight,
-                reps: set.reps,
-                isCompleted: true,
-                isWarmup: set.is_warmup,
-                completedAt: set.completed_at,
+        const templateCompletionCount = getCompletionCountForTemplate(sessionTemplateId);
+        const completedThisWeek = templateCompletionCount >= currentWeek;
+
+        if (completedThisWeek) {
+          const completedSessionForWeek = getCompletedSessionForTemplateWeek(
+            sessionTemplateId,
+            currentWeek
+          );
+          if (completedSessionForWeek) {
+            sessionId = completedSessionForWeek.id;
+            viewingCompletedSession = true;
+
+            const existingSets = getCompletedSetsBySessionId(sessionId);
+            if (existingSets.length > 0) {
+              const setsByExercise = new Map<number, SetData[]>();
+              existingSets.forEach((set) => {
+                if (!setsByExercise.has(set.exercise_id)) {
+                  setsByExercise.set(set.exercise_id, []);
+                }
+                const exerciseSet = setsByExercise.get(set.exercise_id)!;
+                exerciseSet.push({
+                  setNumber: set.set_number,
+                  weight: set.weight,
+                  reps: set.reps,
+                  isCompleted: true,
+                  isWarmup: set.is_warmup,
+                  completedAt: set.completed_at,
+                });
               });
+              setsByExercise.forEach((sets) => {
+                sets.sort((a, b) => a.setNumber - b.setNumber);
+              });
+              setExerciseSets(setsByExercise);
+            }
+          } else {
+            const now = new Date().toISOString();
+            sessionId = insertCompletedSession({
+              workout_plan_id: planId,
+              session_template_id: sessionTemplateId,
+              started_at: now,
+              completed_at: null,
+              notes: null,
             });
-            setsByExercise.forEach((sets) => {
-              sets.sort((a, b) => a.setNumber - b.setNumber);
-            });
-            setExerciseSets(setsByExercise);
           }
         } else {
-          // Create new completed session record
+          // Create new completed session record for the current week
           const now = new Date().toISOString();
-          const planId = sessionData.workout_plan_id;
           sessionId = insertCompletedSession({
             workout_plan_id: planId,
             session_template_id: sessionTemplateId,
@@ -315,11 +344,6 @@ export default function WorkoutSessionScreen() {
       }
 
       setCompletedSessionId(sessionId);
-      if (viewingCompletedSession && existingSessionCompletedAt) {
-        setCompletedSessionCompletedAt(existingSessionCompletedAt);
-      } else {
-        setCompletedSessionCompletedAt(null);
-      }
       setIsViewingCompletedSession(viewingCompletedSession);
       setIsLoading(false);
     } catch (error) {
@@ -368,12 +392,25 @@ export default function WorkoutSessionScreen() {
 
           <Pressable
             onPress={handleFinish}
+            disabled={isViewingCompletedSession}
             testID="finish-button"
             accessibilityRole="button"
             accessibilityLabel="Finish workout"
-            className="bg-primary/10 active:bg-primary/20 px-4 py-2 rounded-lg"
+            className={cn(
+              "px-4 py-2 rounded-lg",
+              isViewingCompletedSession
+                ? "bg-white/5"
+                : "bg-primary/10 active:bg-primary/20"
+            )}
           >
-            <Text className="text-primary text-sm font-bold">Finish</Text>
+            <Text
+              className={cn(
+                "text-sm font-bold",
+                isViewingCompletedSession ? "text-text-muted" : "text-primary"
+              )}
+            >
+              Finish
+            </Text>
           </Pressable>
         </View>
       </View>
@@ -470,7 +507,6 @@ export default function WorkoutSessionScreen() {
           previousWeight={previousSet?.weight}
           previousReps={previousSet?.reps}
           initialSets={exerciseSets.get(currentExercise.exercise_id)}
-          allowEditingCompleted={isViewingCompletedSession}
           onSetsChange={handleSetsChange}
           testID="set-tracker"
         />

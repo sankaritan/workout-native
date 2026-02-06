@@ -356,6 +356,32 @@ export function getCompletedSessionById(id: number): WorkoutSessionCompleted | n
   return cache.completedSessions.find((s) => s.id === id) ?? null;
 }
 
+/**
+ * Count completed sessions for a specific session template
+ */
+export function getCompletionCountForTemplate(sessionTemplateId: number): number {
+  ensureInitialized();
+  return cache.completedSessions.filter(
+    (s) => s.session_template_id === sessionTemplateId && s.completed_at !== null
+  ).length;
+}
+
+/**
+ * Get completed session for a template by week number (1-based)
+ * Week number corresponds to the Nth completion of the template
+ */
+export function getCompletedSessionForTemplateWeek(
+  sessionTemplateId: number,
+  weekNumber: number
+): WorkoutSessionCompleted | null {
+  ensureInitialized();
+  if (weekNumber < 1) return null;
+  const completedSessions = cache.completedSessions
+    .filter((s) => s.session_template_id === sessionTemplateId && s.completed_at !== null)
+    .sort((a, b) => new Date(a.completed_at!).getTime() - new Date(b.completed_at!).getTime());
+  return completedSessions[weekNumber - 1] ?? null;
+}
+
 export function getCompletedSessionsByDateRange(
   startDate: string,
   endDate: string
