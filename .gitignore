@@ -53,3 +53,6 @@ terraform/terraform.tfvars
 
 # editor history (VSCode Local History, etc.)
 .history/
+
+# coverage report
+coverage/

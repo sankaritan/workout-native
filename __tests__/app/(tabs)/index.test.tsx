@@ -24,7 +24,46 @@ jest.mock("@expo/vector-icons", () => ({
   MaterialIcons: "MaterialIcons",
 }));
 
+jest.mock("react-native-svg", () => ({
+  __esModule: true,
+  default: "Svg",
+  Circle: "Circle",
+  Path: "Path",
+}));
+
+jest.mock("@/components/EmptyStateDashboard", () => {
+  const React = require("react");
+  const { Text, Pressable } = require("react-native");
+  return function EmptyStateDashboardMock() {
+    return (
+      <>
+        <Text>Let's create</Text>
+        <Text>Generate Your First Plan</Text>
+        <Text>Tell us about your fitness goals</Text>
+        <Pressable testID="generate-plan-button" />
+      </>
+    );
+  };
+});
+
+jest.mock("@/components/PlansListDashboard", () => {
+  const React = require("react");
+  const { Text } = require("react-native");
+  return function PlansListDashboardMock() {
+    return (
+      <>
+        <Text>Your workout plans</Text>
+        <Text>Balanced 4x/week</Text>
+        <Text>Barbell, Dumbbell</Text>
+        <Text>Next up: Upper Body A</Text>
+        <Text>Generate new workout plan</Text>
+      </>
+    );
+  };
+});
+
 describe("HomeScreen", () => {
+  const renderHome = () => render(<HomeScreen />);
   beforeEach(() => {
     jest.clearAllMocks();
     (storage.isStorageInitialized as jest.Mock).mockReturnValue(true);
@@ -36,7 +75,7 @@ describe("HomeScreen", () => {
     });
 
     it("renders empty state when no active plan", async () => {
-      render(<HomeScreen />);
+      renderHome();
 
       await waitFor(() => {
         expect(screen.getByText(/Let's create/)).toBeTruthy();
@@ -45,7 +84,7 @@ describe("HomeScreen", () => {
     });
 
     it("shows generate plan button", async () => {
-      render(<HomeScreen />);
+      renderHome();
 
       await waitFor(() => {
         expect(screen.getByTestId("generate-plan-button")).toBeTruthy();
@@ -53,7 +92,7 @@ describe("HomeScreen", () => {
     });
 
     it("displays empty state description", async () => {
-      render(<HomeScreen />);
+      renderHome();
 
       await waitFor(() => {
         expect(
@@ -114,7 +153,7 @@ describe("HomeScreen", () => {
     });
 
     it("renders plans list when plans exist", async () => {
-      render(<HomeScreen />);
+      renderHome();
 
       await waitFor(() => {
         expect(screen.getByText("Your workout plans")).toBeTruthy();
@@ -122,7 +161,7 @@ describe("HomeScreen", () => {
     });
 
     it("shows plan card with correct title format", async () => {
-      render(<HomeScreen />);
+      renderHome();
 
       await waitFor(() => {
         // Title should be "[Goal] [Frequency]" e.g., "Balanced 4x/week"
@@ -131,7 +170,7 @@ describe("HomeScreen", () => {
     });
 
     it("shows equipment in plan card", async () => {
-      render(<HomeScreen />);
+      renderHome();
 
       await waitFor(() => {
         expect(screen.getByText("Barbell, Dumbbell")).toBeTruthy();
@@ -139,7 +178,7 @@ describe("HomeScreen", () => {
     });
 
     it("shows next session in plan card", async () => {
-      render(<HomeScreen />);
+      renderHome();
 
       await waitFor(() => {
         expect(screen.getByText("Next up: Upper Body A")).toBeTruthy();
@@ -147,7 +186,7 @@ describe("HomeScreen", () => {
     });
 
     it("displays generate new plan button", async () => {
-      render(<HomeScreen />);
+      renderHome();
 
       await waitFor(() => {
         expect(screen.getByText("Generate new workout plan")).toBeTruthy();

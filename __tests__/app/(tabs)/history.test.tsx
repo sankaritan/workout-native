@@ -19,6 +19,25 @@ jest.mock("@/lib/storage/storage", () => ({
   getExerciseById: jest.fn(),
 }));
 
+jest.mock("@expo/vector-icons", () => ({
+  MaterialIcons: "MaterialIcons",
+}));
+
+jest.mock("@/components/CancelButton", () => {
+  const React = require("react");
+  const { Text } = require("react-native");
+  const Mock = () => <Text>Cancel</Text>;
+  return { __esModule: true, CancelButton: Mock };
+});
+
+const renderHistory = () => render(<HistoryScreen />);
+
+const flushHistoryUpdates = async () => {
+  await act(async () => {
+    await Promise.resolve();
+  });
+};
+
 // Helper to create mock sessions for the current month
 function createMockSessionsForCurrentMonth() {
   const now = new Date();
@@ -83,8 +102,9 @@ describe("HistoryScreen", () => {
 
   describe("Empty State", () => {
     it("shows empty state when no completed workouts", async () => {
-      render(<HistoryScreen />);
+      renderHistory();
 
+      await flushHistoryUpdates();
       await waitFor(() => {
         expect(screen.getByText("No Workout History")).toBeTruthy();
       });
@@ -105,7 +125,7 @@ describe("HistoryScreen", () => {
     });
 
     it("renders current month and year", async () => {
-      render(<HistoryScreen />);
+      renderHistory();
 
       const now = new Date();
       const monthNames = [
@@ -114,14 +134,16 @@ describe("HistoryScreen", () => {
       ];
       const expectedMonthYear = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
 
+      await flushHistoryUpdates();
       await waitFor(() => {
         expect(screen.getByText(expectedMonthYear)).toBeTruthy();
       });
     });
 
     it("shows workout count stats", async () => {
-      render(<HistoryScreen />);
+      renderHistory();
 
+      await flushHistoryUpdates();
       await waitFor(() => {
         expect(screen.getByText("Workouts")).toBeTruthy();
       });
@@ -132,8 +154,9 @@ describe("HistoryScreen", () => {
     });
 
     it("shows streak stats section", async () => {
-      render(<HistoryScreen />);
+      renderHistory();
 
+      await flushHistoryUpdates();
       await waitFor(() => {
         expect(screen.getByText("Streak")).toBeTruthy();
       });
@@ -142,8 +165,9 @@ describe("HistoryScreen", () => {
     });
 
     it("modal is not visible initially", async () => {
-      render(<HistoryScreen />);
+      renderHistory();
 
+      await flushHistoryUpdates();
       await waitFor(() => {
         expect(screen.getByText("History")).toBeTruthy();
       });
@@ -161,16 +185,18 @@ describe("HistoryScreen", () => {
     });
 
     it("calls getCompletedSessionsByDateRange on mount", async () => {
-      render(<HistoryScreen />);
+      renderHistory();
 
+      await flushHistoryUpdates();
       await waitFor(() => {
         expect(storage.getCompletedSessionsByDateRange).toHaveBeenCalled();
       });
     });
 
     it("fetches data with correct date range for current month", async () => {
-      render(<HistoryScreen />);
+      renderHistory();
 
+      await flushHistoryUpdates();
       await waitFor(() => {
         expect(storage.getCompletedSessionsByDateRange).toHaveBeenCalled();
       });
@@ -195,8 +221,9 @@ describe("HistoryScreen", () => {
       (storage.isStorageInitialized as jest.Mock).mockReturnValue(false);
       (storage.initStorage as jest.Mock).mockResolvedValue(undefined);
 
-      render(<HistoryScreen />);
+      renderHistory();
 
+      await flushHistoryUpdates();
       await waitFor(() => {
         expect(storage.initStorage).toHaveBeenCalled();
       });
@@ -205,8 +232,9 @@ describe("HistoryScreen", () => {
     it("does not initialize storage if already initialized", async () => {
       (storage.isStorageInitialized as jest.Mock).mockReturnValue(true);
 
-      render(<HistoryScreen />);
+      renderHistory();
 
+      await flushHistoryUpdates();
       await waitFor(() => {
         expect(screen.getByText("No Workout History")).toBeTruthy();
       });
@@ -223,8 +251,9 @@ describe("HistoryScreen", () => {
         throw new Error("Storage error");
       });
 
-      render(<HistoryScreen />);
+      renderHistory();
 
+      await flushHistoryUpdates();
       await waitFor(() => {
         expect(consoleError).toHaveBeenCalledWith(
           "Failed to load completed sessions:",
@@ -253,7 +282,7 @@ describe("HistoryScreen", () => {
       (storage.getAllCompletedSessions as jest.Mock).mockReturnValue(currentMonthSessions);
       (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue(currentMonthSessions);
 
-      render(<HistoryScreen />);
+      renderHistory();
 
       const monthNames = [
         "January", "February", "March", "April", "May", "June",
@@ -261,6 +290,7 @@ describe("HistoryScreen", () => {
       ];
       const expectedMonthYear = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
 
+      await flushHistoryUpdates();
       await waitFor(() => {
         expect(screen.getByText(expectedMonthYear)).toBeTruthy();
       });
@@ -282,8 +312,9 @@ describe("HistoryScreen", () => {
       (storage.getAllCompletedSessions as jest.Mock).mockReturnValue(currentMonthSessions);
       (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue(currentMonthSessions);
 
-      render(<HistoryScreen />);
+      renderHistory();
 
+      await flushHistoryUpdates();
       await waitFor(() => {
         expect(screen.getByText("History")).toBeTruthy();
       });
@@ -310,7 +341,7 @@ describe("HistoryScreen", () => {
       (storage.getAllCompletedSessions as jest.Mock).mockReturnValue(pastMonthSessions);
       (storage.getCompletedSessionsByDateRange as jest.Mock).mockReturnValue([]); // Current month has no data
 
-      render(<HistoryScreen />);
+      renderHistory();
 
       // Should show current month even though it has no data
       const monthNames = [
@@ -319,6 +350,7 @@ describe("HistoryScreen", () => {
       ];
       const expectedMonthYear = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
 
+      await flushHistoryUpdates();
       await waitFor(() => {
         expect(screen.getByText(expectedMonthYear)).toBeTruthy();
       });

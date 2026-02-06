@@ -16,11 +16,9 @@ import {
   getInProgressSessionByPlanId,
   hasAnyCompletedSets,
   isStorageInitialized,
-  getLatestCompletedSessionByTemplateId,
 } from "@/lib/storage/storage";
 import type { WorkoutPlan, WorkoutSessionTemplate, WorkoutSessionCompleted } from "@/lib/storage/types";
 import { cn } from "@/lib/utils/cn";
-import { formatLastWorkoutDate } from "@/lib/utils/date";
 
 export default function WorkoutDetailScreen() {
   const insets = useSafeAreaInsets();
@@ -105,6 +103,29 @@ export default function WorkoutDetailScreen() {
     return Math.round((completedCount / totalExpectedSessions) * 100);
   };
 
+  // Calculate current week
+  const getCurrentWeek = (): number => {
+    if (!plan || completedSessions.length === 0) return 1;
+
+    // Simple calculation: completed sessions / sessions per week
+    const completedCount = completedSessions.filter(s => s.completed_at !== null).length;
+    const currentWeek = Math.floor(completedCount / plan.weekly_frequency) + 1;
+
+    return Math.min(currentWeek, plan.duration_weeks);
+  };
+
+  const getTemplateCompletionCount = (sessionTemplateId: number): number => {
+    return completedSessions.filter(
+      s => s.session_template_id === sessionTemplateId && s.completed_at !== null
+    ).length;
+  };
+
+  // Check if a session has been completed for the current week
+  const isSessionCompleted = (sessionId: number): boolean => {
+    const currentWeek = getCurrentWeek();
+    return getTemplateCompletionCount(sessionId) >= currentWeek;
+  };
+
   // Determine next session to do
   const getNextSession = (): WorkoutSessionTemplate | null => {
     if (sessions.length === 0) return null;
@@ -115,44 +136,16 @@ export default function WorkoutDetailScreen() {
       if (inProgressTemplate) return inProgressTemplate;
     }
 
-    // Get completed session template IDs (only truly completed ones)
-    const completedTemplateIds = new Set(
-      completedSessions
-        .filter(s => s.completed_at !== null)
-        .map(s => s.session_template_id)
+    const currentWeek = getCurrentWeek();
+    const sortedSessions = [...sessions].sort((a, b) => a.sequence_order - b.sequence_order);
+
+    // Find first session that hasn't been completed for the current week
+    const nextSession = sortedSessions.find(
+      (s) => getTemplateCompletionCount(s.id) < currentWeek
     );
 
-    // Find first session that hasn't been completed yet (in sequence order)
-    const nextSession = sessions
-      .sort((a, b) => a.sequence_order - b.sequence_order)
-      .find(s => !completedTemplateIds.has(s.id));
-
-    // If all sessions completed at least once, return first session (cycle through)
-    return nextSession || sessions[0];
-  };
-
-  // Check if a session has been completed
-  const isSessionCompleted = (sessionId: number): boolean => {
-    return completedSessions.some(
-      s => s.session_template_id === sessionId && s.completed_at !== null
-    );
-  };
-
-  // Get the last completed date for a session
-  const getLastCompletedDate = (sessionId: number): string | null => {
-    const lastCompleted = getLatestCompletedSessionByTemplateId(sessionId);
-    return lastCompleted?.completed_at || null;
-  };
-
-  // Calculate current week
-  const getCurrentWeek = (): number => {
-    if (!plan || completedSessions.length === 0) return 1;
-
-    // Simple calculation: completed sessions / sessions per week
-    const completedCount = completedSessions.filter(s => s.completed_at !== null).length;
-    const currentWeek = Math.floor(completedCount / plan.weekly_frequency) + 1;
-
-    return Math.min(currentWeek, plan.duration_weeks);
+    // If all sessions completed for the week, return first session (cycle through)
+    return nextSession || sortedSessions[0];
   };
 
   // Get workout stats for this month
@@ -265,20 +258,12 @@ export default function WorkoutDetailScreen() {
                       : "Next Up"}
                   </Text>
                 </View>
-                {(() => {
-                  const lastCompletedDate = getLastCompletedDate(nextSession.id);
-                  if (lastCompletedDate && !inProgressSession) {
-                    return (
-                      <View className="flex-row items-center gap-1">
-                        <MaterialIcons name="check-circle" size={16} color="#13ec6d" />
-                        <Text className="text-primary text-xs">
-                          Last workout: {formatLastWorkoutDate(lastCompletedDate)}
-                        </Text>
-                      </View>
-                    );
-                  }
-                  return null;
-                })()}
+                {isSessionCompleted(nextSession.id) && !inProgressSession && (
+                  <View className="flex-row items-center gap-1">
+                    <MaterialIcons name="check-circle" size={16} color="#13ec6d" />
+                    <Text className="text-primary text-xs">Done this week</Text>
+                  </View>
+                )}
               </View>
 
               <Text className="text-xl font-bold text-white mb-2">
@@ -346,20 +331,12 @@ export default function WorkoutDetailScreen() {
                         <Text className="text-text-muted text-sm">
                           Session {session.sequence_order} • {session.estimated_duration_minutes} min
                         </Text>
-                        {(() => {
-                          const lastCompletedDate = getLastCompletedDate(session.id);
-                          if (lastCompletedDate) {
-                            return (
-                              <View className="flex-row items-center gap-1 mt-1">
-                                <MaterialIcons name="check-circle" size={16} color="#13ec6d" />
-                                <Text className="text-primary text-xs">
-                                  Last workout: {formatLastWorkoutDate(lastCompletedDate)}
-                                </Text>
-                              </View>
-                            );
-                          }
-                          return null;
-                        })()}
+                        {isCompleted && (
+                          <View className="flex-row items-center gap-1 mt-1">
+                            <MaterialIcons name="check-circle" size={16} color="#13ec6d" />
+                            <Text className="text-primary text-xs">Done this week</Text>
+                          </View>
+                        )}
                       </View>
                       <MaterialIcons
                         name="chevron-right"
