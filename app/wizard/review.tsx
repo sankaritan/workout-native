@@ -73,6 +73,14 @@ export default function PlanReviewScreen() {
     generateProgram();
   }, [customExercises, generatedProgram, initialGeneratedProgram, initialCustomExercises, frequency, equipment, focus, updateState]);
 
+  // Redirect to wizard start if no program is available
+  // This shouldn't happen in normal flow, but handle it gracefully
+  useEffect(() => {
+    if (!generatedProgram && !isGenerating && !error && !customExercises) {
+      router.replace("/wizard/frequency");
+    }
+  }, [generatedProgram, isGenerating, error, customExercises]);
+
   /**
    * Handle accept plan button press
    * Save the current (possibly modified) program and navigate to it
@@ -192,14 +200,6 @@ export default function PlanReviewScreen() {
       </View>
     );
   }
-
-  // Redirect to wizard start if no program is available
-  // This shouldn't happen in normal flow, but handle it gracefully
-  useEffect(() => {
-    if (!generatedProgram && !isGenerating && !error && !customExercises) {
-      router.replace("/wizard/frequency");
-    }
-  }, [generatedProgram, isGenerating, error, customExercises]);
 
   // Handle missing program - if we get here without a program, we're still generating or have an error
   // The redirect useEffect will handle the edge case where we truly have no program
