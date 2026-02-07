@@ -4,12 +4,11 @@
  */
 
 import React, { useState } from "react";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text } from "react-native";
 import { router } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SelectionCard } from "@/components/ui/SelectionCard";
-import { BackButton } from "@/components/BackButton";
 import { WizardContinueButton } from "@/components/ui/WizardContinueButton";
+import { WizardLayout } from "@/components/WizardLayout";
 import { useWizard } from "@/lib/wizard-context";
 
 // Frequency options based on mockup
@@ -21,7 +20,6 @@ const FREQUENCY_OPTIONS = [
 ];
 
 export default function FrequencyScreen() {
-  const insets = useSafeAreaInsets();
   const { state, updateState } = useWizard();
   const [selectedFrequency, setSelectedFrequency] = useState<number | undefined>(
     state.frequency
@@ -54,97 +52,41 @@ export default function FrequencyScreen() {
   const isContinueDisabled = !selectedFrequency;
 
   return (
-    <View className="flex-1 bg-background-dark w-full">
-      {/* Header */}
-      <View
-        className="flex-row items-center justify-between px-4 pb-4 bg-background-dark/95 w-full"
-        style={{ paddingTop: insets.top + 16 }}
-      >
-        {/* Back button */}
-        <BackButton onPress={handleBack} />
-
-        {/* Step indicator */}
-        <View className="flex-1 items-center">
-          <Text className="text-sm font-medium text-gray-400 uppercase tracking-wider">
-            Step 1 of 5
-          </Text>
-        </View>
-
-        {/* Empty space for balance */}
-        <View className="size-10" />
-      </View>
-
-      {/* Progress Bar - 1 of 5 filled */}
-      <View className="flex-row items-center justify-center gap-2 px-6 pb-2">
-        <View
-          testID="progress-step-1"
-          className="h-1.5 flex-1 rounded-full bg-primary shadow-[0_0_10px_rgba(19,236,109,0.5)]"
-        />
-        <View
-          testID="progress-step-2"
-          className="h-1.5 flex-1 rounded-full bg-surface-dark"
-        />
-        <View
-          testID="progress-step-3"
-          className="h-1.5 flex-1 rounded-full bg-surface-dark"
-        />
-        <View
-          testID="progress-step-4"
-          className="h-1.5 flex-1 rounded-full bg-surface-dark"
-        />
-        <View
-          testID="progress-step-5"
-          className="h-1.5 flex-1 rounded-full bg-surface-dark"
-        />
-      </View>
-
-      {/* Main Content */}
-      <ScrollView
-        className="flex-1 w-full"
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingTop: 16,
-          paddingBottom: 120 + insets.bottom,
-        }}
-      >
-        {/* Title and Subtitle */}
-        <View className="mb-8">
-          <Text className="text-3xl font-bold leading-tight tracking-tight mb-2 text-white">
-            How often do you want to workout?
-          </Text>
-          <Text className="text-base text-gray-400 font-normal leading-relaxed">
-            Choose a weekly goal that fits your schedule.
-          </Text>
-        </View>
-
-        {/* Frequency Options Grid */}
-        <View className="flex-row flex-wrap justify-between gap-y-4">
-          {FREQUENCY_OPTIONS.map((option) => (
-            <View key={option.value} style={{ width: "48%" }}>
-              <SelectionCard
-                label={option.label}
-                value={option.value.toString()}
-                subtitle="Days / Week"
-                icon={option.icon}
-                selected={selectedFrequency === option.value}
-                onPress={() => handleSelect(option.value)}
-                testID={`frequency-${option.value}`}
-              />
-            </View>
-          ))}
-        </View>
-      </ScrollView>
-
-      {/* Continue Button (Fixed at bottom) */}
-      <View
-        className="absolute bottom-0 left-0 right-0 px-4 bg-background-dark/95 pt-12 w-full"
-        style={{ paddingBottom: insets.bottom + 24 }}
-      >
+    <WizardLayout
+      step={1}
+      totalSteps={5}
+      onBack={handleBack}
+      bottomAction={(
         <WizardContinueButton
           onPress={handleContinue}
           disabled={isContinueDisabled}
         />
+      )}
+    >
+      <View className="mb-8">
+        <Text className="text-3xl font-bold leading-tight tracking-tight mb-2 text-white">
+          How often do you want to workout?
+        </Text>
+        <Text className="text-base text-gray-400 font-normal leading-relaxed">
+          Choose a weekly goal that fits your schedule.
+        </Text>
       </View>
-    </View>
+
+      <View className="flex-row flex-wrap justify-between gap-y-4">
+        {FREQUENCY_OPTIONS.map((option) => (
+          <View key={option.value} style={{ width: "48%" }}>
+            <SelectionCard
+              label={option.label}
+              value={option.value.toString()}
+              subtitle="Days / Week"
+              icon={option.icon}
+              selected={selectedFrequency === option.value}
+              onPress={() => handleSelect(option.value)}
+              testID={`frequency-${option.value}`}
+            />
+          </View>
+        ))}
+      </View>
+    </WizardLayout>
   );
 }

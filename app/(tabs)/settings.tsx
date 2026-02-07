@@ -1,6 +1,6 @@
 /**
- * Test/Development Screen
- * Provides utilities for testing and development
+ * Settings Screen
+ * Provides utilities for backup/restore and development
  */
 
 import { exportBackup } from "@/lib/backup/export";
@@ -14,13 +14,12 @@ import React, { useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function TestScreen() {
+export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const [isProcessing, setIsProcessing] = useState(false);
   const [planCount, setPlanCount] = useState(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Load current data stats
   const loadDataStats = () => {
     try {
       const plans = getAllWorkoutPlans();
@@ -34,7 +33,6 @@ export default function TestScreen() {
     loadDataStats();
   }, []);
 
-  // Reload stats when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
       loadDataStats();
@@ -44,31 +42,27 @@ export default function TestScreen() {
   const handleSeedData = async () => {
     console.log("Seed Data button pressed");
     setSuccessMessage(null);
-    
+
     try {
       setIsProcessing(true);
       console.log("Starting seed data process...");
-      
-      // First clear existing data
+
       await resetStorage();
       console.log("Storage reset complete");
-      
-      // Then seed with fresh data
+
       seedExercises();
       console.log("Exercises seeded");
-      
+
       seedTestWorkoutPlan();
       console.log("Test workout plan seeded");
-      
+
       seedMockWorkoutHistory();
       console.log("Mock history seeded");
-      
-      // Reload stats
+
       loadDataStats();
       console.log("Stats reloaded");
-      
-      setSuccessMessage("✓ Sample data seeded successfully! Go to Home to see it.");
 
+      setSuccessMessage("✓ Sample data seeded successfully! Go to Home to see it.");
     } catch (error) {
       console.error("Failed to seed data:", error);
       Alert.alert("Error", `Failed to seed data: ${error}`);
@@ -81,7 +75,7 @@ export default function TestScreen() {
   const handleClearData = async () => {
     console.log("Clear Data button pressed");
     setSuccessMessage(null);
-    
+
     showAlert(
       "Clear All Data",
       "This will permanently delete all your workout plans, sessions, and history. Consider exporting a backup first. This action cannot be undone. Continue?",
@@ -97,18 +91,16 @@ export default function TestScreen() {
             try {
               setIsProcessing(true);
               console.log("Starting clear data process...");
-              
+
               await resetStorage();
               console.log("Storage reset complete");
-              
-              // Seed exercises back (we always need the exercise library)
+
               seedExercises();
               console.log("Exercises re-seeded");
-              
-              // Reload stats
+
               loadDataStats();
               console.log("Stats reloaded");
-              
+
               setSuccessMessage("✓ All workout data cleared!");
             } catch (error) {
               console.error("Failed to clear data:", error);
@@ -126,20 +118,19 @@ export default function TestScreen() {
   const handleExportBackup = async () => {
     console.log("Export Backup button pressed");
     setSuccessMessage(null);
-    
+
     try {
       setIsProcessing(true);
       console.log("Starting export process...");
-      
+
       await exportBackup();
       console.log("Export complete");
-      
+
       setSuccessMessage("✓ Backup exported successfully!");
     } catch (error) {
       console.error("Failed to export backup:", error);
       const errorMessage = error instanceof Error ? error.message : String(error);
-      
-      // Don't show alert if user just cancelled the share dialog
+
       if (!errorMessage.includes("cancelled") && !errorMessage.includes("canceled")) {
         Alert.alert("Error", `Failed to export backup: ${errorMessage}`);
       }
@@ -152,7 +143,7 @@ export default function TestScreen() {
   const handleImportBackup = async () => {
     console.log("Import Backup button pressed");
     setSuccessMessage(null);
-    
+
     showAlert(
       "Import Backup",
       "This will replace all your current workout data with the data from the backup file. This action cannot be undone. Continue?",
@@ -168,21 +159,19 @@ export default function TestScreen() {
             try {
               setIsProcessing(true);
               console.log("Starting import process...");
-              
+
               const backup = await importBackup();
               console.log("Import complete", backup);
-              
-              // Reload stats
+
               loadDataStats();
               console.log("Stats reloaded");
-              
+
               const date = new Date(backup.exportedAt).toLocaleString();
               setSuccessMessage(`✓ Backup imported successfully! Data from ${date} has been restored.`);
             } catch (error) {
               console.error("Failed to import backup:", error);
               const errorMessage = error instanceof Error ? error.message : String(error);
-              
-              // Don't show alert if user just cancelled the file picker
+
               if (!errorMessage.includes("cancelled") && !errorMessage.includes("canceled")) {
                 Alert.alert("Import Failed", errorMessage);
               }
@@ -206,7 +195,6 @@ export default function TestScreen() {
       }}
     >
       <View>
-        {/* Header */}
         <View className="mb-6">
           <Text className="text-3xl font-bold text-white mb-2">
             Settings
@@ -216,7 +204,6 @@ export default function TestScreen() {
           </Text>
         </View>
 
-        {/* Success Message Banner */}
         {successMessage && (
           <View className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4 flex-row items-start gap-3">
             <MaterialIcons name="check-circle" size={24} color="#22c55e" />
@@ -228,13 +215,11 @@ export default function TestScreen() {
           </View>
         )}
 
-        {/* Backup & Restore Section */}
         <View className="mb-6">
           <Text className="text-xl font-bold text-white mb-4">
             Backup & Restore
           </Text>
 
-          {/* Export Data Card */}
           <View className="bg-surface-dark rounded-2xl p-6 mb-4 border border-white/5">
             <View className="flex-row items-start gap-4 mb-4">
               <View className="bg-blue-500/10 p-3 rounded-xl">
@@ -245,7 +230,7 @@ export default function TestScreen() {
                   Export Data
                 </Text>
                 <Text className="text-gray-400 text-sm leading-relaxed">
-                  Download all your workout data as a JSON file. Save this file somewhere safe 
+                  Download all your workout data as a JSON file. Save this file somewhere safe
                   to restore your data later if needed.
                 </Text>
               </View>
@@ -267,7 +252,6 @@ export default function TestScreen() {
             </Pressable>
           </View>
 
-          {/* Import Data Card */}
           <View className="bg-surface-dark rounded-2xl p-6 border border-white/5">
             <View className="flex-row items-start gap-4 mb-4">
               <View className="bg-purple-500/10 p-3 rounded-xl">
@@ -278,7 +262,7 @@ export default function TestScreen() {
                   Import Data
                 </Text>
                 <Text className="text-gray-400 text-sm leading-relaxed">
-                  Restore workout data from a previously exported backup file. 
+                  Restore workout data from a previously exported backup file.
                   This will replace all your current data.
                 </Text>
               </View>
@@ -300,14 +284,13 @@ export default function TestScreen() {
             </Pressable>
           </View>
 
-          {/* Info about Backup & Restore */}
-          <View className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+          <View className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mt-4">
             <View className="flex-row items-start gap-3">
               <MaterialIcons name="info-outline" size={20} color="#3b82f6" />
               <View className="flex-1">
                 <Text className="text-blue-400 text-sm leading-relaxed">
-                  <Text className="font-bold">Tip:</Text> Use "Export Data" to create backups 
-                  before testing destructive operations. You can restore your data anytime 
+                  <Text className="font-bold">Tip:</Text> Use "Export Data" to create backups
+                  before testing destructive operations. You can restore your data anytime
                   using "Import Data".
                 </Text>
               </View>
@@ -315,13 +298,11 @@ export default function TestScreen() {
           </View>
         </View>
 
-        {/* Developer Tools Section */}
         <View className="mb-6">
           <Text className="text-xl font-bold text-white mb-4">
             Developer Tools
           </Text>
 
-          {/* Development Tools Banner */}
           <View className="bg-gray-500/10 border border-gray-500/30 rounded-xl p-4 mb-4 flex-row items-start gap-3">
             <MaterialIcons name="code" size={24} color="#9ca3af" />
             <View className="flex-1">
@@ -334,7 +315,6 @@ export default function TestScreen() {
             </View>
           </View>
 
-          {/* Current Data Status */}
           <View className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-4">
             <View className="flex-row items-center justify-between mb-2">
               <Text className="text-blue-400 font-bold">Current Data Status</Text>
@@ -356,7 +336,6 @@ export default function TestScreen() {
             </View>
           </View>
 
-          {/* Warning Banner - Show if data exists */}
           {planCount > 0 && (
             <View className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-4 flex-row items-start gap-3">
               <MaterialIcons name="info" size={24} color="#eab308" />
@@ -371,7 +350,6 @@ export default function TestScreen() {
             </View>
           )}
 
-          {/* Seed Data Card */}
           <View className="bg-surface-dark rounded-2xl p-6 mb-4 border border-white/5">
             <View className="flex-row items-start gap-4 mb-4">
               <View className="bg-primary/10 p-3 rounded-xl">
@@ -382,7 +360,7 @@ export default function TestScreen() {
                   Seed Sample Data
                 </Text>
                 <Text className="text-gray-400 text-sm leading-relaxed">
-                  Populates the app with pre-generated sample workouts, exercises, and history. 
+                  Populates the app with pre-generated sample workouts, exercises, and history.
                   Useful for testing features with data.
                 </Text>
               </View>
@@ -404,7 +382,6 @@ export default function TestScreen() {
             </Pressable>
           </View>
 
-          {/* Clear Data Card */}
           <View className="bg-surface-dark rounded-2xl p-6 mb-4 border border-white/5">
             <View className="flex-row items-start gap-4 mb-4">
               <View className="bg-red-500/10 p-3 rounded-xl">
@@ -415,7 +392,7 @@ export default function TestScreen() {
                   Clear All Data
                 </Text>
                 <Text className="text-gray-400 text-sm leading-relaxed">
-                  Removes all workout plans, sessions, and history from the app. 
+                  Removes all workout plans, sessions, and history from the app.
                   Useful for testing the empty state dashboard.
                 </Text>
               </View>

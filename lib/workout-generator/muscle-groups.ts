@@ -192,34 +192,3 @@ export function getConsecutiveDayPairs(sessions: SessionTemplate[]): [number, nu
  * Calculate volume (sets) per muscle per session
  * Returns array of sets for each session
  */
-export function calculateSessionVolume(
-  focus: "Balanced" | "Strength" | "Endurance",
-  sessionsPerWeek: number
-): number[] {
-  // Weekly volume targets per muscle (9-20 sets)
-  let weeklyVolume: number;
-
-  switch (focus) {
-    case "Balanced":
-      weeklyVolume = 16; // Mid-high volume
-      break;
-    case "Strength":
-      weeklyVolume = 12; // Moderate volume, higher intensity
-      break;
-    case "Endurance":
-      weeklyVolume = 14; // Moderate-high volume
-      break;
-  }
-
-  // Distribute volume across sessions
-  const baseVolume = Math.floor(weeklyVolume / sessionsPerWeek);
-  const remainder = weeklyVolume % sessionsPerWeek;
-
-  const sessionVolumes: number[] = [];
-  for (let i = 0; i < sessionsPerWeek; i++) {
-    // Add extra set to first sessions if there's a remainder
-    sessionVolumes.push(baseVolume + (i < remainder ? 1 : 0));
-  }
-
-  return sessionVolumes;
-}

@@ -1,7 +1,6 @@
 import {
   getSplitType,
   distributeMuscleGroups,
-  calculateSessionVolume,
 } from "@/lib/workout-generator/muscle-groups";
 
 describe("Muscle Groups Distribution", () => {
@@ -72,38 +71,4 @@ describe("Muscle Groups Distribution", () => {
     });
   });
 
-  describe("calculateSessionVolume", () => {
-    it("distributes 9-20 sets per muscle per week", () => {
-      const result = calculateSessionVolume("Balanced", 3);
-      const totalSetsPerMuscle = result.reduce((sum, sets) => sum + sets, 0);
-
-      expect(totalSetsPerMuscle).toBeGreaterThanOrEqual(9);
-      expect(totalSetsPerMuscle).toBeLessThanOrEqual(20);
-    });
-
-    it("returns array matching session count", () => {
-      const result = calculateSessionVolume("Balanced", 4);
-      expect(result).toHaveLength(4);
-    });
-
-    it("adjusts volume for Strength focus", () => {
-      const balancedVolume = calculateSessionVolume("Balanced", 3);
-      const strengthVolume = calculateSessionVolume("Strength", 3);
-
-      const totalBalanced = balancedVolume.reduce((a, b) => a + b, 0);
-      const totalStrength = strengthVolume.reduce((a, b) => a + b, 0);
-
-      // Strength typically has slightly lower volume
-      expect(totalStrength).toBeLessThanOrEqual(totalBalanced);
-    });
-
-    it("adjusts volume for Endurance focus", () => {
-      const result = calculateSessionVolume("Endurance", 3);
-      const total = result.reduce((a, b) => a + b, 0);
-
-      // Endurance should still be in valid range
-      expect(total).toBeGreaterThanOrEqual(9);
-      expect(total).toBeLessThanOrEqual(20);
-    });
-  });
 });

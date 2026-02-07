@@ -5,8 +5,8 @@
  */
 
 import { ExerciseCardWithActions } from "@/components/ExerciseCardWithActions";
-import { BackButton } from "@/components/BackButton";
 import { WizardContinueButton } from "@/components/ui/WizardContinueButton";
+import { WizardLayout } from "@/components/WizardLayout";
 import { getAllExercises } from "@/lib/storage/storage";
 import type { Exercise } from "@/lib/storage/types";
 import { cn } from "@/lib/utils/cn";
@@ -19,15 +19,13 @@ import { selectInitialExercises } from "@/lib/workout-generator/exercise-selecto
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Pressable, Text, View } from "react-native";
 
 // Exercise count limits
 const MIN_EXERCISES = 1;
 const MAX_EXERCISES = 20;
 
 export default function ExercisesScreen() {
-  const insets = useSafeAreaInsets();
   const { state, updateState } = useWizard();
   const [customExercises, setCustomExercises] = useState<Exercise[]>(
     state.customExercises || [],
@@ -147,137 +145,91 @@ export default function ExercisesScreen() {
     customExercises.length > MAX_EXERCISES;
 
   return (
-    <View className="flex-1 bg-background-dark w-full">
-      {/* Header */}
-      <View
-        className="bg-background-dark/80 px-4 pb-2 w-full"
-        style={{ paddingTop: insets.top + 16 }}
-      >
-        <View className="flex-row items-center justify-between mb-4">
-          {/* Back button */}
-          <BackButton onPress={handleBack} />
-
-          {/* Step indicator */}
-          <Text className="text-sm font-semibold uppercase tracking-widest text-gray-400">
-            Step 4 of 5
-          </Text>
-
-          {/* Empty space for balance */}
-          <View className="size-10" />
-        </View>
-
-        {/* Segmented Progress Bar - 4 of 5 filled */}
-        <View className="flex-row gap-2">
-          <View className="flex-1 h-1.5 rounded-full bg-primary" />
-          <View className="flex-1 h-1.5 rounded-full bg-primary" />
-          <View className="flex-1 h-1.5 rounded-full bg-primary" />
-          <View className="flex-1 h-1.5 rounded-full bg-primary" />
-          <View
-            testID="progress-bar"
-            className="flex-1 h-1.5 rounded-full bg-white/10"
-          />
-        </View>
-      </View>
-
-      {/* Main Content */}
-      <ScrollView
-        className="flex-1 w-full"
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingTop: 24,
-          paddingBottom: 120 + insets.bottom,
-        }}
-      >
-        {/* Title and Subtitle */}
-        <View className="mb-6">
-          <Text className="text-3xl font-bold leading-tight tracking-tight text-white mb-2">
-            Review Exercises
-          </Text>
-          <Text className="text-gray-400 text-base font-normal leading-relaxed">
-            Customize your exercise selection. Minimum {MIN_EXERCISES}, maximum{" "}
-            {MAX_EXERCISES} exercises.
-          </Text>
-        </View>
-
-        {/* Exercise Count */}
-        <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-lg font-semibold text-white">
-            Selected Exercises ({customExercises.length})
-          </Text>
-          <View
-            className={cn(
-              "px-3 py-1 rounded-full",
-              customExercises.length < MIN_EXERCISES
-                ? "bg-red-500/20"
-                : customExercises.length > MAX_EXERCISES
-                  ? "bg-red-500/20"
-                  : "bg-primary/20",
-            )}
-          >
-            <Text
-              className={cn(
-                "text-xs font-semibold",
-                customExercises.length < MIN_EXERCISES
-                  ? "text-red-500"
-                  : customExercises.length > MAX_EXERCISES
-                    ? "text-red-500"
-                    : "text-primary",
-              )}
-            >
-              {customExercises.length < MIN_EXERCISES
-                ? `Need ${MIN_EXERCISES - customExercises.length} more`
-                : customExercises.length > MAX_EXERCISES
-                  ? `Remove ${customExercises.length - MAX_EXERCISES}`
-                  : "Ready"}
-            </Text>
-          </View>
-        </View>
-
-        {/* Flat Exercise List */}
-        {customExercises.map((exercise) => (
-          <ExerciseCardWithActions
-            key={exercise.id}
-            exercise={exercise}
-            onSwap={() => handleSwap(exercise.id)}
-            onRemove={() => handleRemove(exercise.id)}
-            canRemove={customExercises.length > MIN_EXERCISES}
-            showMuscleGroupBadges={true}
-            testID={`exercise-card-${exercise.id}`}
-          />
-        ))}
-
-        {/* Add Exercise Button */}
-        {customExercises.length < MAX_EXERCISES && (
-          <Pressable
-            onPress={handleAdd}
-            testID="add-exercise-button"
-            accessibilityRole="button"
-            accessibilityLabel="Add exercise"
-            className="flex-row items-center justify-center bg-surface-dark rounded-xl p-4 mt-2 active:bg-surface-dark-highlight"
-          >
-            <MaterialIcons
-              name="add-circle-outline"
-              size={24}
-              color="#6b8779"
-            />
-            <Text className="text-primary font-semibold text-base ml-2">
-              Add Exercise
-            </Text>
-          </Pressable>
-        )}
-      </ScrollView>
-
-      {/* Continue Button (Fixed at bottom) */}
-      <View
-        className="absolute bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 p-4 w-full"
-        style={{ paddingBottom: insets.bottom + 24 }}
-      >
+    <WizardLayout
+      step={4}
+      totalSteps={5}
+      onBack={handleBack}
+      bottomAction={(
         <WizardContinueButton
           onPress={handleContinue}
           disabled={isContinueDisabled}
           accessibilityLabel="Continue to review"
         />
+      )}
+    >
+      <View className="mb-6">
+        <Text className="text-3xl font-bold leading-tight tracking-tight text-white mb-2">
+          Review Exercises
+        </Text>
+        <Text className="text-gray-400 text-base font-normal leading-relaxed">
+          Customize your exercise selection. Minimum {MIN_EXERCISES}, maximum{" "}
+          {MAX_EXERCISES} exercises.
+        </Text>
       </View>
-    </View>
+
+      <View className="flex-row items-center justify-between mb-4">
+        <Text className="text-lg font-semibold text-white">
+          Selected Exercises ({customExercises.length})
+        </Text>
+        <View
+          className={cn(
+            "px-3 py-1 rounded-full",
+            customExercises.length < MIN_EXERCISES
+              ? "bg-red-500/20"
+              : customExercises.length > MAX_EXERCISES
+                ? "bg-red-500/20"
+                : "bg-primary/20",
+          )}
+        >
+          <Text
+            className={cn(
+              "text-xs font-semibold",
+              customExercises.length < MIN_EXERCISES
+                ? "text-red-500"
+                : customExercises.length > MAX_EXERCISES
+                  ? "text-red-500"
+                  : "text-primary",
+            )}
+          >
+            {customExercises.length < MIN_EXERCISES
+              ? `Need ${MIN_EXERCISES - customExercises.length} more`
+              : customExercises.length > MAX_EXERCISES
+                ? `Remove ${customExercises.length - MAX_EXERCISES}`
+                : "Ready"}
+          </Text>
+        </View>
+      </View>
+
+      {customExercises.map((exercise) => (
+        <ExerciseCardWithActions
+          key={exercise.id}
+          exercise={exercise}
+          onSwap={() => handleSwap(exercise.id)}
+          onRemove={() => handleRemove(exercise.id)}
+          canRemove={customExercises.length > MIN_EXERCISES}
+          showMuscleGroupBadges={true}
+          testID={`exercise-card-${exercise.id}`}
+        />
+      ))}
+
+      {customExercises.length < MAX_EXERCISES && (
+        <Pressable
+          onPress={handleAdd}
+          testID="add-exercise-button"
+          accessibilityRole="button"
+          accessibilityLabel="Add exercise"
+          className="flex-row items-center justify-center bg-surface-dark rounded-xl p-4 mt-2 active:bg-surface-dark-highlight"
+        >
+          <MaterialIcons
+            name="add-circle-outline"
+            size={24}
+            color="#6b8779"
+          />
+          <Text className="text-primary font-semibold text-base ml-2">
+            Add Exercise
+          </Text>
+        </Pressable>
+      )}
+    </WizardLayout>
   );
 }
