@@ -388,8 +388,15 @@ export function getCompletedSessionsByDateRange(
 ): WorkoutSessionCompleted[] {
   ensureInitialized();
   return cache.completedSessions
-    .filter((s) => s.started_at >= startDate && s.started_at <= endDate)
-    .sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime());
+    .filter((s) => {
+      const date = s.completed_at ?? s.started_at;
+      return date >= startDate && date <= endDate;
+    })
+    .sort((a, b) => {
+      const aDate = a.completed_at ?? a.started_at;
+      const bDate = b.completed_at ?? b.started_at;
+      return new Date(bDate).getTime() - new Date(aDate).getTime();
+    });
 }
 
 export function getAllCompletedSessions(): WorkoutSessionCompleted[] {
