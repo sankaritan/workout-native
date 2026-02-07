@@ -244,7 +244,7 @@ describe("ExerciseHistoryScreen", () => {
 
     await waitFor(() => {
       // Should show weight × reps format (there are multiple, so use getAllByText)
-      const elements = screen.getAllByText(/135.*lbs.*×.*8.*reps/);
+      const elements = screen.getAllByText(/135.*kgs.*×.*8.*reps/);
       expect(elements.length).toBeGreaterThan(0);
       // Also verify set labels
       expect(screen.getByText("Set 1")).toBeTruthy();

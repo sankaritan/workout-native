@@ -88,7 +88,7 @@ export function ProgressChart({ data, className }: ProgressChartProps) {
       {/* Y-axis label */}
       <View className="absolute left-0 top-1/2 -rotate-90 origin-center">
         <Text className="text-xs font-medium text-text-muted">
-          Weight (lbs)
+          Weight (kgs)
         </Text>
       </View>
 

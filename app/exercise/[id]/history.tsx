@@ -236,7 +236,7 @@ export default function ExerciseHistoryScreen() {
               </View>
               <Text className="mt-2 text-2xl font-bold text-white tracking-tight">
                 {personalRecord.weight}
-                <Text className="text-sm font-normal text-gray-500"> lbs</Text>
+                <Text className="text-sm font-normal text-gray-500"> kgs</Text>
               </Text>
               <Text className="text-xs text-gray-500">
                 {personalRecord.reps} reps
@@ -293,11 +293,11 @@ export default function ExerciseHistoryScreen() {
                         </Text>
                         <View className="h-1 w-1 rounded-full bg-gray-400" />
                         <Text className="text-xs text-gray-400">
-                          Max: {group.maxWeight} lbs
+                          Max: {group.maxWeight} kgs
                         </Text>
                         <View className="h-1 w-1 rounded-full bg-gray-400" />
                         <Text className="text-xs text-gray-400">
-                          Volume: {group.totalVolume} lbs
+                          Volume: {group.totalVolume} kgs
                         </Text>
                       </View>
                     </View>
@@ -313,7 +313,7 @@ export default function ExerciseHistoryScreen() {
                             Set {set.set_number}
                           </Text>
                           <Text className="text-sm font-medium text-white">
-                            {set.weight} lbs × {set.reps} reps
+                            {set.weight} kgs × {set.reps} reps
                           </Text>
                         </View>
                       ))}
