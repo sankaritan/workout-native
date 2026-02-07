@@ -63,7 +63,7 @@ function getMonthsWithData(sessions: WorkoutSessionCompleted[]): string[] {
   
   sessions.forEach((session) => {
     if (session.completed_at) {
-      const date = new Date(session.started_at);
+      const date = new Date(session.completed_at ?? session.started_at);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
       monthsSet.add(monthKey);
     }
@@ -229,7 +229,7 @@ export default function HistoryScreen() {
 
     // Find all sessions for this day
     const daySessions = completedSessions.filter((session) => {
-      const sessionDate = new Date(session.started_at);
+      const sessionDate = new Date(session.completed_at ?? session.started_at);
       return sessionDate >= dayStart && sessionDate <= dayEnd;
     });
 
@@ -263,7 +263,7 @@ export default function HistoryScreen() {
   const workoutCount = completedSessions.length;
 
   // Get workout dates as ISO strings for calendar highlighting
-  const workoutDates = completedSessions.map((s) => s.started_at);
+  const workoutDates = completedSessions.map((s) => s.completed_at ?? s.started_at);
 
   // Calculate streak (consecutive days with workouts)
   function calculateStreak(): number {
@@ -272,7 +272,7 @@ export default function HistoryScreen() {
     // Get unique dates with workouts (YYYY-MM-DD format)
     const workoutDatesSet = new Set<string>();
     completedSessions.forEach((session) => {
-      const date = new Date(session.started_at);
+      const date = new Date(session.completed_at ?? session.started_at);
       const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
       workoutDatesSet.add(dateKey);
     });
@@ -443,7 +443,7 @@ export default function HistoryScreen() {
                   <>
                     <Text className="text-lg font-bold text-white">
                       {new Date(
-                        selectedDaySessions[0].started_at
+                        selectedDaySessions[0].completed_at ?? selectedDaySessions[0].started_at
                       ).toLocaleDateString("en-US", {
                         weekday: "long",
                         month: "short",
@@ -467,7 +467,7 @@ export default function HistoryScreen() {
               <View className="gap-4">
                 {selectedDaySessions.map((session, index) => {
                   const startTime = new Date(
-                    session.started_at
+                    session.completed_at ?? session.started_at
                   ).toLocaleTimeString("en-US", {
                     hour: "numeric",
                     minute: "2-digit",
