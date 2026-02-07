@@ -55,9 +55,6 @@ export interface WorkoutProgram {
 }
 
 /**
- * Weekly volume tracking per muscle group
- */
-/**
  * Training split type
  */
 export type SplitType = "Full Body" | "Upper/Lower" | "Push/Pull/Legs";
