@@ -7,13 +7,10 @@
 import React from "react";
 import { View, Text, Pressable } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { cn } from "@/lib/utils/cn";
-import {
-  EXERCISE_PRIORITY_BADGES,
-  EXERCISE_PRIORITY_LABELS,
-  type Exercise,
-} from "@/lib/storage/types";
+import type { Exercise } from "@/lib/storage/types";
 import { theme } from "@/constants/theme";
+import { PriorityBadge } from "@/components/ui/PriorityBadge";
+import { MuscleGroupBadges } from "@/components/ui/MuscleGroupBadges";
 
 export interface ExercisePickerItemProps {
   /** The exercise to display */
@@ -45,48 +42,14 @@ export function ExercisePickerItem({
             {exercise.name}
           </Text>
           {/* Priority Tier Badge - Top Right */}
-          <View
-            className={cn(
-              "px-2.5 py-1 rounded-full border",
-              EXERCISE_PRIORITY_BADGES[exercise.priority].border,
-              EXERCISE_PRIORITY_BADGES[exercise.priority].background
-            )}
-          >
-            <Text
-              className={cn(
-                "text-xs font-medium uppercase",
-                EXERCISE_PRIORITY_BADGES[exercise.priority].text
-              )}
-            >
-              {EXERCISE_PRIORITY_LABELS[exercise.priority]}
-            </Text>
-          </View>
+          <PriorityBadge priority={exercise.priority} />
         </View>
         <Text className="text-sm text-gray-400 mb-1">
           {exercise.equipment_required || "Bodyweight"}
         </Text>
 
         {/* Muscle Group Badges */}
-        <View className="flex-row gap-1 mb-1 flex-wrap">
-          {exercise.muscle_groups.map((muscle, idx) => (
-            <View
-              key={muscle}
-              className={cn(
-                "px-2 py-0.5 rounded",
-                idx === 0 ? "bg-primary/30" : "bg-gray-600/30"
-              )}
-            >
-              <Text
-                className={cn(
-                  "text-xs font-semibold",
-                  idx === 0 ? "text-primary" : "text-gray-400"
-                )}
-              >
-                {muscle}
-              </Text>
-            </View>
-          ))}
-        </View>
+        <MuscleGroupBadges className="mb-1" muscles={exercise.muscle_groups} />
 
         {exercise.description && (
           <Text className="text-xs text-gray-500">

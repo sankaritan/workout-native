@@ -4,22 +4,20 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BackButton } from "@/components/BackButton";
 import { DraggableExerciseItem } from "@/components/DraggableExerciseItem";
 import { SortableList } from "@/components/SortableList";
 import { WizardContinueButton } from "@/components/ui/WizardContinueButton";
 import { WorkoutDesignInfo } from "@/components/WorkoutDesignInfo";
 import { WorkoutPlanCard } from "@/components/WorkoutPlanCard";
+import { WizardLayout } from "@/components/WizardLayout";
 import { useWizard } from "@/lib/wizard-context";
 import { generateWorkoutProgramFromCustomExercises, saveWorkoutProgram } from "@/lib/workout-generator/engine";
 import type { ProgramExercise } from "@/lib/workout-generator/types";
 
 export default function PlanReviewScreen() {
-  const insets = useSafeAreaInsets();
   const { state, updateState, resetState } = useWizard();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -210,119 +208,13 @@ export default function PlanReviewScreen() {
   }
 
   return (
-    <View className="flex-1 bg-background-dark w-full">
-      {/* Header */}
-      <View className="bg-background-dark/80 px-4 pb-2 w-full" style={{ paddingTop: insets.top + 16 }}>
-        <View className="flex-row items-center justify-between mb-4">
-          {/* Back button */}
-          <BackButton onPress={handleBack} />
-
-          {/* Step indicator */}
-          <Text className="text-sm font-semibold uppercase tracking-widest text-gray-400">
-            Step 5 of 5
-          </Text>
-
-          {/* Empty space for balance */}
-          <View className="size-10" />
-        </View>
-
-        {/* Segmented Progress Bar - 5 of 5 filled */}
-        <View className="flex-row gap-2 mb-4">
-          <View className="flex-1 h-1.5 rounded-full bg-primary" />
-          <View className="flex-1 h-1.5 rounded-full bg-primary" />
-          <View className="flex-1 h-1.5 rounded-full bg-primary" />
-          <View className="flex-1 h-1.5 rounded-full bg-primary" />
-          <View
-            testID="progress-bar"
-            className="flex-1 h-1.5 rounded-full bg-primary"
-          />
-        </View>
-
-        {/* Title */}
-        <View>
-          <Text className="text-2xl font-bold text-white">
-            Your Workout Plan
-          </Text>
-          <Text className="text-sm text-gray-400">
-            Review and accept to start training
-          </Text>
-        </View>
-      </View>
-
-      {/* Main Content */}
-      <ScrollView
-        className="flex-1 w-full"
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingTop: 16,
-          paddingBottom: 120 + insets.bottom,
-        }}
-      >
-        {/* Plan Overview Card */}
-        <WorkoutPlanCard program={generatedProgram} />
-
-        {/* Design Info Section */}
-        <WorkoutDesignInfo />
-
-        {/* Sessions Header */}
-        <View className="mb-4">
-          <Text className="text-xl font-bold text-white mb-2">
-            Training Sessions
-          </Text>
-          <Text className="text-sm text-gray-400">
-            Drag to reorder or tap edit to swap exercises
-          </Text>
-        </View>
-
-        {/* Session Cards with Draggable Exercises */}
-        {generatedProgram.sessions.map((session, sessionIdx) => (
-          <View key={sessionIdx} className="mb-6">
-            {/* Session Header */}
-            <View className="bg-surface-dark rounded-t-2xl px-4 pt-4 pb-3 border border-b-0 border-white/10">
-              <View className="flex-row items-center justify-between mb-2">
-                <View className="flex-row items-center flex-1">
-                  <View className="bg-primary/20 rounded-full px-3 py-1 mr-3">
-                    <Text className="text-primary font-bold text-xs">
-                      Day {sessionIdx + 1}
-                    </Text>
-                  </View>
-                  <Text className="text-lg font-bold text-white flex-1">
-                    {session.name}
-                  </Text>
-                </View>
-              </View>
-              <Text className="text-sm text-gray-400">
-                {session.exercises.length} {session.exercises.length === 1 ? "exercise" : "exercises"}
-              </Text>
-            </View>
-
-            {/* Draggable Exercise List */}
-            <View className="bg-surface-dark rounded-b-2xl px-4 pb-4 border border-t-0 border-white/10">
-              <SortableList
-                data={session.exercises}
-                renderItem={(exercise, idx, drag, isActive, dragHandleProps) => (
-                  <DraggableExerciseItem
-                    exercise={exercise}
-                    onSwap={() => handleSwapExercise(sessionIdx, idx)}
-                    drag={drag}
-                    isActive={isActive}
-                    dragHandleProps={dragHandleProps}
-                  />
-                )}
-                onReorder={(newExercises) => handleExerciseReorder(sessionIdx, newExercises)}
-                keyExtractor={(exercise, idx) => `${sessionIdx}-${exercise.exercise.id}-${idx}`}
-              />
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-
-      {/* Action Buttons (Fixed at bottom) */}
-      <View
-        className="absolute bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 p-4 w-full"
-        style={{ paddingBottom: insets.bottom + 24 }}
-      >
-        {/* Accept Plan Button */}
+    <WizardLayout
+      step={5}
+      totalSteps={5}
+      onBack={handleBack}
+      title="Your Workout Plan"
+      subtitle="Review and accept to start training"
+      bottomAction={(
         <WizardContinueButton
           onPress={handleAcceptPlan}
           label="Accept Plan"
@@ -330,7 +222,59 @@ export default function PlanReviewScreen() {
           testID="accept-button"
           accessibilityLabel="Accept workout plan"
         />
+      )}
+    >
+      <WorkoutPlanCard program={generatedProgram} />
+
+      <WorkoutDesignInfo />
+
+      <View className="mb-4">
+        <Text className="text-xl font-bold text-white mb-2">
+          Training Sessions
+        </Text>
+        <Text className="text-sm text-gray-400">
+          Drag to reorder or tap edit to swap exercises
+        </Text>
       </View>
-    </View>
+
+      {generatedProgram.sessions.map((session, sessionIdx) => (
+        <View key={sessionIdx} className="mb-6">
+          <View className="bg-surface-dark rounded-t-2xl px-4 pt-4 pb-3 border border-b-0 border-white/10">
+            <View className="flex-row items-center justify-between mb-2">
+              <View className="flex-row items-center flex-1">
+                <View className="bg-primary/20 rounded-full px-3 py-1 mr-3">
+                  <Text className="text-primary font-bold text-xs">
+                    Day {sessionIdx + 1}
+                  </Text>
+                </View>
+                <Text className="text-lg font-bold text-white flex-1">
+                  {session.name}
+                </Text>
+              </View>
+            </View>
+            <Text className="text-sm text-gray-400">
+              {session.exercises.length} {session.exercises.length === 1 ? "exercise" : "exercises"}
+            </Text>
+          </View>
+
+          <View className="bg-surface-dark rounded-b-2xl px-4 pb-4 border border-t-0 border-white/10">
+            <SortableList
+              data={session.exercises}
+              renderItem={(exercise, idx, drag, isActive, dragHandleProps) => (
+                <DraggableExerciseItem
+                  exercise={exercise}
+                  onSwap={() => handleSwapExercise(sessionIdx, idx)}
+                  drag={drag}
+                  isActive={isActive}
+                  dragHandleProps={dragHandleProps}
+                />
+              )}
+              onReorder={(newExercises) => handleExerciseReorder(sessionIdx, newExercises)}
+              keyExtractor={(exercise, idx) => `${sessionIdx}-${exercise.exercise.id}-${idx}`}
+            />
+          </View>
+        </View>
+      ))}
+    </WizardLayout>
   );
 }

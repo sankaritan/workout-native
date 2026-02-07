@@ -10,6 +10,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import type { ProgramExercise } from "@/lib/workout-generator/types";
 import { theme } from "@/constants/theme";
 import { cn } from "@/lib/utils/cn";
+import { ExerciseInfoRow } from "@/components/ui/ExerciseInfoRow";
+import { SetsRepsBadge } from "@/components/ui/SetsRepsBadge";
 
 export interface DraggableExerciseItemProps {
   /** The exercise to display */
@@ -64,22 +66,10 @@ export function DraggableExerciseItem({
       )}
 
       {/* Exercise Info - Center */}
-      <View className="flex-1 ml-3 mr-3">
-        <Text className="text-white font-semibold">
-          {exercise.exercise.name}
-        </Text>
-        <Text className="text-xs text-gray-400">
-          {exercise.exercise.muscle_group} •{" "}
-          {exercise.exercise.equipment_required || "Bodyweight"}
-        </Text>
-      </View>
+      <ExerciseInfoRow className="flex-1 ml-3 mr-3" exercise={exercise.exercise} />
 
       {/* Sets × Reps Badge */}
-      <View className="bg-primary/10 rounded-lg px-3 py-1.5 mr-2">
-        <Text className="text-primary font-bold text-sm">
-          {exercise.sets} × {exercise.repsMin}-{exercise.repsMax}
-        </Text>
-      </View>
+      <SetsRepsBadge className="mr-2" sets={exercise.sets} repsMin={exercise.repsMin} repsMax={exercise.repsMax} />
 
       {/* Swap Button - Right Side */}
       <Pressable
