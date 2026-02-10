@@ -507,6 +507,7 @@ export default function WorkoutSessionScreen() {
           previousWeight={previousSet?.weight}
           previousReps={previousSet?.reps}
           initialSets={exerciseSets.get(currentExercise.exercise_id)}
+          isSessionFinished={isViewingCompletedSession}
           onSetsChange={handleSetsChange}
           testID="set-tracker"
         />

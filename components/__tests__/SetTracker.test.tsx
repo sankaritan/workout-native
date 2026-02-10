@@ -165,6 +165,73 @@ describe("SetTracker", () => {
     expect(repsInput2.props.value).toBe("10");
   });
 
+  it("prefills next incomplete set when resuming in-progress session", () => {
+    render(
+      <SetTracker
+        targetSets={3}
+        targetReps={10}
+        previousWeight={180}
+        previousReps={8}
+        initialSets={[
+          {
+            setNumber: 1,
+            weight: 170,
+            reps: 10,
+            isCompleted: true,
+            isWarmup: false,
+          },
+          {
+            setNumber: 2,
+            weight: 175,
+            reps: 9,
+            isCompleted: true,
+            isWarmup: false,
+          },
+        ]}
+        onSetsChange={mockOnSetsChange}
+      />,
+    );
+
+    const weightInput3 = screen.getByTestId("weight-input-3");
+    const repsInput3 = screen.getByTestId("reps-input-3");
+    expect(weightInput3.props.value).toBe("175");
+    expect(repsInput3.props.value).toBe("9");
+  });
+
+  it("does not prefill next set when session is finished", () => {
+    render(
+      <SetTracker
+        targetSets={3}
+        targetReps={10}
+        previousWeight={180}
+        previousReps={8}
+        initialSets={[
+          {
+            setNumber: 1,
+            weight: 170,
+            reps: 10,
+            isCompleted: true,
+            isWarmup: false,
+          },
+          {
+            setNumber: 2,
+            weight: 175,
+            reps: 9,
+            isCompleted: true,
+            isWarmup: false,
+          },
+        ]}
+        isSessionFinished
+        onSetsChange={mockOnSetsChange}
+      />,
+    );
+
+    const weightInput3 = screen.getByTestId("weight-input-3");
+    const repsInput3 = screen.getByTestId("reps-input-3");
+    expect(weightInput3.props.value).toBe("");
+    expect(repsInput3.props.value).toBe("");
+  });
+
   it("disables completed set inputs", () => {
     render(
       <SetTracker

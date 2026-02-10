@@ -24,6 +24,14 @@ const normalizeSets = (setsToNormalize: SetData[]) =>
     ...set,
     weightText: set.weightText ?? weightToText(set.weight),
   }));
+const createEmptySet = (setNumber: number): SetData => ({
+  setNumber,
+  weight: null,
+  weightText: "",
+  reps: null,
+  isCompleted: false,
+  isWarmup: false,
+});
 const createInitialSets = (
   targetSets: number,
   previousWeight?: number,
@@ -37,6 +45,67 @@ const createInitialSets = (
     isCompleted: false,
     isWarmup: false,
   }));
+const buildSetsFromInitial = (
+  initialSets: SetData[],
+  targetSets: number,
+  previousWeight?: number,
+  previousReps?: number,
+  shouldPrefillNextSet?: boolean,
+) => {
+  const normalized = normalizeSets(initialSets).sort(
+    (a, b) => a.setNumber - b.setNumber,
+  );
+  const maxSetNumber = normalized.reduce(
+    (max, set) => Math.max(max, set.setNumber),
+    0,
+  );
+  const totalSets = Math.max(targetSets, maxSetNumber);
+  const setsByNumber = new Map(normalized.map((set) => [set.setNumber, set]));
+  const expanded = Array.from({ length: totalSets }, (_, i) => {
+    const setNumber = i + 1;
+    return setsByNumber.get(setNumber) ?? createEmptySet(setNumber);
+  });
+
+  if (!shouldPrefillNextSet) {
+    return expanded;
+  }
+
+  const activeIndex = expanded.findIndex((set) => !set.isCompleted);
+  if (activeIndex === -1) {
+    return expanded;
+  }
+
+  const completedBefore = expanded
+    .slice(0, activeIndex)
+    .filter((set) => set.isCompleted);
+  const lastCompleted = completedBefore[completedBefore.length - 1];
+  const fallbackWeight = lastCompleted?.weight ?? previousWeight ?? null;
+  const fallbackReps = lastCompleted?.reps ?? previousReps ?? null;
+  const fallbackWeightText = lastCompleted
+    ? lastCompleted.weightText ?? weightToText(lastCompleted.weight)
+    : weightToText(previousWeight ?? null);
+
+  return expanded.map((set, index) => {
+    if (index !== activeIndex) {
+      return set;
+    }
+    if (set.weight === null && fallbackWeight !== null) {
+      return {
+        ...set,
+        weight: fallbackWeight,
+        weightText: fallbackWeightText,
+        reps: set.reps ?? fallbackReps,
+      };
+    }
+    if (set.reps === null && fallbackReps !== null) {
+      return {
+        ...set,
+        reps: fallbackReps,
+      };
+    }
+    return set;
+  });
+};
 
 export interface SetData {
   setNumber: number;
@@ -58,6 +127,8 @@ export interface SetTrackerProps {
   previousReps?: number;
   /** Initial sets data (for returning to already-started exercise) */
   initialSets?: SetData[];
+  /** When true, skip resume prefill behavior */
+  isSessionFinished?: boolean;
   /** Allow editing of completed sets */
   allowEditingCompleted?: boolean;
   /** Callback when set data changes */
@@ -72,6 +143,7 @@ export function SetTracker({
   previousWeight,
   previousReps,
   initialSets,
+  isSessionFinished = false,
   allowEditingCompleted = false,
   onSetsChange,
   testID,
@@ -83,7 +155,13 @@ export function SetTracker({
   // First set gets prefilled with previous exercise values
   const [sets, setSets] = useState<SetData[]>(() =>
     initialSets && initialSets.length > 0
-      ? normalizeSets(initialSets)
+      ? buildSetsFromInitial(
+          initialSets,
+          targetSets,
+          previousWeight,
+          previousReps,
+          !isSessionFinished,
+        )
       : createInitialSets(targetSets, previousWeight, previousReps),
   );
 
@@ -95,7 +173,15 @@ export function SetTracker({
       initialSets.length > 0 &&
       initialSets !== lastNotifiedSets.current
     ) {
-      setSets(normalizeSets(initialSets));
+      setSets(
+        buildSetsFromInitial(
+          initialSets,
+          targetSets,
+          previousWeight,
+          previousReps,
+          !isSessionFinished,
+        ),
+      );
     } else if (
       !initialSets ||
       (initialSets.length === 0 && initialSets !== lastNotifiedSets.current)
@@ -103,7 +189,13 @@ export function SetTracker({
       // Reset to empty sets for new exercise - first set gets prefilled with previous values
       setSets(createInitialSets(targetSets, previousWeight, previousReps));
     }
-  }, [initialSets, targetSets, previousWeight, previousReps]);
+  }, [
+    initialSets,
+    targetSets,
+    previousWeight,
+    previousReps,
+    isSessionFinished,
+  ]);
 
   // Notify parent of changes
   useEffect(() => {
