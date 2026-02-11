@@ -47,7 +47,7 @@ function getPlanExerciseTemplate(
 }
 
 export default function SingleSessionScreen() {
-  const { id, planId } = useLocalSearchParams<{ id: string; planId?: string }>();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const sessionId = id ? parseInt(id, 10) : null;
   const insets = useSafeAreaInsets();
 
