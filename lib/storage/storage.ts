@@ -460,9 +460,6 @@ export function insertCompletedSession(session: WorkoutSessionCompletedInsert): 
   ensureInitialized();
   const id = getNextId("completedSessions");
   const newSession: WorkoutSessionCompleted = {
-    session_type: "plan",
-    exercise_id: null,
-    name: null,
     ...session,
     id,
     session_type: session.session_type ?? "plan",
