@@ -450,11 +450,7 @@ export default function WorkoutDetailScreen() {
                     ? getExerciseById(session.exercise_id)
                     : null;
                 const title = session.name || exercise?.name || "Quick workout";
-                const status = session.completed_at
-                  ? "Finished"
-                  : hasAnyCompletedSets(session.id)
-                  ? "In progress"
-                  : "Not started";
+                const status = session.completed_at ? "Finished" : "Not started";
                 const timestamp = new Date(session.completed_at ?? session.started_at).toLocaleString(
                   "en-US",
                   { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }
