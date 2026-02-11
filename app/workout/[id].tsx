@@ -301,7 +301,7 @@ export default function WorkoutDetailScreen() {
 
               <Pressable
                 onPress={() => handleStartSession(nextSession.id)}
-                className="bg-primary rounded-xl py-3 px-6 active:scale-[0.98]"
+                className="bg-primary rounded-xl py-3 px-6 active:scale-[0.98] w-full"
                 accessibilityRole="button"
                 accessibilityLabel={`${inProgressSession ? "Continue" : "Start"} ${nextSession.name}`}
                 testID="start-session-button"
@@ -313,27 +313,26 @@ export default function WorkoutDetailScreen() {
                   </Text>
                 </View>
               </Pressable>
+
+              <Text className="text-text-muted text-sm text-center mt-3">
+                Or just start single exercise
+              </Text>
+
+              <Pressable
+                onPress={handleStartSingleWorkout}
+                className="rounded-xl py-3 px-6 border border-primary/40 bg-primary/5 active:scale-[0.98] w-full"
+                accessibilityRole="button"
+                accessibilityLabel="Start a quick workout"
+              >
+                <View className="flex-row items-center justify-center gap-2">
+                  <MaterialIcons name="bolt" size={20} color="#13ec6d" />
+                  <Text className="text-primary font-bold">
+                    Quick workout
+                  </Text>
+                </View>
+              </Pressable>
             </View>
           )}
-
-          <View className="border-t border-white/5 pt-4 mt-2">
-            <Text className="text-text-muted text-sm mb-3">
-              Start an ad hoc workout from this plan
-            </Text>
-            <Pressable
-              onPress={handleStartSingleWorkout}
-              className="rounded-xl py-3 px-6 border border-primary/40 bg-primary/5 active:scale-[0.98] self-start"
-              accessibilityRole="button"
-              accessibilityLabel="Start a quick workout"
-            >
-              <View className="flex-row items-center justify-center gap-2">
-                <MaterialIcons name="bolt" size={20} color="#13ec6d" />
-                <Text className="text-primary font-bold">
-                  Quick workout
-                </Text>
-              </View>
-            </Pressable>
-          </View>
         </View>
 
         {/* Sessions List */}
