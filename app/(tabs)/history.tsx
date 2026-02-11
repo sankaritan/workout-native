@@ -488,7 +488,7 @@ export default function HistoryScreen() {
                       <View className="flex-1 min-w-0">
                         <View className="flex-row justify-between items-start">
                           <Text className="font-semibold text-base text-white flex-1 pr-2">
-                            {session.template?.name || "Workout Session"}
+                            {session.template?.name || session.name || "Workout Session"}
                           </Text>
                           <Text className="text-xs font-medium text-gray-400">
                             {startTime}

@@ -13,8 +13,10 @@ import {
   getWorkoutPlanById,
   getSessionTemplatesByPlanId,
   getCompletedSessionsByPlanId,
+  getSingleSessionsByPlanId,
   getInProgressSessionByPlanId,
   hasAnyCompletedSets,
+  getExerciseById,
   isStorageInitialized,
 } from "@/lib/storage/storage";
 import type { WorkoutPlan, WorkoutSessionTemplate, WorkoutSessionCompleted } from "@/lib/storage/types";
@@ -26,8 +28,10 @@ export default function WorkoutDetailScreen() {
   const [plan, setPlan] = useState<WorkoutPlan | null>(null);
   const [sessions, setSessions] = useState<WorkoutSessionTemplate[]>([]);
   const [completedSessions, setCompletedSessions] = useState<WorkoutSessionCompleted[]>([]);
+  const [singleSessions, setSingleSessions] = useState<WorkoutSessionCompleted[]>([]);
   const [inProgressSession, setInProgressSession] = useState<WorkoutSessionCompleted | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"plan" | "single">("plan");
 
   useEffect(() => {
     loadWorkoutData();
@@ -39,6 +43,12 @@ export default function WorkoutDetailScreen() {
       loadWorkoutData();
     }, [id])
   );
+
+  useEffect(() => {
+    if (singleSessions.length === 0 && activeTab === "single") {
+      setActiveTab("plan");
+    }
+  }, [singleSessions, activeTab]);
 
   const loadWorkoutData = () => {
     try {
@@ -65,11 +75,15 @@ export default function WorkoutDetailScreen() {
         setSessions(planSessions);
 
         // Get completed sessions
-        const completed = getCompletedSessionsByPlanId(workoutPlan.id);
+        const completed = getCompletedSessionsByPlanId(workoutPlan.id, "plan");
         setCompletedSessions(completed);
 
+        // Get single (ad hoc) sessions
+        const singles = getSingleSessionsByPlanId(workoutPlan.id);
+        setSingleSessions(singles);
+
         // Get in-progress session (started but not finished)
-        const inProgress = getInProgressSessionByPlanId(workoutPlan.id);
+        const inProgress = getInProgressSessionByPlanId(workoutPlan.id, "plan");
         setInProgressSession(inProgress);
       }
 
@@ -82,6 +96,15 @@ export default function WorkoutDetailScreen() {
 
   const handleStartSession = (sessionId: number) => {
     router.push(`/session/${sessionId}`);
+  };
+
+  const handleStartSingleWorkout = () => {
+    if (!plan) return;
+    router.push(`/workout/${plan.id}/single`);
+  };
+
+  const handleOpenSingleSession = (sessionId: number) => {
+    router.push(`/single-session/${sessionId}`);
   };
 
   const handleBack = () => {
@@ -153,7 +176,9 @@ export default function WorkoutDetailScreen() {
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    return completedSessions.filter(s => {
+    const allSessions = [...completedSessions, ...singleSessions];
+
+    return allSessions.filter(s => {
       if (!s.completed_at) return false;
       const completedDate = new Date(s.completed_at);
       return completedDate >= firstDayOfMonth;
@@ -197,6 +222,7 @@ export default function WorkoutDetailScreen() {
   const progress = calculateProgress();
   const currentWeek = getCurrentWeek();
   const monthlyWorkouts = getMonthlyStats();
+  const hasSingleSessions = singleSessions.length > 0;
 
   return (
     <ScrollView
@@ -289,65 +315,179 @@ export default function WorkoutDetailScreen() {
               </Pressable>
             </View>
           )}
+
+          <View className="border-t border-white/5 pt-4 mt-2">
+            <Text className="text-text-muted text-sm mb-3">
+              Start an ad hoc workout from this plan
+            </Text>
+            <Pressable
+              onPress={handleStartSingleWorkout}
+              className="bg-primary rounded-xl py-3 px-6 active:scale-[0.98]"
+              accessibilityRole="button"
+              accessibilityLabel="Start a single workout"
+            >
+              <View className="flex-row items-center justify-center gap-2">
+                <MaterialIcons name="bolt" size={20} color="#102218" />
+                <Text className="text-background-dark font-bold">
+                  Start single workout
+                </Text>
+              </View>
+            </Pressable>
+          </View>
         </View>
 
-        {/* All Sessions List */}
+        {/* Sessions List */}
         <View className="mb-6">
-          <Text className="text-xl font-bold text-white mb-4">
-            All Sessions
+          <Text className="text-xl font-bold text-white mb-3">
+            Sessions
           </Text>
-          <View className="gap-3">
-            {sessions
-              .sort((a, b) => a.sequence_order - b.sequence_order)
-              .map((session) => {
-                const isCompleted = isSessionCompleted(session.id);
-                const isNext = nextSession?.id === session.id;
+
+          <View className="flex-row bg-surface-dark rounded-2xl border border-white/5 p-1 mb-4">
+            <Pressable
+              onPress={() => setActiveTab("plan")}
+              className={cn(
+                "flex-1 py-3 rounded-xl items-center",
+                activeTab === "plan" ? "bg-primary" : "bg-transparent"
+              )}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: activeTab === "plan" }}
+            >
+              <Text
+                className={cn(
+                  "font-bold",
+                  activeTab === "plan" ? "text-background-dark" : "text-white"
+                )}
+              >
+                Plan sessions
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => hasSingleSessions && setActiveTab("single")}
+              disabled={!hasSingleSessions}
+              className={cn(
+                "flex-1 py-3 rounded-xl items-center",
+                activeTab === "single" ? "bg-primary" : "bg-transparent",
+                !hasSingleSessions && "opacity-40"
+              )}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: activeTab === "single", disabled: !hasSingleSessions }}
+            >
+              <Text
+                className={cn(
+                  "font-bold",
+                  activeTab === "single" ? "text-background-dark" : "text-white"
+                )}
+              >
+                Single sessions
+              </Text>
+            </Pressable>
+          </View>
+
+          {activeTab === "plan" ? (
+            <View className="gap-3">
+              {sessions
+                .sort((a, b) => a.sequence_order - b.sequence_order)
+                .map((session) => {
+                  const isCompleted = isSessionCompleted(session.id);
+                  const isNext = nextSession?.id === session.id;
+
+                  return (
+                    <Pressable
+                      key={session.id}
+                      onPress={() => handleStartSession(session.id)}
+                      className={cn(
+                        "bg-surface-dark rounded-xl p-4 border active:scale-[0.98]",
+                        isNext ? "border-primary/30" : "border-white/5"
+                      )}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${session.name} ${isCompleted ? 'completed' : ''}`}
+                    >
+                      <View className="flex-row items-center justify-between">
+                        <View className="flex-1">
+                          <View className="flex-row items-center gap-2 mb-1">
+                            <Text className="text-white font-bold text-lg">
+                              {session.name}
+                            </Text>
+                            {isNext && !isCompleted && (
+                              <View className="bg-primary/20 px-2 py-1 rounded">
+                                <Text className="text-primary text-xs font-bold">
+                                  NEXT
+                                </Text>
+                              </View>
+                            )}
+                          </View>
+                          <Text className="text-text-muted text-sm">
+                            Session {session.sequence_order} • {session.estimated_duration_minutes} min
+                          </Text>
+                          {isCompleted && (
+                            <View className="flex-row items-center gap-1 mt-1">
+                              <MaterialIcons name="check-circle" size={16} color="#13ec6d" />
+                              <Text className="text-primary text-xs">Done this week</Text>
+                            </View>
+                          )}
+                        </View>
+                        <MaterialIcons
+                          name="chevron-right"
+                          size={24}
+                          color={isNext ? "#13ec6d" : "#9db9a8"}
+                        />
+                      </View>
+                    </Pressable>
+                  );
+                })}
+            </View>
+          ) : (
+            <View className="gap-3">
+              {!hasSingleSessions && (
+                <Text className="text-text-muted text-sm">
+                  No single sessions yet. Start one to see it here.
+                </Text>
+              )}
+              {singleSessions.map((session) => {
+                const exercise =
+                  session.exercise_id !== undefined && session.exercise_id !== null
+                    ? getExerciseById(session.exercise_id)
+                    : null;
+                const title = session.name || exercise?.name || "Single workout";
+                const status = session.completed_at
+                  ? "Finished"
+                  : hasAnyCompletedSets(session.id)
+                  ? "In progress"
+                  : "Not started";
+                const timestamp = new Date(session.completed_at ?? session.started_at).toLocaleString(
+                  "en-US",
+                  { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }
+                );
 
                 return (
                   <Pressable
                     key={session.id}
-                    onPress={() => handleStartSession(session.id)}
-                    className={cn(
-                      "bg-surface-dark rounded-xl p-4 border active:scale-[0.98]",
-                      isNext ? "border-primary/30" : "border-white/5"
-                    )}
+                    onPress={() => handleOpenSingleSession(session.id)}
+                    className="bg-surface-dark rounded-xl p-4 border border-white/5 active:scale-[0.98]"
                     accessibilityRole="button"
-                    accessibilityLabel={`${session.name} ${isCompleted ? 'completed' : ''}`}
+                    accessibilityLabel={`${title} ${status}`}
                   >
                     <View className="flex-row items-center justify-between">
-                      <View className="flex-1">
+                      <View className="flex-1 mr-3">
                         <View className="flex-row items-center gap-2 mb-1">
-                          <Text className="text-white font-bold text-lg">
-                            {session.name}
+                          <MaterialIcons name="bolt" size={18} color="#13ec6d" />
+                          <Text className="text-white font-bold text-lg" numberOfLines={1}>
+                            {title}
                           </Text>
-                          {isNext && !isCompleted && (
-                            <View className="bg-primary/20 px-2 py-1 rounded">
-                              <Text className="text-primary text-xs font-bold">
-                                NEXT
-                              </Text>
-                            </View>
-                          )}
                         </View>
-                        <Text className="text-text-muted text-sm">
-                          Session {session.sequence_order} • {session.estimated_duration_minutes} min
+                        <Text className="text-text-muted text-sm" numberOfLines={1}>
+                          {(exercise?.equipment_required || "Bodyweight") + " • " + status}
                         </Text>
-                        {isCompleted && (
-                          <View className="flex-row items-center gap-1 mt-1">
-                            <MaterialIcons name="check-circle" size={16} color="#13ec6d" />
-                            <Text className="text-primary text-xs">Done this week</Text>
-                          </View>
-                        )}
+                        <Text className="text-xs text-gray-500 mt-1">{timestamp}</Text>
                       </View>
-                      <MaterialIcons
-                        name="chevron-right"
-                        size={24}
-                        color={isNext ? "#13ec6d" : "#9db9a8"}
-                      />
+                      <MaterialIcons name="chevron-right" size={22} color="#9db9a8" />
                     </View>
                   </Pressable>
                 );
               })}
-          </View>
+            </View>
+          )}
         </View>
 
 

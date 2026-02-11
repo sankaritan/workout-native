@@ -13,6 +13,7 @@ import type {
   WorkoutSessionTemplate,
   SessionExerciseTemplate,
   WorkoutSessionCompleted,
+  WorkoutSessionType,
   ExerciseSetCompleted,
   ExerciseInsert,
   WorkoutPlanInsert,
@@ -120,7 +121,17 @@ export async function initStorage(): Promise<void> {
     cache.workoutPlans = workoutPlansJson[1] ? JSON.parse(workoutPlansJson[1]) : [];
     cache.sessionTemplates = sessionTemplatesJson[1] ? JSON.parse(sessionTemplatesJson[1]) : [];
     cache.exerciseTemplates = exerciseTemplatesJson[1] ? JSON.parse(exerciseTemplatesJson[1]) : [];
-    cache.completedSessions = completedSessionsJson[1] ? JSON.parse(completedSessionsJson[1]) : [];
+
+    const completedSessionsRaw: WorkoutSessionCompleted[] = completedSessionsJson[1]
+      ? JSON.parse(completedSessionsJson[1])
+      : [];
+    cache.completedSessions = completedSessionsRaw.map((session) => ({
+      session_type: "plan",
+      exercise_id: null,
+      name: null,
+      ...session,
+    }));
+
     cache.completedSets = completedSetsJson[1] ? JSON.parse(completedSetsJson[1]) : [];
     cache.idCounters = idCountersJson[1]
       ? JSON.parse(idCountersJson[1])
@@ -340,20 +351,59 @@ export function insertExerciseTemplate(template: SessionExerciseTemplateInsert):
   return id;
 }
 
+export function getPlanExercises(planId: number): Exercise[] {
+  ensureInitialized();
+  const sessionTemplates = getSessionTemplatesByPlanId(planId);
+  const exerciseIds = new Set<number>();
+
+  sessionTemplates.forEach((session) => {
+    const sessionExercises = getExerciseTemplatesBySessionId(session.id);
+    sessionExercises.forEach((exercise) => {
+      exerciseIds.add(exercise.exercise_id);
+    });
+  });
+
+  return Array.from(exerciseIds)
+    .map((exerciseId) => getExerciseById(exerciseId))
+    .filter((exercise): exercise is Exercise => Boolean(exercise))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 // ============================================================================
 // Completed Workout Session queries
 // ============================================================================
 
-export function getCompletedSessionsByPlanId(planId: number): WorkoutSessionCompleted[] {
+export function getCompletedSessionsByPlanId(
+  planId: number,
+  sessionType: WorkoutSessionType | "all" = "plan"
+): WorkoutSessionCompleted[] {
   ensureInitialized();
-  return cache.completedSessions
-    .filter((s) => s.workout_plan_id === planId)
-    .sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime());
+  let sessions = cache.completedSessions.filter((s) => s.workout_plan_id === planId);
+
+  if (sessionType !== "all") {
+    sessions = sessions.filter(
+      (s) => (s.session_type ?? "plan") === sessionType
+    );
+  }
+
+  return sessions.sort(
+    (a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime()
+  );
 }
 
 export function getCompletedSessionById(id: number): WorkoutSessionCompleted | null {
   ensureInitialized();
   return cache.completedSessions.find((s) => s.id === id) ?? null;
+}
+
+export function getSingleSessionById(id: number): WorkoutSessionCompleted | null {
+  const session = getCompletedSessionById(id);
+  if (!session) return null;
+  return (session.session_type ?? "plan") === "single" ? session : null;
+}
+
+export function getSingleSessionsByPlanId(planId: number): WorkoutSessionCompleted[] {
+  return getCompletedSessionsByPlanId(planId, "single");
 }
 
 /**
@@ -409,7 +459,16 @@ export function getAllCompletedSessions(): WorkoutSessionCompleted[] {
 export function insertCompletedSession(session: WorkoutSessionCompletedInsert): number {
   ensureInitialized();
   const id = getNextId("completedSessions");
-  const newSession: WorkoutSessionCompleted = { ...session, id };
+  const newSession: WorkoutSessionCompleted = {
+    session_type: "plan",
+    exercise_id: null,
+    name: null,
+    ...session,
+    id,
+    session_type: session.session_type ?? "plan",
+    exercise_id: session.exercise_id ?? null,
+    name: session.name ?? null,
+  };
   cache.completedSessions.push(newSession);
   persistCache().catch(console.error);
   return id;
@@ -429,14 +488,25 @@ export function updateCompletedSession(
   }
 }
 
+export function deleteCompletedSession(sessionId: number): void {
+  ensureInitialized();
+  cache.completedSessions = cache.completedSessions.filter((s) => s.id !== sessionId);
+  cache.completedSets = cache.completedSets.filter((s) => s.completed_session_id !== sessionId);
+  persistCache().catch(console.error);
+}
+
 /**
  * Get in-progress session for a plan (started but not completed)
  * Returns the most recently started session that has completed_at = null
  */
-export function getInProgressSessionByPlanId(planId: number): WorkoutSessionCompleted | null {
+export function getInProgressSessionByPlanId(
+  planId: number,
+  sessionType: WorkoutSessionType | "all" = "plan"
+): WorkoutSessionCompleted | null {
   ensureInitialized();
   const inProgressSessions = cache.completedSessions
     .filter((s) => s.workout_plan_id === planId && s.completed_at === null)
+    .filter((s) => sessionType === "all" || (s.session_type ?? "plan") === sessionType)
     .sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime());
   return inProgressSessions[0] ?? null;
 }
@@ -456,8 +526,31 @@ export function hasAnyCompletedSets(completedSessionId: number): boolean {
 export function getInProgressSessionByTemplateId(sessionTemplateId: number): WorkoutSessionCompleted | null {
   ensureInitialized();
   const inProgressSessions = cache.completedSessions
-    .filter((s) => s.session_template_id === sessionTemplateId && s.completed_at === null)
+    .filter(
+      (s) =>
+        s.session_template_id === sessionTemplateId &&
+        s.completed_at === null &&
+        (s.session_type ?? "plan") === "plan"
+    )
     .sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime());
+  return inProgressSessions[0] ?? null;
+}
+
+export function getInProgressSingleSessionByExercise(
+  planId: number,
+  exerciseId: number
+): WorkoutSessionCompleted | null {
+  ensureInitialized();
+  const inProgressSessions = cache.completedSessions
+    .filter(
+      (s) =>
+        (s.session_type ?? "plan") === "single" &&
+        s.workout_plan_id === planId &&
+        s.exercise_id === exerciseId &&
+        s.completed_at === null
+    )
+    .sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime());
+
   return inProgressSessions[0] ?? null;
 }
 
