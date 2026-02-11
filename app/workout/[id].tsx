@@ -320,7 +320,7 @@ export default function WorkoutDetailScreen() {
 
               <Pressable
                 onPress={handleStartSingleWorkout}
-                className="rounded-xl py-3 px-6 border border-primary/40 bg-primary/5 active:scale-[0.98] w-full"
+                className="rounded-xl py-3 px-6 border border-primary/40 bg-primary/5 active:scale-[0.98] w-full mt-3"
                 accessibilityRole="button"
                 accessibilityLabel="Start a quick workout"
               >
