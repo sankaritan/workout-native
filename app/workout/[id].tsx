@@ -322,7 +322,7 @@ export default function WorkoutDetailScreen() {
             </Text>
             <Pressable
               onPress={handleStartSingleWorkout}
-              className="rounded-xl py-3 px-6 border border-primary/40 bg-primary/5 active:scale-[0.98]"
+              className="rounded-xl py-3 px-6 border border-primary/40 bg-primary/5 active:scale-[0.98] self-start"
               accessibilityRole="button"
               accessibilityLabel="Start a quick workout"
             >
