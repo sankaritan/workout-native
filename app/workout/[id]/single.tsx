@@ -44,7 +44,7 @@ export default function SingleWorkoutListScreen() {
         setExercises(planExercises);
       }
     } catch (error) {
-      console.error("Failed to load single workout data:", error);
+      console.error("Failed to load quick workout data:", error);
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +77,7 @@ export default function SingleWorkoutListScreen() {
         notes: null,
         session_type: "single",
         exercise_id: exerciseId,
-        name: exercise?.name ?? "Single workout",
+        name: exercise?.name ?? "Quick workout",
       });
 
     router.push({
@@ -136,7 +136,7 @@ export default function SingleWorkoutListScreen() {
               {plan.name}
             </Text>
             <Text className="text-2xl font-bold text-white">
-              Single Workouts
+              Quick Workout
             </Text>
           </View>
         </View>
@@ -156,7 +156,7 @@ export default function SingleWorkoutListScreen() {
               No exercises found
             </Text>
             <Text className="text-text-muted">
-              Add exercises to this plan to start a single workout.
+              Add exercises to this plan to start a quick workout.
             </Text>
           </View>
         ) : (
@@ -167,7 +167,7 @@ export default function SingleWorkoutListScreen() {
                 onPress={() => handleExercisePress(exercise.id)}
                 className="active:scale-[0.99]"
                 accessibilityRole="button"
-                accessibilityLabel={`Start single workout with ${exercise.name}`}
+                accessibilityLabel={`Start quick workout with ${exercise.name}`}
               >
                 <ExerciseCardWithActions
                   exercise={exercise}

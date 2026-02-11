@@ -175,14 +175,29 @@ export default function SingleSessionScreen() {
     [exercise, exerciseSets, session]
   );
 
+  const goBack = useCallback(
+    (fallbackPlanId?: number) => {
+      if (router.canGoBack()) {
+        router.back();
+        return;
+      }
+      if (fallbackPlanId) {
+        router.replace(`/workout/${fallbackPlanId}/single`);
+        return;
+      }
+      router.replace("/");
+    },
+    []
+  );
+
   const handleBack = useCallback(() => {
     if (!session) {
-      router.replace("/");
+      goBack();
       return;
     }
 
     if (isViewingCompletedSession) {
-      router.replace(`/workout/${session.workout_plan_id}/single`);
+      goBack(session.workout_plan_id);
       return;
     }
 
@@ -192,8 +207,8 @@ export default function SingleSessionScreen() {
       persistSets(false);
     }
 
-    router.replace(`/workout/${session.workout_plan_id}/single`);
-  }, [hasCompletedSets, isViewingCompletedSession, persistSets, session]);
+    goBack(session.workout_plan_id);
+  }, [goBack, hasCompletedSets, isViewingCompletedSession, persistSets, session]);
 
   const handleFinish = useCallback(() => {
     if (isViewingCompletedSession) {
@@ -240,7 +255,7 @@ export default function SingleSessionScreen() {
 
           <View className="flex-col flex-1 items-center">
             <Text className="text-sm font-medium text-text-muted uppercase tracking-wider">
-              Single Workout
+              Quick Workout
             </Text>
             <Text className="text-lg font-bold text-white" numberOfLines={1}>
               {session.name || exercise.name}

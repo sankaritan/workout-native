@@ -322,14 +322,14 @@ export default function WorkoutDetailScreen() {
             </Text>
             <Pressable
               onPress={handleStartSingleWorkout}
-              className="bg-primary rounded-xl py-3 px-6 active:scale-[0.98]"
+              className="rounded-xl py-3 px-6 border border-primary/40 bg-primary/5 active:scale-[0.98]"
               accessibilityRole="button"
-              accessibilityLabel="Start a single workout"
+              accessibilityLabel="Start a quick workout"
             >
               <View className="flex-row items-center justify-center gap-2">
-                <MaterialIcons name="bolt" size={20} color="#102218" />
-                <Text className="text-background-dark font-bold">
-                  Start single workout
+                <MaterialIcons name="bolt" size={20} color="#13ec6d" />
+                <Text className="text-primary font-bold">
+                  Quick workout
                 </Text>
               </View>
             </Pressable>
@@ -379,7 +379,7 @@ export default function WorkoutDetailScreen() {
                   activeTab === "single" ? "text-background-dark" : "text-white"
                 )}
               >
-                Single sessions
+                Quick workouts
               </Text>
             </Pressable>
           </View>
@@ -441,7 +441,7 @@ export default function WorkoutDetailScreen() {
             <View className="gap-3">
               {!hasSingleSessions && (
                 <Text className="text-text-muted text-sm">
-                  No single sessions yet. Start one to see it here.
+                  No quick workouts yet. Start one to see it here.
                 </Text>
               )}
               {singleSessions.map((session) => {
@@ -449,7 +449,7 @@ export default function WorkoutDetailScreen() {
                   session.exercise_id !== undefined && session.exercise_id !== null
                     ? getExerciseById(session.exercise_id)
                     : null;
-                const title = session.name || exercise?.name || "Single workout";
+                const title = session.name || exercise?.name || "Quick workout";
                 const status = session.completed_at
                   ? "Finished"
                   : hasAnyCompletedSets(session.id)
