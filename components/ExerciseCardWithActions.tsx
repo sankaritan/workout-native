@@ -24,6 +24,8 @@ export interface ExerciseCardWithActionsProps {
   canRemove: boolean;
   /** Whether to show muscle group badges */
   showMuscleGroupBadges?: boolean;
+  /** Whether to render swap/remove action buttons */
+  showActions?: boolean;
   /** Optional testID for testing */
   testID?: string;
 }
@@ -38,6 +40,7 @@ export function ExerciseCardWithActions({
   onRemove,
   canRemove,
   showMuscleGroupBadges = false,
+  showActions = true,
   testID,
 }: ExerciseCardWithActionsProps) {
   return (
@@ -46,7 +49,7 @@ export function ExerciseCardWithActions({
       className="flex-row items-start bg-surface-dark rounded-xl p-3 mb-2"
     >
       {/* Exercise Info */}
-      <View className="flex-1 mr-2">
+      <View className={cn("flex-1", showActions && "mr-2")}>
         <View className="flex-row items-start justify-between mb-1">
           <Text className="text-white font-semibold flex-1 mr-2">
             {exercise.name}
@@ -65,38 +68,40 @@ export function ExerciseCardWithActions({
       </View>
 
       {/* Action Buttons */}
-      <View className="flex-row items-center gap-1">
-        {/* Swap Button */}
-        <Pressable
-          testID="swap-button"
-          onPress={onSwap}
-          accessibilityLabel="Swap exercise"
-          accessibilityRole="button"
-          className="p-2 rounded-lg active:bg-white/10"
-        >
-          <MaterialIcons name="swap-horiz" size={22} color={theme.colors.text.muted } />
-        </Pressable>
+      {showActions && (
+        <View className="flex-row items-center gap-1">
+          {/* Swap Button */}
+          <Pressable
+            testID="swap-button"
+            onPress={onSwap}
+            accessibilityLabel="Swap exercise"
+            accessibilityRole="button"
+            className="p-2 rounded-lg active:bg-white/10"
+          >
+            <MaterialIcons name="swap-horiz" size={22} color={theme.colors.text.muted } />
+          </Pressable>
 
-        {/* Remove Button */}
-        <Pressable
-          testID="remove-button"
-          onPress={canRemove ? onRemove : undefined}
-          disabled={!canRemove}
-          accessibilityLabel="Remove exercise"
-          accessibilityRole="button"
-          accessibilityState={{ disabled: !canRemove }}
-          className={cn(
-            "p-2 rounded-lg active:bg-white/10",
-            !canRemove && "opacity-30"
-          )}
-        >
-          <MaterialIcons
-            name="close"
-            size={22}
-            color={canRemove ? theme.colors.danger.DEFAULT : theme.colors.text.muted}
-          />
-        </Pressable>
-      </View>
+          {/* Remove Button */}
+          <Pressable
+            testID="remove-button"
+            onPress={canRemove ? onRemove : undefined}
+            disabled={!canRemove}
+            accessibilityLabel="Remove exercise"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: !canRemove }}
+            className={cn(
+              "p-2 rounded-lg active:bg-white/10",
+              !canRemove && "opacity-30"
+            )}
+          >
+            <MaterialIcons
+              name="close"
+              size={22}
+              color={canRemove ? theme.colors.danger.DEFAULT : theme.colors.text.muted}
+            />
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }

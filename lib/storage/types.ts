@@ -78,6 +78,8 @@ export interface SessionExerciseTemplate {
 }
 
 // Completed Workout Sessions
+export type WorkoutSessionType = "plan" | "single";
+
 export interface WorkoutSessionCompleted {
   id: number;
   workout_plan_id: number;
@@ -85,6 +87,9 @@ export interface WorkoutSessionCompleted {
   started_at: string; // ISO datetime string
   completed_at: string | null; // ISO datetime string
   notes: string | null;
+  session_type?: WorkoutSessionType;
+  exercise_id?: number | null;
+  name?: string | null;
 }
 
 // Completed Exercise Sets

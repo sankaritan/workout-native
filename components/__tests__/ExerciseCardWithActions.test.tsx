@@ -167,4 +167,19 @@ describe("ExerciseCardWithActions", () => {
     );
     expect(screen.getByTestId("test-card")).toBeTruthy();
   });
+
+  it("hides action buttons when showActions is false", () => {
+    render(
+      <ExerciseCardWithActions
+        exercise={mockCompoundExercise}
+        onSwap={mockOnSwap}
+        onRemove={mockOnRemove}
+        canRemove={true}
+        showActions={false}
+      />
+    );
+
+    expect(screen.queryByTestId("swap-button")).toBeNull();
+    expect(screen.queryByTestId("remove-button")).toBeNull();
+  });
 });
