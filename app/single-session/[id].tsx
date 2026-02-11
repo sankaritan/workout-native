@@ -222,7 +222,7 @@ export default function SingleSessionScreen() {
 
     persistSets(true);
     if (session) {
-      router.replace(`/workout/${session.workout_plan_id}/single`);
+      router.replace(`/workout/${session.workout_plan_id}`);
     } else {
       router.replace("/");
     }
