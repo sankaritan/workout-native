@@ -11,7 +11,10 @@ import {
   getStravaSyncApiBaseUrl,
   registerStravaInstall,
 } from "@/lib/strava/client";
-import { retryPendingStravaSyncs } from "@/lib/strava/sync";
+import {
+  retryPendingStravaSyncs,
+  syncAllCompletedSessionsToStravaWithProgress,
+} from "@/lib/strava/sync";
 import {
   clearStravaConnectionState,
   getStravaConnectionState,
@@ -26,7 +29,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import { useFocusEffect } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
@@ -41,6 +44,11 @@ export default function SettingsScreen() {
   const [stravaLastSyncAt, setStravaLastSyncAt] = useState<string | null>(null);
   const [stravaLastSyncError, setStravaLastSyncError] = useState<string | null>(null);
   const [isStravaBusy, setIsStravaBusy] = useState(false);
+  const [syncAllProgress, setSyncAllProgress] = useState<{
+    processed: number;
+    total: number;
+    succeeded: number;
+  } | null>(null);
 
   const loadDataStats = () => {
     try {
@@ -156,10 +164,14 @@ export default function SettingsScreen() {
         install_id: installId,
         sync_token: registration.sync_token,
       });
-      await setStravaSyncEnabled(true);
-      setStravaEnabled(true);
       setStravaInstallId(installId);
       setStravaSyncToken(registration.sync_token);
+
+      if (Platform.OS === "web" && typeof window !== "undefined") {
+        setSuccessMessage("Redirecting to Strava...");
+        window.location.assign(registration.connect_url);
+        return;
+      }
 
       await WebBrowser.openBrowserAsync(registration.connect_url);
       const connected = await reconcileStravaConnectionStatus(installId, registration.sync_token);
@@ -198,6 +210,28 @@ export default function SettingsScreen() {
       showAlert("Error", "Failed to disconnect Strava.");
     } finally {
       setIsStravaBusy(false);
+    }
+  };
+
+  const handleSyncAllHistory = async () => {
+    try {
+      setIsStravaBusy(true);
+      setSyncAllProgress({ processed: 0, total: 0, succeeded: 0 });
+      const result = await syncAllCompletedSessionsToStravaWithProgress((progress) => {
+        setSyncAllProgress(progress);
+      });
+      if (result.attempted === 0) {
+        setSuccessMessage("No completed sessions to sync or Strava is not connected.");
+      } else {
+        setSuccessMessage(`✓ Synced ${result.succeeded}/${result.attempted} sessions to Strava.`);
+      }
+      await loadStravaSettings();
+    } catch (error) {
+      console.error("Failed to sync all Strava history:", error);
+      showAlert("Error", "Failed to sync workout history to Strava.");
+    } finally {
+      setIsStravaBusy(false);
+      setSyncAllProgress(null);
     }
   };
 
@@ -507,6 +541,11 @@ export default function SettingsScreen() {
                   Last sync error: {stravaLastSyncError}
                 </Text>
               )}
+              {syncAllProgress && syncAllProgress.total > 0 && (
+                <Text className="text-xs text-blue-300 mt-1">
+                  Syncing history: {syncAllProgress.processed}/{syncAllProgress.total} (success: {syncAllProgress.succeeded})
+                </Text>
+              )}
             </View>
 
             {!stravaConnected ? (
@@ -525,20 +564,37 @@ export default function SettingsScreen() {
                 </View>
               </Pressable>
             ) : (
-              <Pressable
-                onPress={handleDisconnectStrava}
-                disabled={isStravaBusy}
-                className="bg-red-500/20 border border-red-500/30 rounded-xl py-3 px-6 active:scale-[0.98]"
-                accessibilityRole="button"
-                accessibilityLabel="Disconnect Strava"
-              >
-                <View className="flex-row items-center justify-center gap-2">
-                  <MaterialIcons name="link-off" size={20} color="#ef4444" />
-                  <Text className="text-red-400 font-bold">
-                    {isStravaBusy ? "Disconnecting..." : "Disconnect Strava"}
-                  </Text>
-                </View>
-              </Pressable>
+              <View className="gap-3">
+                <Pressable
+                  onPress={handleSyncAllHistory}
+                  disabled={isStravaBusy}
+                  className="bg-blue-500/20 border border-blue-500/30 rounded-xl py-3 px-6 active:scale-[0.98]"
+                  accessibilityRole="button"
+                  accessibilityLabel="Sync all history to Strava"
+                >
+                  <View className="flex-row items-center justify-center gap-2">
+                    <MaterialIcons name="history" size={20} color="#3b82f6" />
+                    <Text className="text-blue-400 font-bold">
+                      {isStravaBusy ? "Syncing..." : "Sync All History"}
+                    </Text>
+                  </View>
+                </Pressable>
+
+                <Pressable
+                  onPress={handleDisconnectStrava}
+                  disabled={isStravaBusy}
+                  className="bg-red-500/20 border border-red-500/30 rounded-xl py-3 px-6 active:scale-[0.98]"
+                  accessibilityRole="button"
+                  accessibilityLabel="Disconnect Strava"
+                >
+                  <View className="flex-row items-center justify-center gap-2">
+                    <MaterialIcons name="link-off" size={20} color="#ef4444" />
+                    <Text className="text-red-400 font-bold">
+                      {isStravaBusy ? "Disconnecting..." : "Disconnect Strava"}
+                    </Text>
+                  </View>
+                </Pressable>
+              </View>
             )}
           </View>
         </View>

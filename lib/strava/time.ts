@@ -26,7 +26,7 @@ export function formatWorkoutActivityName(completedAtIso: string): string {
   const date = new Date(completedAtIso);
   const month = toTwoDigits(date.getMonth() + 1);
   const day = toTwoDigits(date.getDate());
-  return `Workout ${month}-${day}`;
+  return `Training ${month}-${day}`;
 }
 
 export function buildStravaIdempotencyKey(

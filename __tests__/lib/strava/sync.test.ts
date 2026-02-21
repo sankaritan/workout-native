@@ -1,6 +1,8 @@
 import {
   syncCompletedSessionToStrava,
   retryPendingStravaSyncs,
+  syncAllCompletedSessionsToStrava,
+  syncAllCompletedSessionsToStravaWithProgress,
 } from "@/lib/strava/sync";
 import {
   getStravaConnectionState,
@@ -13,6 +15,10 @@ import {
   getStravaSyncOutbox,
   removeOutboxItemByIdempotencyKey,
 } from "@/lib/strava/outbox";
+import {
+  getAllCompletedSessions,
+  getCompletedSetsBySessionId,
+} from "@/lib/storage/storage";
 
 jest.mock("@/lib/storage/preferences", () => ({
   getStravaConnectionState: jest.fn(),
@@ -30,6 +36,11 @@ jest.mock("@/lib/strava/outbox", () => ({
   removeOutboxItemByIdempotencyKey: jest.fn(),
 }));
 
+jest.mock("@/lib/storage/storage", () => ({
+  getAllCompletedSessions: jest.fn(),
+  getCompletedSetsBySessionId: jest.fn(),
+}));
+
 describe("strava sync orchestration", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -43,6 +54,8 @@ describe("strava sync orchestration", () => {
     });
     (getStravaSyncOutbox as jest.Mock).mockResolvedValue([]);
     (postStravaSessionSync as jest.Mock).mockResolvedValue(undefined);
+    (getAllCompletedSessions as jest.Mock).mockReturnValue([]);
+    (getCompletedSetsBySessionId as jest.Mock).mockReturnValue([]);
   });
 
   it("does not sync when disabled", async () => {
@@ -70,7 +83,7 @@ describe("strava sync orchestration", () => {
       "token-1",
       expect.objectContaining({
         installId: "install-1",
-        activityName: "Workout 02-21",
+        activityName: "Training 02-21",
         sportType: "WeightTraining",
         elapsedSeconds: 720,
         startTimeIso: "2026-02-21T13:48:00.000Z",
@@ -122,5 +135,55 @@ describe("strava sync orchestration", () => {
 
     expect(postStravaSessionSync).toHaveBeenCalledTimes(1);
     expect(removeOutboxItemByIdempotencyKey).toHaveBeenCalledWith("session-5-2026");
+  });
+
+  it("syncs all history even when auto-sync is disabled", async () => {
+    (getStravaSyncEnabled as jest.Mock).mockResolvedValue(false);
+    (getAllCompletedSessions as jest.Mock).mockReturnValue([
+      {
+        id: 1,
+        completed_at: "2026-02-21T14:00:00.000Z",
+        session_type: "plan",
+      },
+      {
+        id: 2,
+        completed_at: "2026-02-22T14:00:00.000Z",
+        session_type: "single",
+      },
+    ]);
+    (getCompletedSetsBySessionId as jest.Mock).mockImplementation((id: number) =>
+      id === 1 ? [{ id: 11 }, { id: 12 }] : [{ id: 21 }]
+    );
+
+    const result = await syncAllCompletedSessionsToStrava();
+
+    expect(result).toEqual({ attempted: 2, succeeded: 2 });
+    expect(postStravaSessionSync).toHaveBeenCalledTimes(2);
+  });
+
+  it("reports sync-all progress callback", async () => {
+    (getAllCompletedSessions as jest.Mock).mockReturnValue([
+      {
+        id: 1,
+        completed_at: "2026-02-21T14:00:00.000Z",
+        session_type: "plan",
+      },
+      {
+        id: 2,
+        completed_at: "2026-02-22T14:00:00.000Z",
+        session_type: "single",
+      },
+    ]);
+    (getCompletedSetsBySessionId as jest.Mock).mockReturnValue([{ id: 11 }]);
+    const onProgress = jest.fn();
+
+    await syncAllCompletedSessionsToStravaWithProgress(onProgress);
+
+    expect(onProgress).toHaveBeenCalledTimes(2);
+    expect(onProgress).toHaveBeenLastCalledWith({
+      processed: 2,
+      total: 2,
+      succeeded: 2,
+    });
   });
 });

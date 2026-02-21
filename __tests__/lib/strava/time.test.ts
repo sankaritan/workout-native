@@ -19,8 +19,8 @@ describe("strava time helpers", () => {
     expect(timing.elapsedSeconds).toBe(720);
   });
 
-  it("formats activity names as Workout MM-DD", () => {
-    expect(formatWorkoutActivityName("2026-07-04T10:00:00.000Z")).toBe("Workout 07-04");
+  it("formats activity names as Training MM-DD", () => {
+    expect(formatWorkoutActivityName("2026-07-04T10:00:00.000Z")).toBe("Training 07-04");
   });
 
   it("builds deterministic idempotency key", () => {
