@@ -104,7 +104,8 @@ export default function WorkoutDetailScreen() {
   };
 
   const handleOpenSingleSession = (sessionId: number) => {
-    router.push(`/single-session/${sessionId}`);
+    // typedRoutes does not currently include this dynamic route in generated unions.
+    router.push(`/single-session/${sessionId}` as never);
   };
 
   const handleBack = () => {

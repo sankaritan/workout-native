@@ -3,6 +3,7 @@ import {
   seedMockWorkoutHistory,
   seedTestWorkoutPlan,
 } from "@/lib/storage/seed-data";
+import { retryPendingStravaSyncs } from "@/lib/strava/sync";
 import { initStorage } from "@/lib/storage/storage";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -60,6 +61,8 @@ export default function RootLayout() {
         // Use the Test tab in the app to manually seed or clear data.
         // seedTestWorkoutPlan();
         // seedMockWorkoutHistory();
+
+        await retryPendingStravaSyncs();
         
         setStorageReady(true);
         console.log("Storage initialized successfully");

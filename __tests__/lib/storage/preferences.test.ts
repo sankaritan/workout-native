@@ -6,6 +6,11 @@ import {
   setUnitPreference,
   getAllPreferences,
   clearAllPreferences,
+  getStravaSyncEnabled,
+  setStravaSyncEnabled,
+  getStravaConnectionState,
+  setStravaConnectionState,
+  clearStravaConnectionState,
 } from "@/lib/storage/preferences";
 
 // AsyncStorage is already mocked in jest.setup.js
@@ -96,6 +101,12 @@ describe("Preferences", () => {
 
       expect(prefs.onboarding_completed).toBe(false);
       expect(prefs.unit_preference).toBe("lbs");
+      expect(prefs.strava_sync_enabled).toBe(false);
+      expect(prefs.strava_connected).toBe(false);
+      expect(prefs.strava_install_id).toBeNull();
+      expect(prefs.strava_sync_token).toBeNull();
+      expect(prefs.strava_last_sync_at).toBeNull();
+      expect(prefs.strava_last_sync_error).toBeNull();
     });
 
     it("returns all saved preferences", async () => {
@@ -116,6 +127,56 @@ describe("Preferences", () => {
 
       expect(prefs.onboarding_completed).toBe(true);
       expect(prefs.unit_preference).toBe("lbs"); // default
+    });
+  });
+
+  describe("Strava Preferences", () => {
+    it("returns default Strava sync state", async () => {
+      const enabled = await getStravaSyncEnabled();
+      const connection = await getStravaConnectionState();
+
+      expect(enabled).toBe(false);
+      expect(connection.connected).toBe(false);
+      expect(connection.install_id).toBeNull();
+      expect(connection.sync_token).toBeNull();
+      expect(connection.last_sync_at).toBeNull();
+      expect(connection.last_sync_error).toBeNull();
+    });
+
+    it("saves and loads Strava sync enabled", async () => {
+      await setStravaSyncEnabled(true);
+      expect(await getStravaSyncEnabled()).toBe(true);
+    });
+
+    it("saves and loads Strava connection state", async () => {
+      await setStravaConnectionState({
+        connected: true,
+        install_id: "install-1",
+        sync_token: "token-1",
+        last_sync_at: "2026-02-21T10:00:00.000Z",
+        last_sync_error: null,
+      });
+
+      const connection = await getStravaConnectionState();
+      expect(connection.connected).toBe(true);
+      expect(connection.install_id).toBe("install-1");
+      expect(connection.sync_token).toBe("token-1");
+      expect(connection.last_sync_at).toBe("2026-02-21T10:00:00.000Z");
+      expect(connection.last_sync_error).toBeNull();
+    });
+
+    it("clears Strava connection state", async () => {
+      await setStravaConnectionState({
+        connected: true,
+        install_id: "install-2",
+        sync_token: "token-2",
+      });
+
+      await clearStravaConnectionState();
+      const connection = await getStravaConnectionState();
+      expect(connection.connected).toBe(false);
+      expect(connection.install_id).toBeNull();
+      expect(connection.sync_token).toBeNull();
     });
   });
 
@@ -189,6 +250,11 @@ describe("Preferences", () => {
       );
       expect(AsyncStorage.setItem).toHaveBeenCalledWith(
         "@workout_app:unit_preference",
+        expect.any(String)
+      );
+      await setStravaSyncEnabled(true);
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+        "@workout_app:strava_sync_enabled",
         expect.any(String)
       );
     });

@@ -378,13 +378,36 @@ To use Terraform, you need a Cloudflare API token with these permissions:
 - **Account: Cloudflare Pages: Edit**
 - **Account: Access: Apps and Policies: Edit**
 - **Account: Access: Apps and Policies: Read**
+- **Account: Workers Scripts: Edit**
+- **Account: Workers KV Storage: Edit**
 - **Account: Account Settings: Read**
+- **Zone: Workers Routes: Edit** (only if using `strava_sync_route_pattern`)
 
 Create your token at: Cloudflare Dashboard → My Profile → API Tokens
 
 Then either:
 1. Export as environment variable: `export CLOUDFLARE_API_TOKEN="your-token"`
 2. Add to `terraform/terraform.tfvars`: `cloudflare_api_token = "your-token"` (not recommended)
+
+### Strava Sync Backend (Terraform)
+
+Strava sync is implemented with a Cloudflare Worker + KV namespace and managed in Terraform (`terraform/strava_sync.tf`).
+
+1. Configure these variables in your local `terraform.tfvars`:
+   - `strava_client_id`
+   - `strava_client_secret`
+   - `strava_redirect_uri` (must match Strava app settings and your worker callback endpoint)
+   - `strava_callback_success_url` (optional)
+   - optionally `strava_sync_route_pattern` and `strava_sync_zone_id` if attaching to a custom domain route
+2. Apply Terraform:
+   - `cd terraform`
+   - `terraform plan`
+   - `terraform apply`
+3. Configure the app runtime with the worker base URL:
+   - `EXPO_PUBLIC_STRAVA_SYNC_API_BASE_URL=https://<your-worker-host>`
+
+The app Settings screen includes Strava connect/disconnect and an auto-sync toggle.
+Each completed set contributes **4 minutes** to Strava activity duration.
 
 ## Contributing
 

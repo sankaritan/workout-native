@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BackButton } from "@/components/BackButton";
 import { SetTracker, type SetData } from "@/components/SetTracker";
 import { showAlert } from "@/lib/utils/alert";
+import { syncCompletedSessionToStrava } from "@/lib/strava/sync";
 import {
   deleteCompletedSession,
   deleteCompletedSetsBySessionId,
@@ -143,17 +144,21 @@ export default function SingleSessionScreen() {
   );
 
   const persistSets = useCallback(
-    (markComplete: boolean) => {
-      if (!session) return;
+    (markComplete: boolean): { completedAtIso: string | null; completedSetCount: number } => {
+      if (!session) {
+        return { completedAtIso: null, completedSetCount: 0 };
+      }
 
       deleteCompletedSetsBySessionId(session.id);
       const now = new Date().toISOString();
       const exerciseId = session.exercise_id ?? exercise?.id ?? 0;
+      let completedSetCount = 0;
 
       exerciseSets.forEach((set) => {
         if (!set.isCompleted || set.weight === null || set.reps === null) {
           return;
         }
+        completedSetCount += 1;
 
         insertCompletedSet({
           completed_session_id: session.id,
@@ -171,6 +176,11 @@ export default function SingleSessionScreen() {
         setSession({ ...session, completed_at: now });
         setIsViewingCompletedSession(true);
       }
+
+      return {
+        completedAtIso: markComplete ? now : null,
+        completedSetCount,
+      };
     },
     [exercise, exerciseSets, session]
   );
@@ -220,7 +230,15 @@ export default function SingleSessionScreen() {
       return;
     }
 
-    persistSets(true);
+    const persisted = persistSets(true);
+    if (session && persisted.completedAtIso) {
+      void syncCompletedSessionToStrava({
+        completedSessionId: session.id,
+        completedAtIso: persisted.completedAtIso,
+        completedSetCount: persisted.completedSetCount,
+        activityType: "single",
+      });
+    }
     if (session) {
       router.replace(`/workout/${session.workout_plan_id}`);
     } else {

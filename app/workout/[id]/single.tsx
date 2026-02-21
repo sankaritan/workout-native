@@ -80,10 +80,8 @@ export default function SingleWorkoutListScreen() {
         name: exercise?.name ?? "Quick workout",
       });
 
-    router.push({
-      pathname: "/single-session/[id]",
-      params: { id: String(sessionId), planId: String(planId) },
-    });
+    // typedRoutes does not currently include this dynamic route in generated unions.
+    router.push(`/single-session/${sessionId}?planId=${planId}` as never);
   };
 
   if (isLoading) {

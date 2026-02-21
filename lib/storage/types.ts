@@ -108,6 +108,12 @@ export interface ExerciseSetCompleted {
 export interface Preferences {
   onboarding_completed: boolean;
   unit_preference: 'lbs' | 'kg';
+  strava_sync_enabled: boolean;
+  strava_connected: boolean;
+  strava_install_id: string | null;
+  strava_sync_token: string | null;
+  strava_last_sync_at: string | null;
+  strava_last_sync_error: string | null;
 }
 
 // Insert types (omit auto-generated fields)

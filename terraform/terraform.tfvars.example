@@ -8,3 +8,15 @@ access_policy_include_domains = []
 
 # Optional: put API token here (not recommended). Prefer exporting CLOUDFLARE_API_TOKEN env var.
 # cloudflare_api_token = ""
+
+# Strava sync worker configuration
+strava_sync_worker_name       = "strava-sync-worker"
+strava_sync_kv_namespace_title = "strava_sync_state"
+strava_sync_route_pattern     = ""
+strava_sync_zone_id           = ""
+
+# Keep these as secrets in env-specific tfvars, not committed
+strava_client_id              = ""
+strava_client_secret          = ""
+strava_redirect_uri           = ""
+strava_callback_success_url   = ""

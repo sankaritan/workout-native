@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BackButton } from "@/components/BackButton";
 import { SetTracker, type SetData } from "@/components/SetTracker";
 import { showAlert } from "@/lib/utils/alert";
+import { syncCompletedSessionToStrava } from "@/lib/strava/sync";
 import {
   getSessionWithExercises,
   getLastCompletedSetForExercise,
@@ -189,10 +190,12 @@ export default function WorkoutSessionScreen() {
 
               // Save all completed sets to database
                const now = new Date().toISOString();
+               let completedSetCount = 0;
 
                exerciseSets.forEach((sets, exerciseId) => {
                  sets.forEach((set) => {
                     if (set.isCompleted && set.weight !== null && set.reps !== null) {
+                     completedSetCount += 1;
                      insertCompletedSet({
                        completed_session_id: completedSessionId!,
                        exercise_id: exerciseId,
@@ -209,6 +212,12 @@ export default function WorkoutSessionScreen() {
               // Mark session as completed
                if (completedSessionId) {
                  updateCompletedSession(completedSessionId, now);
+                 void syncCompletedSessionToStrava({
+                   completedSessionId,
+                   completedAtIso: now,
+                   completedSetCount,
+                   activityType: "plan",
+                 });
                }
 
               // Navigate back to the workout plan view
