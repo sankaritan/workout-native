@@ -107,7 +107,21 @@ Otherwise, download and install Node.js 20+ from [nodejs.org](https://nodejs.org
 npm install
 ```
 
-### 3. Start Development Server
+### 3. Configure Optional Env Vars (Strava)
+
+If you want to use Strava connect/sync locally, create a local env file:
+
+```bash
+cp .env.example .env.local
+# then edit .env.local and set EXPO_PUBLIC_STRAVA_SYNC_API_BASE_URL
+```
+
+Notes:
+- The variable name must be exactly `EXPO_PUBLIC_STRAVA_SYNC_API_BASE_URL` (uppercase).
+- Restart Expo after changing env vars (`npm start -- --clear`).
+- If this value is missing, Strava connect is intentionally disabled.
+
+### 4. Start Development Server
 
 ```bash
 npm start
@@ -405,14 +419,19 @@ Strava sync is implemented with a Cloudflare Worker + KV namespace and managed i
    - `strava_client_id`
    - `strava_client_secret`
    - `strava_redirect_uri` = `https://<worker-host>/strava/callback`
-   - `strava_callback_success_url` (optional)
+   - `strava_callback_success_url` (recommended for web/PWA): `https://<your-pages-host>/settings`
    - `strava_sync_api_base_url` = `https://<worker-host>`
    - optionally `strava_sync_route_pattern` and `strava_sync_zone_id` if attaching to a custom domain route
    - run `terraform apply` again so secrets are written to Worker and Pages env vars are updated
 5. Trigger a new Pages deployment after the Terraform apply so the new `EXPO_PUBLIC_*` value is baked into the build.
 
 The app Settings screen includes Strava connect/disconnect and an auto-sync toggle.
+Auto-sync is **off by default**.
+There is also a **Sync All History** action in Settings to backfill previously completed sessions to Strava.
 Each completed set contributes **4 minutes** to Strava activity duration.
+
+For web/iOS Home Screen mode, Strava connect uses same-window redirect (not popup) to avoid popup blocking.
+The app also sends a runtime `return_to` URL during connect, so after OAuth callback the worker redirects back to the page where connect was started.
 
 ## Contributing
 

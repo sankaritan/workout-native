@@ -158,7 +158,11 @@ export default function SettingsScreen() {
       }
 
       const installId = stravaInstallId ?? generateInstallId();
-      const registration = await registerStravaInstall(installId);
+      const returnToUrl =
+        Platform.OS === "web" && typeof window !== "undefined"
+          ? window.location.href
+          : undefined;
+      const registration = await registerStravaInstall(installId, returnToUrl);
       await setStravaConnectionState({
         connected: false,
         install_id: installId,

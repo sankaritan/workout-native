@@ -58,10 +58,16 @@ export function getStravaSyncApiBaseUrl(): string | null {
   return getApiBaseUrl();
 }
 
-export async function registerStravaInstall(installId: string): Promise<RegisterInstallResponse> {
+export async function registerStravaInstall(
+  installId: string,
+  returnToUrl?: string
+): Promise<RegisterInstallResponse> {
   return requestJson<RegisterInstallResponse>("/strava/register-install", {
     method: "POST",
-    body: JSON.stringify({ install_id: installId }),
+    body: JSON.stringify({
+      install_id: installId,
+      return_to: returnToUrl,
+    }),
   });
 }
 

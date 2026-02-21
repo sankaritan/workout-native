@@ -169,6 +169,10 @@ async function handleRegisterInstall(request, env) {
   if (!installId) {
     return responseJson({ error: "install_id is required" }, request, 400);
   }
+  const returnTo =
+    typeof body.return_to === "string" && body.return_to.trim() !== ""
+      ? body.return_to.trim()
+      : null;
 
   const syncToken = randomToken();
   const tokenHash = await sha256(syncToken);
@@ -181,6 +185,7 @@ async function handleRegisterInstall(request, env) {
     connected: false,
     created_at: existing.created_at ?? new Date().toISOString(),
     updated_at: new Date().toISOString(),
+    return_to: returnTo ?? existing.return_to ?? null,
   });
 
   const connectUrl = `${new URL(request.url).origin}/strava/connect?install_id=${encodeURIComponent(installId)}`;
@@ -268,7 +273,7 @@ async function handleCallback(request, env) {
     },
   });
 
-  const successUrl = env.STRAVA_CALLBACK_SUCCESS_URL;
+  const successUrl = install.return_to || env.STRAVA_CALLBACK_SUCCESS_URL;
   if (successUrl) {
     return Response.redirect(successUrl, 302);
   }

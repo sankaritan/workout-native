@@ -56,3 +56,6 @@ terraform/terraform.tfvars
 
 # coverage report
 coverage/
+
+# environment variable files
+.env
