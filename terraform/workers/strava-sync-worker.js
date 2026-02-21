@@ -2,32 +2,35 @@ const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
 };
 
-function responseJson(data, status = 200, extraHeaders = {}) {
+function responseJson(data, request, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       ...JSON_HEADERS,
-      ...corsHeaders(),
+      ...corsHeaders(request),
       ...extraHeaders,
     },
   });
 }
 
-function responseText(text, status = 200, contentType = "text/plain; charset=utf-8") {
+function responseText(request, text, status = 200, contentType = "text/plain; charset=utf-8") {
   return new Response(text, {
     status,
     headers: {
       "content-type": contentType,
-      ...corsHeaders(),
+      ...corsHeaders(request),
     },
   });
 }
 
-function corsHeaders() {
+function corsHeaders(request) {
+  const origin = request.headers.get("origin");
   return {
-    "access-control-allow-origin": "*",
+    "access-control-allow-origin": origin ?? "*",
     "access-control-allow-methods": "GET,POST,OPTIONS",
     "access-control-allow-headers": "content-type,authorization",
+    "access-control-max-age": "86400",
+    vary: "Origin",
   };
 }
 
@@ -159,12 +162,12 @@ async function handleRegisterInstall(request, env) {
   try {
     body = await request.json();
   } catch {
-    return responseJson({ error: "Invalid JSON body" }, 400);
+    return responseJson({ error: "Invalid JSON body" }, request, 400);
   }
 
   const installId = typeof body.install_id === "string" ? body.install_id.trim() : "";
   if (!installId) {
-    return responseJson({ error: "install_id is required" }, 400);
+    return responseJson({ error: "install_id is required" }, request, 400);
   }
 
   const syncToken = randomToken();
@@ -185,24 +188,24 @@ async function handleRegisterInstall(request, env) {
   return responseJson({
     connect_url: connectUrl,
     sync_token: syncToken,
-  });
+  }, request);
 }
 
 async function handleConnect(request, env) {
   const configError = ensureStravaConfig(env);
   if (configError) {
-    return responseJson({ error: configError }, 500);
+    return responseJson({ error: configError }, request, 500);
   }
 
   const url = new URL(request.url);
   const installId = (url.searchParams.get("install_id") || "").trim();
   if (!installId) {
-    return responseJson({ error: "install_id is required" }, 400);
+    return responseJson({ error: "install_id is required" }, request, 400);
   }
 
   const install = await readInstall(env, installId);
   if (!install) {
-    return responseJson({ error: "Unknown install_id" }, 404);
+    return responseJson({ error: "Unknown install_id" }, request, 404);
   }
 
   const redirect = stravaAuthUrl({
@@ -220,7 +223,7 @@ async function handleConnect(request, env) {
 async function handleCallback(request, env) {
   const configError = ensureStravaConfig(env);
   if (configError) {
-    return responseText(configError, 500);
+    return responseText(request, configError, 500);
   }
 
   const url = new URL(request.url);
@@ -228,12 +231,12 @@ async function handleCallback(request, env) {
   const code = (url.searchParams.get("code") || "").trim();
 
   if (!installId || !code) {
-    return responseText("Missing state or code", 400);
+    return responseText(request, "Missing state or code", 400);
   }
 
   const install = await readInstall(env, installId);
   if (!install) {
-    return responseText("Unknown install id", 404);
+    return responseText(request, "Unknown install id", 404);
   }
 
   const response = await fetch(stravaTokenUrl(), {
@@ -249,7 +252,7 @@ async function handleCallback(request, env) {
 
   if (!response.ok) {
     const text = await response.text();
-    return responseText(`Failed to exchange OAuth code: ${text}`, 500);
+    return responseText(request, `Failed to exchange OAuth code: ${text}`, 500);
   }
 
   const tokenData = await response.json();
@@ -270,22 +273,22 @@ async function handleCallback(request, env) {
     return Response.redirect(successUrl, 302);
   }
 
-  return responseText("Strava connected. You can close this tab.", 200);
+  return responseText(request, "Strava connected. You can close this tab.", 200);
 }
 
 async function handleStatus(request, env) {
   const url = new URL(request.url);
   const installId = (url.searchParams.get("install_id") || "").trim();
   if (!installId) {
-    return responseJson({ error: "install_id is required" }, 400);
+    return responseJson({ error: "install_id is required" }, request, 400);
   }
 
   const auth = await authenticateInstall(request, env, installId);
   if (!auth.ok) {
-    return responseJson({ error: auth.message }, auth.status);
+    return responseJson({ error: auth.message }, request, auth.status);
   }
 
-  return responseJson({ connected: Boolean(auth.record.connected) });
+  return responseJson({ connected: Boolean(auth.record.connected) }, request);
 }
 
 function buildStravaCreatePayload(syncPayload) {
@@ -309,32 +312,32 @@ async function handleSyncSession(request, env) {
   try {
     syncPayload = await request.json();
   } catch {
-    return responseJson({ error: "Invalid JSON body" }, 400);
+    return responseJson({ error: "Invalid JSON body" }, request, 400);
   }
 
   const installId = typeof syncPayload.installId === "string" ? syncPayload.installId.trim() : "";
   if (!installId) {
-    return responseJson({ error: "installId is required" }, 400);
+    return responseJson({ error: "installId is required" }, request, 400);
   }
 
   const auth = await authenticateInstall(request, env, installId);
   if (!auth.ok) {
-    return responseJson({ error: auth.message }, auth.status);
+    return responseJson({ error: auth.message }, request, auth.status);
   }
 
   if (!auth.record.connected || !auth.record.strava?.access_token) {
-    return responseJson({ error: "Install is not connected to Strava" }, 409);
+    return responseJson({ error: "Install is not connected to Strava" }, request, 409);
   }
 
   const idempotencyKey =
     typeof syncPayload.idempotencyKey === "string" ? syncPayload.idempotencyKey.trim() : "";
   if (!idempotencyKey) {
-    return responseJson({ error: "idempotencyKey is required" }, 400);
+    return responseJson({ error: "idempotencyKey is required" }, request, 400);
   }
 
   const syncMarker = await env.STRAVA_SYNC_STATE.get(buildIdempotencyKey(installId, idempotencyKey));
   if (syncMarker) {
-    return responseJson({ ok: true, already_synced: true });
+    return responseJson({ ok: true, already_synced: true }, request);
   }
 
   const record = await refreshTokenIfNeeded(env, installId, auth.record);
@@ -352,7 +355,7 @@ async function handleSyncSession(request, env) {
 
   if (!response.ok) {
     const text = await response.text();
-    return responseJson({ error: `Strava create activity failed: ${text}` }, 500);
+    return responseJson({ error: `Strava create activity failed: ${text}` }, request, 500);
   }
 
   const created = await response.json();
@@ -366,7 +369,7 @@ async function handleSyncSession(request, env) {
   return responseJson({
     ok: true,
     strava_activity_id: created.id,
-  });
+  }, request);
 }
 
 async function handleDisconnect(request, env) {
@@ -374,21 +377,21 @@ async function handleDisconnect(request, env) {
   try {
     body = await request.json();
   } catch {
-    return responseJson({ error: "Invalid JSON body" }, 400);
+    return responseJson({ error: "Invalid JSON body" }, request, 400);
   }
 
   const installId = typeof body.install_id === "string" ? body.install_id.trim() : "";
   if (!installId) {
-    return responseJson({ error: "install_id is required" }, 400);
+    return responseJson({ error: "install_id is required" }, request, 400);
   }
 
   const auth = await authenticateInstall(request, env, installId);
   if (!auth.ok) {
-    return responseJson({ error: auth.message }, auth.status);
+    return responseJson({ error: auth.message }, request, auth.status);
   }
 
   await env.STRAVA_SYNC_STATE.delete(buildInstallKey(installId));
-  return responseJson({ ok: true });
+  return responseJson({ ok: true }, request);
 }
 
 export default {
@@ -396,7 +399,7 @@ export default {
     if (request.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
-        headers: corsHeaders(),
+        headers: corsHeaders(request),
       });
     }
 
@@ -422,10 +425,10 @@ export default {
         return handleDisconnect(request, env);
       }
 
-      return responseJson({ error: "Not found" }, 404);
+      return responseJson({ error: "Not found" }, request, 404);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown worker error";
-      return responseJson({ error: message }, 500);
+      return responseJson({ error: message }, request, 500);
     }
   },
 };

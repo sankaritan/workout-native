@@ -105,3 +105,9 @@ variable "strava_callback_success_url" {
   description = "Optional URL to redirect to after successful OAuth callback."
   default     = ""
 }
+
+variable "strava_sync_api_base_url" {
+  type        = string
+  description = "Public base URL used by frontend for Strava sync API (EXPO_PUBLIC_STRAVA_SYNC_API_BASE_URL)."
+  default     = ""
+}

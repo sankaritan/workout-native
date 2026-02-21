@@ -406,10 +406,10 @@ Strava sync is implemented with a Cloudflare Worker + KV namespace and managed i
    - `strava_client_secret`
    - `strava_redirect_uri` = `https://<worker-host>/strava/callback`
    - `strava_callback_success_url` (optional)
+   - `strava_sync_api_base_url` = `https://<worker-host>`
    - optionally `strava_sync_route_pattern` and `strava_sync_zone_id` if attaching to a custom domain route
-   - run `terraform apply` again so secrets are written to Worker
-5. Configure the app runtime with the worker base URL:
-   - `EXPO_PUBLIC_STRAVA_SYNC_API_BASE_URL=https://<your-worker-host>`
+   - run `terraform apply` again so secrets are written to Worker and Pages env vars are updated
+5. Trigger a new Pages deployment after the Terraform apply so the new `EXPO_PUBLIC_*` value is baked into the build.
 
 The app Settings screen includes Strava connect/disconnect and an auto-sync toggle.
 Each completed set contributes **4 minutes** to Strava activity duration.

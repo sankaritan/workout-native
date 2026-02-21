@@ -51,7 +51,10 @@ export default function SettingsScreen() {
     }
   };
 
-  const loadStravaSettings = async () => {
+  const loadStravaSettings = async (): Promise<{
+    enabled: boolean;
+    connection: Awaited<ReturnType<typeof getStravaConnectionState>>;
+  } | null> => {
     try {
       const [enabled, connection] = await Promise.all([
         getStravaSyncEnabled(),
@@ -63,8 +66,31 @@ export default function SettingsScreen() {
       setStravaSyncToken(connection.sync_token);
       setStravaLastSyncAt(connection.last_sync_at);
       setStravaLastSyncError(connection.last_sync_error);
+      return { enabled, connection };
     } catch (error) {
       console.error("Failed to load strava settings:", error);
+      return null;
+    }
+  };
+
+  const reconcileStravaConnectionStatus = async (
+    installIdOverride?: string | null,
+    syncTokenOverride?: string | null
+  ): Promise<boolean> => {
+    const installId = installIdOverride ?? stravaInstallId;
+    const syncToken = syncTokenOverride ?? stravaSyncToken;
+    if (!installId || !syncToken) {
+      return false;
+    }
+
+    try {
+      const status = await getStravaConnectionStatus(installId, syncToken);
+      await setStravaConnectionState({ connected: status.connected });
+      setStravaConnected(status.connected);
+      return status.connected;
+    } catch (error) {
+      console.error("Failed to refresh Strava connection status:", error);
+      return false;
     }
   };
 
@@ -74,14 +100,24 @@ export default function SettingsScreen() {
 
   useEffect(() => {
     loadDataStats();
-    void loadStravaSettings();
+    void loadStravaSettings().then((data) => {
+      void reconcileStravaConnectionStatus(
+        data?.connection.install_id ?? null,
+        data?.connection.sync_token ?? null
+      );
+    });
     void retryPendingStravaSyncs();
   }, []);
 
   useFocusEffect(
     React.useCallback(() => {
       loadDataStats();
-      void loadStravaSettings();
+      void loadStravaSettings().then((data) => {
+        void reconcileStravaConnectionStatus(
+          data?.connection.install_id ?? null,
+          data?.connection.sync_token ?? null
+        );
+      });
       void retryPendingStravaSyncs();
     }, [])
   );
@@ -126,14 +162,11 @@ export default function SettingsScreen() {
       setStravaSyncToken(registration.sync_token);
 
       await WebBrowser.openBrowserAsync(registration.connect_url);
-      const status = await getStravaConnectionStatus(installId, registration.sync_token);
-
-      await setStravaConnectionState({ connected: status.connected });
-      setStravaConnected(status.connected);
-      if (status.connected) {
+      const connected = await reconcileStravaConnectionStatus(installId, registration.sync_token);
+      if (connected) {
         setSuccessMessage("✓ Strava connected successfully.");
       } else {
-        setSuccessMessage("Strava connection is pending. Complete OAuth and refresh this screen.");
+        setSuccessMessage("Strava connection is pending. Return to this screen after completing OAuth.");
       }
     } catch (error) {
       console.error("Failed to connect Strava:", error);
