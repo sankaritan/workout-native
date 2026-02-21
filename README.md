@@ -393,17 +393,22 @@ Then either:
 
 Strava sync is implemented with a Cloudflare Worker + KV namespace and managed in Terraform (`terraform/strava_sync.tf`).
 
-1. Configure these variables in your local `terraform.tfvars`:
-   - `strava_client_id`
-   - `strava_client_secret`
-   - `strava_redirect_uri` (must match Strava app settings and your worker callback endpoint)
-   - `strava_callback_success_url` (optional)
-   - optionally `strava_sync_route_pattern` and `strava_sync_zone_id` if attaching to a custom domain route
-2. Apply Terraform:
+1. Apply Terraform once to create Worker + KV (you can keep Strava vars empty at this stage):
    - `cd terraform`
    - `terraform plan`
    - `terraform apply`
-3. Configure the app runtime with the worker base URL:
+2. Get your Worker host from Cloudflare (Workers dashboard), for example:
+   - `strava-sync-worker.<subdomain>.workers.dev`
+3. Create/update your Strava app:
+   - Authorization Callback Domain = Worker host (domain only, no protocol/path)
+4. Set Strava variables in local `terraform.tfvars` and re-apply:
+   - `strava_client_id`
+   - `strava_client_secret`
+   - `strava_redirect_uri` = `https://<worker-host>/strava/callback`
+   - `strava_callback_success_url` (optional)
+   - optionally `strava_sync_route_pattern` and `strava_sync_zone_id` if attaching to a custom domain route
+   - run `terraform apply` again so secrets are written to Worker
+5. Configure the app runtime with the worker base URL:
    - `EXPO_PUBLIC_STRAVA_SYNC_API_BASE_URL=https://<your-worker-host>`
 
 The app Settings screen includes Strava connect/disconnect and an auto-sync toggle.
