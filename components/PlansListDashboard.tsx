@@ -11,7 +11,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { WorkoutPlan } from "@/lib/storage/types";
 import { getCompletedSessionsByDateRange, getSessionTemplatesByPlanId, getCompletedSessionsByPlanId } from "@/lib/storage/storage";
-import { BalanceIcon } from "@/components/icons";
+import { AppLogoIcon, BalanceIcon } from "@/components/icons";
 
 interface PlansListDashboardProps {
   plans: WorkoutPlan[];
@@ -116,12 +116,19 @@ export default function PlansListDashboard({ plans }: PlansListDashboardProps) {
         className="px-6 pt-8 pb-4"
         style={{ paddingTop: insets.top + 32 }}
       >
-        <Text className="text-3xl font-bold tracking-tight text-white">
-          Your workout plans
-        </Text>
-        <Text className="text-sm text-gray-400">
-          {formatCurrentDate()}
-        </Text>
+        <View className="flex-row items-center gap-3">
+          <View className="size-10 rounded-xl bg-primary/10 border border-primary/20 items-center justify-center">
+            <AppLogoIcon size={26} color="#13ec6d" />
+          </View>
+          <View>
+            <Text className="text-3xl font-bold tracking-tight text-white">
+              Your workout plans
+            </Text>
+            <Text className="text-sm text-gray-400">
+              {formatCurrentDate()}
+            </Text>
+          </View>
+        </View>
       </View>
 
       {/* Scrollable Content */}

@@ -5,3 +5,4 @@
 
 export { BarbellIcon } from "./BarbellIcon";
 export { BalanceIcon } from "./BalanceIcon";
+export { AppLogoIcon } from "./AppLogoIcon";
